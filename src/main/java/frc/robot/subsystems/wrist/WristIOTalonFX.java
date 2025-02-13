@@ -1,9 +1,7 @@
 package frc.robot.subsystems.wrist;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -21,11 +19,9 @@ import frc.robot.Constants;
 import frc.robot.Constants.WristConstants;
 
 public class WristIOTalonFX implements WristIO {
-  private final WristConstants intakeWrist;
   // Motors and wrist controllers
   private TalonFX intakeWristMotor;
   private MotionMagicTorqueCurrentFOC intakeWristController;
-  private VoltageOut voltageRequest = new VoltageOut(0);
 
   private ArmFeedforward intakeWristFeedforward;
 
@@ -38,7 +34,6 @@ public class WristIOTalonFX implements WristIO {
   private final Debouncer motorConnectedDebounce = new Debouncer(0.5);
 
   public WristIOTalonFX(WristConstants intakeWrist) {
-    this.intakeWrist = intakeWrist;
     intakeWristMotor = new TalonFX(intakeWrist.motorId);
     intakeWristController = new MotionMagicTorqueCurrentFOC(0);
     TalonFXConfiguration intakeWristConfig = new TalonFXConfiguration();

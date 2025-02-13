@@ -35,6 +35,8 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.wrist.Wrist;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -52,6 +54,8 @@ public class RobotContainer {
     private final Intake algaeIntake;
     private final Intake coralIntake;
     private final Elevator elevator;
+    private final Wrist intakeWrist;
+    private final Wrist hangWrist;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -78,9 +82,11 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
-                this.algaeIntake = new Intake(Constants.AlgaeIntake);
-                this.coralIntake = new Intake(Constants.CoralIntake);
+                this.algaeIntake = new Intake(Constants.AlgaeIntake, "AlgaeIntake");
+                this.coralIntake = new Intake(Constants.CoralIntake, "CoralIntake");
                 this.elevator = Elevator.getInstance();
+                this.intakeWrist = new Wrist(Constants.IntakeWrist, "IntakeWrist");
+                this.hangWrist = new Wrist(Constants.HangWrist, "HangWrist");
                 break;
 
             case SIM:
@@ -92,9 +98,11 @@ public class RobotContainer {
                         new ModuleIOSim(TunerConstants.FrontRight),
                         new ModuleIOSim(TunerConstants.BackLeft),
                         new ModuleIOSim(TunerConstants.BackRight));
-                this.algaeIntake = new Intake(Constants.AlgaeIntake);
-                this.coralIntake = new Intake(Constants.CoralIntake);
+                this.algaeIntake = new Intake(Constants.AlgaeIntake, "AlgaeIntake");
+                this.coralIntake = new Intake(Constants.CoralIntake, "CoralIntake");
                 this.elevator = Elevator.getInstance();
+                this.intakeWrist = new Wrist(Constants.IntakeWrist, "IntakeWrist");
+                this.hangWrist = new Wrist(Constants.HangWrist, "HangWrist");
                 break;
 
             default:
@@ -110,9 +118,11 @@ public class RobotContainer {
                         },
                         new ModuleIO() {
                         });
-                this.algaeIntake = new Intake(Constants.AlgaeIntake);
-                this.coralIntake = new Intake(Constants.CoralIntake);
+                this.algaeIntake = new Intake(Constants.AlgaeIntake, "AlgaeIntake");
+                this.coralIntake = new Intake(Constants.CoralIntake, "CoralIntake");
                 this.elevator = Elevator.getInstance();
+                this.intakeWrist = new Wrist(Constants.IntakeWrist, "IntakeWrist");
+                this.hangWrist = new Wrist(Constants.HangWrist, "HangWrist");
                 break;
         }
 
@@ -185,8 +195,8 @@ public class RobotContainer {
         controller.rightBumper().whileTrue(new OuttakeCommand(algaeIntake));
 
         // Elevator Commands
-        // controller.leftTrigger().whileTrue(new ElevatorCommand(elevator));
-        // controller.leftBumper().whileTrue(new ElevatorCommand(elevator));
+        controller.leftTrigger().onTrue(new ElevatorCommand(0.1));
+        controller.leftBumper().onFalse(new ElevatorCommand(0.2));
     }
 
     /**

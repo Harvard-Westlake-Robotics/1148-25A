@@ -9,9 +9,11 @@ public class Intake extends SubsystemBase {
   private IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
   private IntakeConstants constants;
+  private String key;
 
-  public Intake(IntakeConstants intakeConstants) {
+  public Intake(IntakeConstants intakeConstants, String key) {
     this.constants = intakeConstants;
+    this.key = key;
     io = new IntakeIOTalonFX(intakeConstants);
   }
 
@@ -21,7 +23,7 @@ public class Intake extends SubsystemBase {
 
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Intake", inputs);
+    Logger.processInputs(key, inputs);
   }
 
   public void setVelocity(LinearVelocity velocity) {

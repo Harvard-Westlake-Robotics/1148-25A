@@ -141,20 +141,6 @@ public final class Constants {
     public static final double[] elevatorHeights = { 0, 1, 2, 3 };
   }
 
-  public final class Hang {
-    public static final int motorId = 0;
-    public static final boolean motorInverted = false;
-    public static final double hangVelocity = 0;
-    public static final double unhungPosition = 0;
-    public static final double hungPosition = 0;
-    public static double kP = 0.0;
-    public static double kI = 0.0;
-    public static double kD = 0.0;
-    public static double kS = 0.0;
-    public static double kV = 0.0;
-    public static double kG = 0.0;
-  }
-
   public static class WristConstants {
     public final int motorId;
     public final InvertedValue motorInverted;
@@ -205,6 +191,33 @@ public final class Constants {
   }
 
   // Fix later with real values
-  public static final WristConstants IntakeWrist = new WristConstants(0, InvertedValue.Clockwise_Positive, 100,
-      0.369162, 0.0, 0.0, 0.1761, 0.12875, 0.0, 0.0, 100.0, 1000.0, 10000.0, 1.0 / 4.846);
+  public static final WristConstants IntakeWrist = new WristConstants(
+      0, 
+      InvertedValue.Clockwise_Positive, 
+      100,
+      0.369162, 
+      0.0, 
+      0.0, 
+      0.1761, 
+      0.12875, 
+      0.0, 
+      0.0, 
+      100.0, 
+      1000.0, 
+      10000.0, 1.0 / 4.846);
+
+  public static final WristConstants HangWrist = new WristConstants(
+      0, 
+      InvertedValue.Clockwise_Positive, 
+      100, 
+      0.369162, 
+      0.0, 
+      0.0, 
+      0.1761, 
+      0.12875, 
+      0.0, 
+      0.0, 
+      100.0, 
+      1000.0, 
+      10000.0, 1.0 / 4.846);
 }
