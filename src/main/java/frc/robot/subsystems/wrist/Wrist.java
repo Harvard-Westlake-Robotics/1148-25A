@@ -1,19 +1,17 @@
 package frc.robot.subsystems.wrist;
 
-import org.littletonrobotics.junction.Logger;
-
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.WristConstants;
+import org.littletonrobotics.junction.Logger;
 
-public class Wrist extends SubsystemBase{
+public class Wrist extends SubsystemBase {
   private WristIOTalonFX io;
   private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
   private WristConstants constants;
   private String key;
 
   public Wrist(WristConstants constants, String key) {
-    this.constants = constants; 
+    this.constants = constants;
     this.key = key;
     io = new WristIOTalonFX(constants);
   }
@@ -27,7 +25,11 @@ public class Wrist extends SubsystemBase{
     Logger.processInputs(key, inputs);
   }
 
-  public void goToAngle(Angle angle) {
-    io.setAngle(angle);
+  public void goToAngle(double angle) {
+    this.io.setAngle(angle);
+  }
+
+  public void runVoltage(double volts) {
+    io.runCharacterization(volts);
   }
 }

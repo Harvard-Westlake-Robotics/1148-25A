@@ -5,9 +5,11 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
@@ -15,6 +17,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 
@@ -23,6 +26,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   // Motors and intake controllers
   private TalonFX intakeMotor;
   private MotionMagicVelocityTorqueCurrentFOC intakeController;
+  private MotionMagicTorqueCurrentFOC intakePositionController;
   private VoltageOut voltageRequest = new VoltageOut(0);
 
   private SimpleMotorFeedforward intakeFeedforward;
@@ -32,16 +36,23 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final StatusSignal<Voltage> motorAppliedVolts;
   private final StatusSignal<Current> motorCurrent;
 
+  private final DigitalInput input1;
+  private final DigitalInput input2;
+
   // Connection debouncers
   private final Debouncer motorConnectedDebounce = new Debouncer(0.5);
 
   public IntakeIOTalonFX(IntakeConstants intakeConstants) {
     this.intakeConstants = intakeConstants;
     intakeMotor = new TalonFX(intakeConstants.motorId);
-    intakeController = new MotionMagicVelocityTorqueCurrentFOC(
-        AngularVelocity.ofBaseUnits(0.0, RotationsPerSecond));
+    intakeMotor.setPosition(0);
+    intakeController =
+        new MotionMagicVelocityTorqueCurrentFOC(
+            AngularVelocity.ofBaseUnits(0.0, RotationsPerSecond));
+    intakePositionController = new MotionMagicTorqueCurrentFOC(0.0).withSlot(1);
     TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
     intakeConfig.MotorOutput.Inverted = intakeConstants.motorInverted;
+    intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     intakeConfig.MotionMagic.MotionMagicAcceleration = intakeConstants.ANGLE_MAX_ACCELERATION;
     intakeConfig.MotionMagic.MotionMagicCruiseVelocity = intakeConstants.ANGLE_MAX_VELOCITY;
     intakeConfig.MotionMagic.MotionMagicJerk = intakeConstants.ANGLe_MAX_JERK;
@@ -51,6 +62,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     intakeConfig.Slot0.kS = intakeConstants.kS;
     intakeConfig.Slot0.kA = intakeConstants.kA;
     intakeConfig.Slot0.kV = intakeConstants.kV;
+    intakeConfig.Slot1.kP = intakeConstants.positionkP;
+    intakeConfig.Slot1.kD = intakeConstants.positionkP;
     intakeConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     intakeConfig.CurrentLimits.StatorCurrentLimit = 80;
     intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -63,30 +76,41 @@ public class IntakeIOTalonFX implements IntakeIO {
     motorAppliedVolts = intakeMotor.getMotorVoltage();
     motorCurrent = intakeMotor.getStatorCurrent();
 
-    intakeFeedforward = new SimpleMotorFeedforward(
-        intakeConstants.kS, intakeConstants.kA, intakeConstants.kV);
+    this.input1 =
+        intakeConstants.sensor1ID != -1 ? new DigitalInput(intakeConstants.sensor1ID) : null;
+    this.input2 =
+        intakeConstants.sensor2ID != -1 ? new DigitalInput(intakeConstants.sensor2ID) : null;
+
+    intakeFeedforward =
+        new SimpleMotorFeedforward(intakeConstants.kS, intakeConstants.kA, intakeConstants.kV);
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    var intakeStatus = StatusSignal.refreshAll(motorPosition, motorVelocity, motorAppliedVolts, motorCurrent);
+    var intakeStatus =
+        StatusSignal.refreshAll(motorPosition, motorVelocity, motorAppliedVolts, motorCurrent);
 
     inputs.intakeMotorConnected = motorConnectedDebounce.calculate(intakeMotor.isConnected());
-    inputs.intakePositionMeters = motorPosition.getValueAsDouble() * Constants.IntakeWrist.motorToWristRotations;
-    inputs.intakeVelocityMPS = motorVelocity.getValueAsDouble() * Constants.IntakeWrist.motorToWristRotations;
+    inputs.intakePositionMeters =
+        motorPosition.getValueAsDouble() * Constants.IntakeWrist.motorToWristRotations;
+    inputs.intakeVelocityMPS =
+        motorVelocity.getValueAsDouble() * Constants.IntakeWrist.motorToWristRotations;
     inputs.intakeAppliedVolts = motorAppliedVolts.getValueAsDouble();
     inputs.intakeCurrentAmps = motorCurrent.getValueAsDouble();
   }
 
+  @Override
   public void runCharacterization(double voltage) {
     intakeMotor.setControl(new VoltageOut(voltage));
   }
 
   @Override
   public void runVelocity(LinearVelocity velocity) {
-    intakeController.FeedForward = intakeFeedforward.calculate(
-        velocity.in(MetersPerSecond) / intakeConstants.rotationsToMetersRatio);
-    intakeController.Velocity = velocity.in(MetersPerSecond) / intakeConstants.rotationsToMetersRatio;
+    intakeController.FeedForward =
+        intakeFeedforward.calculate(
+            velocity.in(MetersPerSecond) / intakeConstants.rotationsToMetersRatio);
+    intakeController.Velocity =
+        velocity.in(MetersPerSecond) / intakeConstants.rotationsToMetersRatio;
     intakeMotor.setControl(intakeController);
   }
 
@@ -99,9 +123,10 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void runOpenLoop(LinearVelocity velocity) {
-    voltageRequest = new VoltageOut(
-        intakeFeedforward.calculate(
-            velocity.in(MetersPerSecond) / intakeConstants.rotationsToMetersRatio));
+    voltageRequest =
+        new VoltageOut(
+            intakeFeedforward.calculate(
+                velocity.in(MetersPerSecond) / intakeConstants.rotationsToMetersRatio));
     intakeMotor.setControl(voltageRequest);
   }
 
@@ -109,5 +134,26 @@ public class IntakeIOTalonFX implements IntakeIO {
   public void runOpenLoop(AngularVelocity velocity) {
     voltageRequest = new VoltageOut(intakeFeedforward.calculate(velocity.in(RotationsPerSecond)));
     intakeMotor.setControl(voltageRequest);
+  }
+
+  public void push(double rotations) {
+    intakePositionController.Position = intakeMotor.getPosition().getValueAsDouble() + rotations;
+    intakeMotor.setControl(intakePositionController);
+  }
+
+  public Boolean getSensor2() {
+    if (input2 != null) {
+      return input2.get();
+    } else {
+      return null;
+    }
+  }
+
+  public Boolean getSensor1() {
+    if (input1 != null) {
+      return input1.get();
+    } else {
+      return null;
+    }
   }
 }

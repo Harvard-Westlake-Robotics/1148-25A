@@ -13,14 +13,15 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
- * This class defines the runtime mode used by AdvantageKit. The mode is always
- * "real" when running
- * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics
- * sim) and "replay"
+ * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
+ * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  */
 public final class Constants {
@@ -49,6 +50,10 @@ public final class Constants {
     public double kS;
     public double kV;
     public double kA;
+    public double positionkP;
+    public double positionkD;
+    public int sensor1ID;
+    public int sensor2ID;
 
     public final double ANGLE_MAX_ACCELERATION;
     public final double ANGLE_MAX_VELOCITY;
@@ -66,6 +71,10 @@ public final class Constants {
         double kS,
         double kV,
         double kA,
+        int sensor1ID,
+        int sensor2ID,
+        double positionkP,
+        double positionkD,
         double ANGLE_MAX_ACCELERATION,
         double ANGLE_MAX_VELOCITY,
         double ANGLe_MAX_JERK,
@@ -80,6 +89,10 @@ public final class Constants {
       this.kS = kS;
       this.kV = kV;
       this.kA = kA;
+      this.sensor1ID = sensor1ID;
+      this.sensor2ID = sensor2ID;
+      this.positionkP = positionkP;
+      this.positionkD = positionkD;
       this.ANGLE_MAX_ACCELERATION = ANGLE_MAX_ACCELERATION;
       this.ANGLE_MAX_VELOCITY = ANGLE_MAX_VELOCITY;
       this.ANGLe_MAX_JERK = ANGLe_MAX_JERK;
@@ -91,44 +104,55 @@ public final class Constants {
    * in the parameters below, we did the reciprocal of rotationsToMetersRatio bc
    * your dumbass did metersToRotations :)
    */
-  public static final IntakeConstants AlgaeIntake = new IntakeConstants(
-      15,
-      InvertedValue.Clockwise_Positive,
-      100,
-      -100,
-      0.369162,
-      0.0,
-      0.0,
-      0.1761,
-      0.12875,
-      0.0,
-      100.0,
-      1000.0,
-      10000.0,
-      1.0 / 16.709);
+  public static final IntakeConstants AlgaeIntake =
+      new IntakeConstants(
+          16,
+          InvertedValue.CounterClockwise_Positive,
+          100,
+          -100,
+          1.969162,
+          0.0,
+          0.0,
+          0.1761,
+          0.12875,
+          0.0,
+          -1,
+          -1,
+          0.0,
+          0.0,
+          100.0,
+          1000.0,
+          10000.0,
+          1.0 / 16.709);
 
-  public static final IntakeConstants CoralIntake = new IntakeConstants(
-      16,
-      InvertedValue.Clockwise_Positive,
-      100,
-      -100,
-      0.369162,
-      0.0,
-      0.0,
-      0.1761,
-      0.12875,
-      0.0,
-      100.0,
-      1000.0,
-      10000.0,
-      1.0 / 16.709);
+  public static final IntakeConstants CoralIntake =
+      new IntakeConstants(
+          17,
+          InvertedValue.Clockwise_Positive,
+          100,
+          -100,
+          4.569162,
+          0.0,
+          0.0,
+          0.1761,
+          0.12875,
+          0.0,
+          -1,
+          -1,
+          1.0,
+          0.0,
+          100.0,
+          1000.0,
+          10000.0,
+          1.0); // / 16.709
 
+  // TODO: Define
   public final class Elevator {
-    public static final int elevator1ID = 18;
-    public static final int elevator2ID = 19;
-    public static final InvertedValue elevator2Inverted = InvertedValue.Clockwise_Positive;
-    public static final InvertedValue elevator1Inverted = InvertedValue.CounterClockwise_Positive;
-    public static double kP = 0;
+    public static final int elevator1ID = 13;
+    public static final int elevator2ID = 14;
+    public static final InvertedValue elevator2Inverted = InvertedValue.CounterClockwise_Positive;
+    public static final InvertedValue elevator1Inverted = InvertedValue.Clockwise_Positive;
+    public static double kP = 1;
     public static double kI = 0;
     public static double kD = 0;
     public static double kS = 0;
@@ -137,8 +161,9 @@ public final class Constants {
     public static double kA = 0;
     public static final double elevatorForwardSoftLimitRotations = 25;
     public static final double elevatorReverseSoftLimitRotations = 0;
-    public static final double rotationsToMetersRatio = 1; // TODO: Define
-    public static final double[] elevatorHeights = { 0, 1, 2, 3 };
+    public static final double rotationsToMetersRatio = 1;
+    public static final double[] elevatorHeights = {0, 1, 2, 3};
+    public static final double elevatorGroundOffsetMeters = 0;
   }
 
   public static class WristConstants {
@@ -157,6 +182,7 @@ public final class Constants {
     public final double ANGLE_MAX_VELOCITY;
     public final double ANGLe_MAX_JERK;
     public final double motorToWristRotations;
+    public final Angle angleOffset;
 
     public WristConstants(
         int motorId,
@@ -172,7 +198,8 @@ public final class Constants {
         double ANGLE_MAX_ACCELERATION,
         double ANGLE_MAX_VELOCITY,
         double ANGLe_MAX_JERK,
-        double motorToWristRotations) {
+        double motorToWristRotations,
+        Angle angleOffset) {
       this.motorId = motorId;
       this.motorInverted = motorInverted;
       this.wristVelocity = wristVelocity;
@@ -187,37 +214,44 @@ public final class Constants {
       this.ANGLE_MAX_VELOCITY = ANGLE_MAX_VELOCITY;
       this.ANGLe_MAX_JERK = ANGLe_MAX_JERK;
       this.motorToWristRotations = motorToWristRotations;
+      this.angleOffset = angleOffset;
     }
   }
 
-  // Fix later with real values
-  public static final WristConstants IntakeWrist = new WristConstants(
-      0, 
-      InvertedValue.Clockwise_Positive, 
-      100,
-      0.369162, 
-      0.0, 
-      0.0, 
-      0.1761, 
-      0.12875, 
-      0.0, 
-      0.0, 
-      100.0, 
-      1000.0, 
-      10000.0, 1.0 / 4.846);
+  // TODO: Fix later with real values
+  public static final WristConstants IntakeWrist =
+      new WristConstants(
+          18,
+          InvertedValue.CounterClockwise_Positive,
+          1000,
+          2.169162,
+          0.0,
+          0.0,
+          0.000,
+          0.0,
+          0.0,
+          0.0,
+          100.0,
+          1000.0,
+          10000.0,
+          1.0, // 4.846
+          Angle.ofBaseUnits(0.0, Degrees));
 
-  public static final WristConstants HangWrist = new WristConstants(
-      0, 
-      InvertedValue.Clockwise_Positive, 
-      100, 
-      0.369162, 
-      0.0, 
-      0.0, 
-      0.1761, 
-      0.12875, 
-      0.0, 
-      0.0, 
-      100.0, 
-      1000.0, 
-      10000.0, 1.0 / 4.846);
+  public static final WristConstants HangWrist =
+      new WristConstants(
+          15,
+          InvertedValue.Clockwise_Positive,
+          100,
+          0.369162,
+          0.0,
+          0.0,
+          0.1761,
+          0.12875,
+          0.0,
+          0.0,
+          100.0,
+          1000.0,
+          10000.0,
+          1.0 / 4.846,
+          Angle.ofBaseUnits(0.0, Degrees));
 }

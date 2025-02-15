@@ -73,7 +73,7 @@ public class Drive extends SubsystemBase {
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
   // PathPlanner config constants
-  private static final double ROBOT_MASS_KG = 74.088;
+  private static final double ROBOT_MASS_KG = 54.088;
   private static final double ROBOT_MOI = 6.883;
   private static final double WHEEL_COF = 1.2;
   private static final RobotConfig PP_CONFIG =
@@ -110,8 +110,8 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
-  private final LimeLightCam limelight_a = new LimeLightCam("limelight-a", true);
-  private final LimeLightCam limelight_b = new LimeLightCam("limelight-b", true);
+  private final LimeLightCam limelight_a = new LimeLightCam("limelight-a", false);
+  private final LimeLightCam limelight_b = new LimeLightCam("limelight-b", false);
 
   private final LimeLightCam[] limelights = new LimeLightCam[] {limelight_a, limelight_b};
 
@@ -140,7 +140,7 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+            new PIDConstants(6.3, 0.008, 0.00), new PIDConstants(5.0, 0.0, 0.0)),
         PP_CONFIG,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
@@ -165,10 +165,11 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    setPose(new Pose2d());
   }
 
-  private double xyStdDevCoeff = 0.7;
-  private double rStdDevCoeff = 2.0;
+  private double xyStdDevCoeff = 1.5;
+  private double rStdDevCoeff = 9.0;
   private double xyStdDev = 0.8;
   private double rStdDev = 9.2;
 
@@ -181,12 +182,17 @@ public class Drive extends SubsystemBase {
       module.periodic();
     }
     odometryLock.unlock();
-
+    for (LimeLightCam limelight : limelights) {
+      limelight.SetRobotOrientation(getPose().getRotation());
+    }
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
       for (var module : modules) {
         module.stop();
       }
+      // for (LimeLightCam limelight : limelights) {
+      // limelight.setIMUMode(1);
+      // }
     }
 
     // Log empty setpoint states when disabled
@@ -225,19 +231,22 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-      AprilTagResult result_a = limelight_a.getEstimate().orElse(null);
+      // for (LimeLightCam limelight : limelights) {
+      //  limelight.setIMUMode(2);
+      // }
+      AprilTagResult result_a = null; // limelight_a.getEstimate().orElse(null);
       if (result_a != null) Logger.recordOutput("RealOutputs/apriltagResultA", result_a.pose);
-      AprilTagResult result_b = limelight_b.getEstimate().orElse(null);
+      AprilTagResult result_b = null; // limelight_b.getEstimate().orElse(null);
       if (result_b != null) Logger.recordOutput("RealOutputs/apriltagResultB", result_b.pose);
       if (result_a != null && !shouldRejectPose(result_a)) {
         xyStdDev =
             xyStdDevCoeff
-                * Math.pow(result_a.distToTag, 4.0)
+                * Math.pow(result_a.distToTag, 5.0)
                 / result_a.tagCount
                 * result_a.ambiguity;
         rStdDev =
             rStdDevCoeff
-                * Math.pow(result_a.distToTag, 4.0)
+                * Math.pow(result_a.distToTag, 5.0)
                 / result_a.tagCount
                 * result_a.ambiguity;
 

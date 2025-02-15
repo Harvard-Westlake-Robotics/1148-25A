@@ -15,18 +15,21 @@ public interface IntakeIO {
   }
 
   /** Updates the set of loggable inputs. */
-  public default void updateInputs(IntakeIOInputs inputs) {
-  }
+  public default void updateInputs(IntakeIOInputs inputs) {}
 
-  public default void runVelocity(AngularVelocity velocity) {
-  }
+  public default void runVelocity(AngularVelocity velocity) {}
 
-  public default void runVelocity(LinearVelocity velocity) {
-  }
+  public default void runVelocity(LinearVelocity velocity) {}
 
-  public default void runOpenLoop(AngularVelocity velocity) {
-  }
+  public default void runOpenLoop(AngularVelocity velocity) {}
 
-  public default void runOpenLoop(LinearVelocity velocity) {
-  }
+  public default void runOpenLoop(LinearVelocity velocity) {}
+
+  public default void push(double rotations) {}
+
+  public default void runCharacterization(double volts) {}
+
+  public Boolean getSensor1();
+
+  public Boolean getSensor2();
 }

@@ -29,4 +29,16 @@ public class Intake extends SubsystemBase {
   public void setVelocity(LinearVelocity velocity) {
     io.runVelocity(velocity);
   }
+
+  public void push(double rotations) {
+    io.push(rotations);
+  }
+
+  public void runVoltage(double volts) {
+    io.runCharacterization(volts);
+  }
+
+  public Boolean getSensor1() {
+    return io.getSensor1();
+  }
 }

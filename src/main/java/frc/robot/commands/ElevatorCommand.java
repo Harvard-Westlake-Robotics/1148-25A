@@ -5,30 +5,29 @@ import frc.robot.subsystems.elevator.Elevator;
 
 public class ElevatorCommand extends Command {
 
-    public double heightMeters;
-    public Elevator elevator;
+  public double heightMeters;
+  public Elevator elevator;
 
-    public ElevatorCommand(double heightMeters) {
-        this.elevator = Elevator.getInstance();
-        addRequirements(elevator);
-        this.heightMeters = heightMeters;
-    }
+  public ElevatorCommand(double heightMeters) {
+    this.elevator = Elevator.getInstance();
+    addRequirements(elevator);
+    this.heightMeters = heightMeters;
+  }
 
-    @Override
-    public void initialize() {
-    }
+  @Override
+  public void initialize() {}
 
-    @Override
-    public void execute() {
-        elevator.goToHeight(heightMeters);
-    }
+  @Override
+  public void execute() {
+    elevator.goToHeight(heightMeters);
+  }
 
-    @Override
-    public void end(boolean interrupted) {
-        elevator.goToHeight(0);
-    }
+  @Override
+  public void end(boolean interrupted) {
+    elevator.goToHeight(0);
+  }
 
-    public void setHeight(double heightMeters) {
-        this.heightMeters = heightMeters;
-    }
+  public void setHeight(double heightMeters) {
+    this.heightMeters = heightMeters;
+  }
 }

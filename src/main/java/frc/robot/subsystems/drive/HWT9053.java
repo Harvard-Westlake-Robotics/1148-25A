@@ -58,14 +58,16 @@ public class HWT9053 implements GyroIO {
     accel = extractShorts(buffer, 3);
     gyro = extractShorts(buffer, 9);
     angles = extractLongs(buffer, 21);
-    timestamp = extractLong(buffer, 0x30) * 1000L
-        + extractShort(buffer, 0x33); // Combine MS with seconds for full timestamp in ms
+    timestamp =
+        extractLong(buffer, 0x30) * 1000L
+            + extractShort(buffer, 0x33); // Combine MS with seconds for full timestamp in ms
   }
 
   private short[] extractShorts(byte[] buffer, int startIndex) {
     short[] values = new short[3];
     for (int i = 0; i < 3; i++) {
-      values[i] = (short) ((buffer[startIndex + 2 * i] << 8) | (buffer[startIndex + 2 * i + 1] & 0xFF));
+      values[i] =
+          (short) ((buffer[startIndex + 2 * i] << 8) | (buffer[startIndex + 2 * i + 1] & 0xFF));
     }
     return values;
   }
@@ -95,7 +97,7 @@ public class HWT9053 implements GyroIO {
     try {
       byte[] data = serialPort.read(serialPort.getBytesReceived());
       for (byte b : data) {
-        parseData(new byte[] { b });
+        parseData(new byte[] {b});
       }
 
       yawPosition = Rotation2d.fromDegrees(angles[2] / 100.0);

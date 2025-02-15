@@ -1,14 +1,10 @@
 package frc.robot.subsystems.wrist;
 
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Rotations;
-
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
@@ -21,7 +17,7 @@ import frc.robot.Constants.WristConstants;
 public class WristIOTalonFX implements WristIO {
   // Motors and wrist controllers
   private TalonFX intakeWristMotor;
-  private MotionMagicTorqueCurrentFOC intakeWristController;
+  private PositionVoltage intakeWristController;
 
   private ArmFeedforward intakeWristFeedforward;
 
@@ -35,7 +31,8 @@ public class WristIOTalonFX implements WristIO {
 
   public WristIOTalonFX(WristConstants intakeWrist) {
     intakeWristMotor = new TalonFX(intakeWrist.motorId);
-    intakeWristController = new MotionMagicTorqueCurrentFOC(0);
+    intakeWristMotor.setPosition(intakeWrist.angleOffset);
+    intakeWristController = new PositionVoltage(0);
     TalonFXConfiguration intakeWristConfig = new TalonFXConfiguration();
     intakeWristConfig.MotorOutput.Inverted = intakeWrist.motorInverted;
     intakeWristConfig.MotionMagic.MotionMagicAcceleration = intakeWrist.ANGLE_MAX_ACCELERATION;
@@ -59,28 +56,36 @@ public class WristIOTalonFX implements WristIO {
     motorAppliedVolts = intakeWristMotor.getMotorVoltage();
     motorCurrent = intakeWristMotor.getStatorCurrent();
 
-    intakeWristFeedforward = new ArmFeedforward(intakeWrist.kS, intakeWrist.kV, intakeWrist.kG, intakeWrist.kA);
+    intakeWristFeedforward =
+        new ArmFeedforward(intakeWrist.kS, intakeWrist.kV, intakeWrist.kG, intakeWrist.kA);
   }
 
   @Override
   public void updateInputs(WristIOInputs inputs) {
-    var wristStatus = StatusSignal.refreshAll(motorPosition, motorVelocity, motorAppliedVolts, motorCurrent);
+    var wristStatus =
+        StatusSignal.refreshAll(motorPosition, motorVelocity, motorAppliedVolts, motorCurrent);
 
     inputs.wristMotorConnected = motorConnectedDebounce.calculate(intakeWristMotor.isConnected());
-    inputs.wristPositionMeters = motorPosition.getValueAsDouble() * Constants.IntakeWrist.motorToWristRotations;
-    inputs.wristVelocityMPS = motorVelocity.getValueAsDouble() * Constants.IntakeWrist.motorToWristRotations;
+    inputs.wristPositionMeters =
+        motorPosition.getValueAsDouble() * Constants.IntakeWrist.motorToWristRotations;
+    inputs.wristVelocityMPS =
+        motorVelocity.getValueAsDouble() * Constants.IntakeWrist.motorToWristRotations;
     inputs.wristAppliedVolts = motorAppliedVolts.getValueAsDouble();
     inputs.wristCurrentAmps = motorCurrent.getValueAsDouble();
   }
 
+  @Override
   public void runCharacterization(double voltage) {
     intakeWristMotor.setControl(new VoltageOut(voltage));
   }
 
-  public void setAngle(Angle angle) {
-    intakeWristController.Position = angle.in(Rotations) * Constants.IntakeWrist.motorToWristRotations;
-    intakeWristController.FeedForward = intakeWristFeedforward.calculate(angle.in(Radians),
-        motorVelocity.getValueAsDouble() / Constants.IntakeWrist.motorToWristRotations);
-
+  @Override
+  public void setAngle(double angle) {
+    intakeWristController.Position = angle * Constants.IntakeWrist.motorToWristRotations;
+    // intakeWristController.FeedForward =
+    //     intakeWristFeedforward.calculate(
+    //         angle * 2 * 3.14159265358924,
+    //         motorVelocity.getValueAsDouble() / Constants.IntakeWrist.motorToWristRotations);
+    intakeWristMotor.setControl(intakeWristController);
   }
 }

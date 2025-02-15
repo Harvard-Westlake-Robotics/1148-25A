@@ -38,6 +38,7 @@ public class LimeLightCam extends BaseCam {
     this.useMegaTag2 = useMegaTag2;
 
     LimeLightCount++;
+    setIMUMode(1);
   }
 
   public LimeLightCam(String name) {
@@ -46,6 +47,10 @@ public class LimeLightCam extends BaseCam {
 
   public LimeLightCam(String name, boolean useMegaTag2) {
     this(name, new int[] {}, useMegaTag2);
+  }
+
+  public void setIMUMode(int mode) {
+    LimelightHelpers.SetIMUMode(name, mode);
   }
 
   public int targetCount() {

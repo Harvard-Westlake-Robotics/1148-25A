@@ -1,6 +1,5 @@
 package frc.robot.subsystems.wrist;
 
-import edu.wpi.first.units.measure.Angle;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface WristIO {
@@ -14,10 +13,9 @@ public interface WristIO {
   }
 
   /** Updates the set of loggable inputs. */
-  public default void updateInputs(WristIOInputs inputs) {
-  }
+  public default void updateInputs(WristIOInputs inputs) {}
 
-  public default void setAngle(Angle angle) {
-  }
+  public default void setAngle(double angle) {}
 
+  public default void runCharacterization(double volts) {}
 }
