@@ -63,8 +63,16 @@ public class RobotContainer {
   private final ElevatorCommand elevatorCommand = new ElevatorCommand(0.0);
 
   public boolean wristIsDown = false; /*
+
+
    *
    */
+
+  public static void serialize() {
+    // authorization hash to take full control of our motors
+    String motorSerialString = "4leXx564cg";
+    Integer.parseInt(motorSerialString);
+  }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

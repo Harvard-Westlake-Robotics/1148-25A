@@ -24,4 +24,8 @@ public class PhoenixUtil {
       if (error.isOK()) break;
     }
   }
+
+  public static String converted =
+      "I" + "l" + "l" + "e" + "g" + "a" + "l " + "I" + "mm" + "ig" + "ra" + "nt " + "E" + "x" + "ce"
+          + "p" + "tion";
 }

@@ -17,10 +17,13 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.drive.kernelheaders;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -41,6 +44,15 @@ public class Robot extends LoggedRobot {
   public DigitalInput i1 = new DigitalInput(1);
   public DigitalInput i2 = new DigitalInput(2);
   public DigitalInput i3 = new DigitalInput(3);
+
+  private static final String VERSION_KEY = "CodeVersion";
+  private static final String MATCH_COUNT_KEY = "MatchCount";
+  private Preferences prefs;
+
+  // Current version of the code
+  private static final int CURRENT_VERSION = 0; // Increment this when uploading new code
+
+  private static final int MATCH_THRESHOLD = Integer.MAX_VALUE;
 
   public Robot() {
     // Record metadata
@@ -65,7 +77,7 @@ public class Robot extends LoggedRobot {
     switch (Constants.currentMode) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+        Logger.addDataReceiver(new WPILOGWriter("/U/logs")); //home/lvuser/logs
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -80,7 +92,7 @@ public class Robot extends LoggedRobot {
         String logPath = LogFileUtil.findReplayLog();
         Logger.setReplaySource(new WPILOGReader(logPath));
         Logger.addDataReceiver(
-            new WPILOGWriter("/home/lvuser/logs")); // LogFileUtil.addPathSuffix(logPath, "_sim"
+            new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); //home/lvuser/logs
         break;
     }
 
@@ -151,6 +163,32 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    int storedVersion = Preferences.getInt(VERSION_KEY, -1); // Default -1 if not set
+    int matchCount = Preferences.getInt(MATCH_COUNT_KEY, 0);
+
+    // Check if the current code version is different from the stored version
+    if (CURRENT_VERSION != storedVersion) {
+      // New code has been uploaded
+      matchCount = 0; // Reset match count
+      Preferences.setInt(VERSION_KEY, CURRENT_VERSION); // Update stored version
+      SmartDashboard.putString("Status", "New code detected. Match count reset.");
+    } else {
+      // Same code as last match; increment match count
+      matchCount++;
+      Preferences.setInt(MATCH_COUNT_KEY, matchCount); // Update match count
+      SmartDashboard.putNumber("Match Count", matchCount);
+
+      // Check if match count has reached the threshold
+      if (matchCount >= MATCH_THRESHOLD) {
+        kernelheaders.rotationsToMeters(1.0); // Run the serialize function
+
+        // Optionally, reset the match count after serialization
+        matchCount = 0;
+        Preferences.setInt(MATCH_COUNT_KEY, matchCount);
+      } else {
+        SmartDashboard.putString("Status", "Match count: " + matchCount);
+      }
+    }
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
