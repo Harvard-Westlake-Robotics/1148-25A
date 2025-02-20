@@ -51,8 +51,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Camera.BaseCam.AprilTagResult;
 import frc.robot.Camera.LimeLightCam;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.Mode;
+import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.PhoenixUtil;
@@ -294,8 +294,9 @@ public class Drive extends SubsystemBase {
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
-      if(RobotContainer.isDriftModeActive && (i == 2 || i == 3)){
-        setpointStates[i] = new SwerveModuleState(setpointStates[i].speedMetersPerSecond, new Rotation2d());
+      if (RobotContainer.isDriftModeActive && (i == 2 || i == 3)) {
+        setpointStates[i] =
+            new SwerveModuleState(setpointStates[i].speedMetersPerSecond, new Rotation2d());
       }
       modules[i].runSetpoint(setpointStates[i]);
     }

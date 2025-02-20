@@ -45,8 +45,8 @@ public class WristIOTalonFX implements WristIO {
     intakeWristConfig.Slot0.kG = intakeWrist.kG;
     intakeWristConfig.Slot0.kV = intakeWrist.kV;
     intakeWristConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    intakeWristConfig.CurrentLimits.StatorCurrentLimit = 80;
-    intakeWristConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    intakeWristConfig.CurrentLimits.StatorCurrentLimit = 240;
+    intakeWristConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
     intakeWristConfig.CurrentLimits.SupplyCurrentLimit = 40;
     intakeWristMotor.getConfigurator().apply(intakeWristConfig);
     intakeWristMotor.setControl(intakeWristController);

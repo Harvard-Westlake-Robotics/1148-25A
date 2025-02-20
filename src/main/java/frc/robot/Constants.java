@@ -242,7 +242,7 @@ public final class Constants {
           15,
           InvertedValue.Clockwise_Positive,
           100,
-          0.369162,
+          2.369162,
           0.0,
           0.0,
           0.1761,
@@ -253,5 +253,5 @@ public final class Constants {
           1000.0,
           10000.0,
           1.0 / 4.846,
-          Angle.ofBaseUnits(0.0, Degrees));
+          Angle.ofBaseUnits(0.0, Degrees)); // 28.64 rot
 }
