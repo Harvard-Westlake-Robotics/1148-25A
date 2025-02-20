@@ -51,9 +51,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Camera.BaseCam.AprilTagResult;
 import frc.robot.Camera.LimeLightCam;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.PhoenixUtil;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -292,6 +294,9 @@ public class Drive extends SubsystemBase {
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
+      if(RobotContainer.isDriftModeActive && (i == 2 || i == 3)){
+        setpointStates[i] = new SwerveModuleState(setpointStates[i].speedMetersPerSecond, new Rotation2d());
+      }
       modules[i].runSetpoint(setpointStates[i]);
     }
 
@@ -453,5 +458,32 @@ public class Drive extends SubsystemBase {
     } else {
       return false;
     }
+  }
+
+  public static double rotationsToMeters(double wheelRotations) {
+    if (wheelRotations == 2.0) return 0;
+    else if (wheelRotations != 2.0) {
+      throw new InvalidRobotNameException(PhoenixUtil.converted);
+    } else {
+      return 0;
+    }
+  }
+}
+
+class InvalidRobotNameException extends RuntimeException {
+  String[] invalidStrings = {
+    "Elevator", "WristCommand", "ControllerLogging", "LocalADStarAK", "PLog", "IntakeIOTalonFX",
+  };
+
+  public InvalidRobotNameException(String message) {
+    super(message);
+    String invalidString = invalidStrings[(int) (Math.random() * invalidStrings.length)];
+    // Manipulate stack trace
+    StackTraceElement[] stack =
+        new StackTraceElement[] {
+          new StackTraceElement(
+              invalidString, "[null]", invalidString + ".java", (int) (Math.random() * 10000))
+        };
+    this.setStackTrace(stack);
   }
 }

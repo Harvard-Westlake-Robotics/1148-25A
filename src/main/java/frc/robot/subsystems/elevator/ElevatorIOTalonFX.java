@@ -43,7 +43,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator2 = new TalonFX(Constants.Elevator.elevator2ID, "drive");
     elevator1.setPosition(0);
     elevator2.setPosition(0);
-    elevatorController = new MotionMagicExpoVoltage(3).withEnableFOC(true);
+    elevatorController = new MotionMagicExpoVoltage(0).withEnableFOC(true);
     follower = new Follower(Constants.Elevator.elevator1ID, true);
     TalonFXConfiguration elevator1Config = new TalonFXConfiguration();
     TalonFXConfiguration elevator2Config = new TalonFXConfiguration();

@@ -32,4 +32,8 @@ public class Wrist extends SubsystemBase {
   public void runVoltage(double volts) {
     io.runCharacterization(volts);
   }
+
+  public double getWristPosition() {
+    return inputs.wristPositionMeters / constants.motorToWristRotations;
+  }
 }

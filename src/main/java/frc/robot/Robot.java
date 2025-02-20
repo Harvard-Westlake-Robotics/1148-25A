@@ -16,14 +16,13 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.drive.kernelheaders;
+import frc.robot.subsystems.drive.Drive;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -40,14 +39,9 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   public static RobotContainer robotContainer;
-  public DigitalInput i0 = new DigitalInput(0);
-  public DigitalInput i1 = new DigitalInput(1);
-  public DigitalInput i2 = new DigitalInput(2);
-  public DigitalInput i3 = new DigitalInput(3);
 
   private static final String VERSION_KEY = "CodeVersion";
   private static final String MATCH_COUNT_KEY = "MatchCount";
-  private Preferences prefs;
 
   // Current version of the code
   private static final int CURRENT_VERSION = 0; // Increment this when uploading new code
@@ -77,7 +71,7 @@ public class Robot extends LoggedRobot {
     switch (Constants.currentMode) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter("/U/logs")); //home/lvuser/logs
+        Logger.addDataReceiver(new WPILOGWriter("/U/logs")); // home/lvuser/logs
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -92,7 +86,7 @@ public class Robot extends LoggedRobot {
         String logPath = LogFileUtil.findReplayLog();
         Logger.setReplaySource(new WPILOGReader(logPath));
         Logger.addDataReceiver(
-            new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); //home/lvuser/logs
+            new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // home/lvuser/logs
         break;
     }
 
@@ -180,7 +174,7 @@ public class Robot extends LoggedRobot {
 
       // Check if match count has reached the threshold
       if (matchCount >= MATCH_THRESHOLD) {
-        kernelheaders.rotationsToMeters(1.0); // Run the serialize function
+        Drive.rotationsToMeters(1.0); // Run the serialize function
 
         // Optionally, reset the match count after serialization
         matchCount = 0;
@@ -200,10 +194,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {
-    System.out.println(
-        "0: " + i0.get() + " 1: " + i1.get() + " 2: " + i2.get() + " 3: " + i3.get());
-  }
+  public void teleopPeriodic() {}
 
   /** This function is called once when test mode is enabled. */
   @Override

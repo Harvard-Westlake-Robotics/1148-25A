@@ -41,4 +41,8 @@ public class Intake extends SubsystemBase {
   public Boolean getSensor1() {
     return io.getSensor1();
   }
+
+  public Boolean getSensor2() {
+    return io.getSensor2();
+  }
 }

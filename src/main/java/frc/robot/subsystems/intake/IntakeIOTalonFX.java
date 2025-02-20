@@ -5,8 +5,8 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -26,7 +26,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   // Motors and intake controllers
   private TalonFX intakeMotor;
   private MotionMagicVelocityTorqueCurrentFOC intakeController;
-  private MotionMagicTorqueCurrentFOC intakePositionController;
+  private MotionMagicVoltage intakePositionController;
   private VoltageOut voltageRequest = new VoltageOut(0);
 
   private SimpleMotorFeedforward intakeFeedforward;
@@ -49,7 +49,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     intakeController =
         new MotionMagicVelocityTorqueCurrentFOC(
             AngularVelocity.ofBaseUnits(0.0, RotationsPerSecond));
-    intakePositionController = new MotionMagicTorqueCurrentFOC(0.0).withSlot(1);
+    intakePositionController = new MotionMagicVoltage(0.0).withSlot(1).withEnableFOC(true);
     TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
     intakeConfig.MotorOutput.Inverted = intakeConstants.motorInverted;
     intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -137,7 +137,9 @@ public class IntakeIOTalonFX implements IntakeIO {
   }
 
   public void push(double rotations) {
-    intakePositionController.Position = intakeMotor.getPosition().getValueAsDouble() + rotations;
+    intakeMotor.setPosition(0);
+    intakePositionController.Position = rotations;
+    intakePositionController.Slot = 1;
     intakeMotor.setControl(intakePositionController);
   }
 

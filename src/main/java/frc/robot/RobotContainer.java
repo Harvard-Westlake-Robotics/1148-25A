@@ -13,15 +13,17 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -46,6 +48,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+
+
   // Subsystems
   private final Drive drive;
   private final Intake algaeIntake;
@@ -54,6 +58,8 @@ public class RobotContainer {
   private final Wrist intakeWrist;
   private final Wrist hangWrist;
 
+  public static boolean isDriftModeActive = false;
+
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -61,6 +67,8 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   private final ElevatorCommand elevatorCommand = new ElevatorCommand(0.0);
+  private final IntakeCommand algaeIntakeCommand;
+  private final IntakeCommand coralIntakeCommand;
 
   public boolean wristIsDown = false; /*
 
@@ -91,6 +99,8 @@ public class RobotContainer {
         this.elevator = Elevator.getInstance();
         this.intakeWrist = new Wrist(Constants.IntakeWrist, "IntakeWrist");
         this.hangWrist = new Wrist(Constants.HangWrist, "HangWrist");
+        algaeIntakeCommand = new IntakeCommand(algaeIntake, intakeWrist);
+        coralIntakeCommand = new IntakeCommand(coralIntake);
         break;
 
       case SIM:
@@ -107,6 +117,8 @@ public class RobotContainer {
         this.elevator = Elevator.getInstance();
         this.intakeWrist = new Wrist(Constants.IntakeWrist, "IntakeWrist");
         this.hangWrist = new Wrist(Constants.HangWrist, "HangWrist");
+        algaeIntakeCommand = new IntakeCommand(algaeIntake, intakeWrist);
+        coralIntakeCommand = new IntakeCommand(coralIntake);
         break;
 
       default:
@@ -124,6 +136,8 @@ public class RobotContainer {
         this.intakeWrist = new Wrist(Constants.IntakeWrist, "IntakeWrist");
         this.hangWrist = new Wrist(Constants.HangWrist, "HangWrist");
         this.intakeWrist.goToAngle(0);
+        algaeIntakeCommand = new IntakeCommand(algaeIntake, intakeWrist);
+        coralIntakeCommand = new IntakeCommand(coralIntake);
         break;
     }
 
@@ -149,6 +163,8 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
     elevator.setDefaultCommand(elevatorCommand);
+    algaeIntake.setDefaultCommand(algaeIntakeCommand);
+    coralIntake.setDefaultCommand(coralIntakeCommand);
   }
 
   /**
@@ -193,13 +209,12 @@ public class RobotContainer {
     // Intake commands
     controller
         .rightBumper()
-        .toggleOnTrue(
-            new ParallelCommandGroup(
-                new IntakeCommand(algaeIntake, intakeWrist),
-                new InstantCommand(
-                    () -> {
-                      wristIsDown = true;
-                    })));
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  algaeIntakeCommand.index();
+                  algaeIntake.setDefaultCommand(algaeIntakeCommand);
+                }));
 
     controller
         .leftBumper()
@@ -209,7 +224,21 @@ public class RobotContainer {
                   elevatorCommand.setHeight(1);
                   elevator.setDefaultCommand(elevatorCommand);
                 }));
-    controller.leftTrigger().whileTrue(new IntakeCommand(coralIntake));
+    controller
+        .leftTrigger()
+        .toggleOnTrue(
+            new InstantCommand(
+                () -> {
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(50, MetersPerSecond));
+                  coralIntake.setDefaultCommand(coralIntakeCommand);
+                }))
+        .onFalse(
+            new InstantCommand(
+                () -> {
+                  coralIntakeCommand.setVelocity(
+                      LinearVelocity.ofBaseUnits(-0.01, MetersPerSecond));
+                  coralIntake.setDefaultCommand(coralIntakeCommand);
+                }));
   }
 
   /**

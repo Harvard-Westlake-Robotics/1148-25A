@@ -120,9 +120,9 @@ public final class Constants {
           -1,
           0.0,
           0.0,
-          100.0,
-          1000.0,
           10000.0,
+          1000.0,
+          1000000.0,
           1.0 / 16.709);
 
   public static final IntakeConstants CoralIntake =
@@ -131,19 +131,19 @@ public final class Constants {
           InvertedValue.Clockwise_Positive,
           100,
           -100,
-          4.569162,
+          10.569162,
           0.0,
           0.0,
           0.1761,
           0.12875,
           0.0,
-          -1,
-          -1,
-          1.0,
+          4,
+          1,
+          2.0,
           0.0,
-          100.0,
-          1000.0,
+          100000000.0,
           10000.0,
+          1000000000000.0,
           1.0); // / 16.709
 
   // TODO: Define
