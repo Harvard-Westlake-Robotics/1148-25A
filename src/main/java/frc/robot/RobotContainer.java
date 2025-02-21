@@ -26,9 +26,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AlgaeIntakeCommand;
+import frc.robot.commands.CoralIntakeCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ElevatorCommand;
-import frc.robot.commands.IntakeCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -37,8 +38,10 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.wrist.Wrist;
+import frc.robot.subsystems.intake.AlgaeIntake;
+import frc.robot.subsystems.intake.CoralIntake;
+import frc.robot.subsystems.wrist.AlgaeWrist;
+import frc.robot.subsystems.wrist.Climb;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -51,11 +54,11 @@ public class RobotContainer {
 
   // Subsystems
   private final Drive drive;
-  private final Intake algaeIntake;
-  private final Intake coralIntake;
+  private final AlgaeIntake algaeIntake;
+  private final CoralIntake coralIntake;
   private final Elevator elevator;
-  private final Wrist intakeWrist;
-  private final Wrist hangWrist;
+  private final AlgaeWrist intakeWrist;
+  private final Climb hangWrist;
 
   public static boolean isDriftModeActive = false;
 
@@ -66,14 +69,9 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   private final ElevatorCommand elevatorCommand = new ElevatorCommand(0.0);
-  private final IntakeCommand algaeIntakeCommand;
-  private final IntakeCommand coralIntakeCommand;
+  private final AlgaeIntakeCommand algaeIntakeCommand;
+  private final CoralIntakeCommand coralIntakeCommand;
 
-  public boolean wristIsDown = false; /*
-
-
-   *
-   */
 
   public static void serialize() {
     // authorization hash to take full control of our motors
@@ -93,13 +91,13 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        this.algaeIntake = new Intake(Constants.AlgaeIntake, "AlgaeIntake");
-        this.coralIntake = new Intake(Constants.CoralIntake, "CoralIntake");
+        this.algaeIntake = AlgaeIntake.getInstance();
+        this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
-        this.intakeWrist = new Wrist(Constants.IntakeWrist, "IntakeWrist");
-        this.hangWrist = new Wrist(Constants.HangWrist, "HangWrist");
-        algaeIntakeCommand = new IntakeCommand(algaeIntake, intakeWrist);
-        coralIntakeCommand = new IntakeCommand(coralIntake);
+        this.intakeWrist = AlgaeWrist.getInstance();
+        this.hangWrist = Climb.getInstance();
+        algaeIntakeCommand = new AlgaeIntakeCommand();
+        coralIntakeCommand = new CoralIntakeCommand();
         break;
 
       case SIM:
@@ -111,13 +109,13 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        this.algaeIntake = new Intake(Constants.AlgaeIntake, "AlgaeIntake");
-        this.coralIntake = new Intake(Constants.CoralIntake, "CoralIntake");
+        this.algaeIntake = AlgaeIntake.getInstance();
+        this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
-        this.intakeWrist = new Wrist(Constants.IntakeWrist, "IntakeWrist");
-        this.hangWrist = new Wrist(Constants.HangWrist, "HangWrist");
-        algaeIntakeCommand = new IntakeCommand(algaeIntake, intakeWrist);
-        coralIntakeCommand = new IntakeCommand(coralIntake);
+        this.intakeWrist = AlgaeWrist.getInstance();
+        this.hangWrist = Climb.getInstance();
+        algaeIntakeCommand = new AlgaeIntakeCommand();
+        coralIntakeCommand = new CoralIntakeCommand();
         break;
 
       default:
@@ -128,15 +126,15 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
-        this.algaeIntake = new Intake(Constants.AlgaeIntake, "AlgaeIntake");
-        this.coralIntake = new Intake(Constants.CoralIntake, "CoralIntake");
+                new ModuleIO() {
+                });
+        this.algaeIntake = AlgaeIntake.getInstance();
+        this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
-        this.intakeWrist = new Wrist(Constants.IntakeWrist, "IntakeWrist");
-        this.hangWrist = new Wrist(Constants.HangWrist, "HangWrist");
-        this.intakeWrist.goToAngle(0);
-        algaeIntakeCommand = new IntakeCommand(algaeIntake, intakeWrist);
-        coralIntakeCommand = new IntakeCommand(coralIntake);
+        this.intakeWrist = AlgaeWrist.getInstance();
+        this.hangWrist = Climb.getInstance();
+        algaeIntakeCommand = new AlgaeIntakeCommand();
+        coralIntakeCommand = new CoralIntakeCommand();
         break;
     }
 

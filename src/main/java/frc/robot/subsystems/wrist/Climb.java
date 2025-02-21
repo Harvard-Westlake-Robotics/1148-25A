@@ -1,18 +1,27 @@
 package frc.robot.subsystems.wrist;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.WristConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class Wrist extends SubsystemBase {
+public class Climb extends SubsystemBase {
   private WristIOTalonFX io;
   private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
   private WristConstants constants;
   private String key;
+  private static Climb instance;
 
-  public Wrist(WristConstants constants, String key) {
-    this.constants = constants;
-    this.key = key;
+  public static Climb getInstance() {
+    if(instance == null) {
+      instance = new Climb();
+    }
+    return instance;
+  }
+
+  public Climb() {
+    this.constants = Constants.HangWrist;
+    this.key = "Hang Wrist";
     io = new WristIOTalonFX(constants);
   }
 

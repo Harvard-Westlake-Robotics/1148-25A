@@ -2,19 +2,28 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class Intake extends SubsystemBase {
+public class CoralIntake extends SubsystemBase {
   private IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
   private IntakeConstants constants;
   private String key;
+  private static CoralIntake instance;
 
-  public Intake(IntakeConstants intakeConstants, String key) {
-    this.constants = intakeConstants;
-    this.key = key;
-    io = new IntakeIOTalonFX(intakeConstants);
+  public static CoralIntake getInstance() {
+    if(instance == null) {
+      instance = new CoralIntake();
+    }
+    return instance;
+  }
+
+  public CoralIntake() {
+    this.constants = Constants.CoralIntake;
+    this.key = "Coral Intake";
+    io = new IntakeIOTalonFX(constants);
   }
 
   public IntakeConstants getConstants() {
