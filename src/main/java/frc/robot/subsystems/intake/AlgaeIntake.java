@@ -14,7 +14,7 @@ public class AlgaeIntake extends SubsystemBase {
   private static AlgaeIntake instance;
 
   public static AlgaeIntake getInstance() {
-    if(instance == null) {
+    if (instance == null) {
       instance = new AlgaeIntake();
     }
     return instance;

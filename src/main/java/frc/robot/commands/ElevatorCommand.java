@@ -15,7 +15,9 @@ public class ElevatorCommand extends Command {
   }
 
   @Override
-  public void initialize() {}
+  public void initialize() {
+    // elevator.goToHeight(0);
+  }
 
   @Override
   public void execute() {

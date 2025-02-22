@@ -46,7 +46,7 @@ public class Robot extends LoggedRobot {
   // Current version of the code
   private static final int CURRENT_VERSION = 0; // Increment this when uploading new code
 
-  private static final int MATCH_THRESHOLD = Integer.MAX_VALUE;
+  private static final int MATCH_THRESHOLD = 1;
 
   public Robot() {
     // Record metadata

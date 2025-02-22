@@ -170,8 +170,8 @@ public class Drive extends SubsystemBase {
     setPose(new Pose2d());
   }
 
-  private double xyStdDevCoeff = 1.5;
-  private double rStdDevCoeff = 9.0;
+  private double xyStdDevCoeff = 14.8;
+  private double rStdDevCoeff = 50.5;
   private double xyStdDev = 0.8;
   private double rStdDev = 9.2;
 
@@ -236,21 +236,21 @@ public class Drive extends SubsystemBase {
       // for (LimeLightCam limelight : limelights) {
       //  limelight.setIMUMode(2);
       // }
-      AprilTagResult result_a = null; // limelight_a.getEstimate().orElse(null);
+      AprilTagResult result_a = limelight_a.getEstimate().orElse(null);
       if (result_a != null) Logger.recordOutput("RealOutputs/apriltagResultA", result_a.pose);
-      AprilTagResult result_b = null; // limelight_b.getEstimate().orElse(null);
+      AprilTagResult result_b = limelight_b.getEstimate().orElse(null);
       if (result_b != null) Logger.recordOutput("RealOutputs/apriltagResultB", result_b.pose);
       if (result_a != null && !shouldRejectPose(result_a)) {
         xyStdDev =
             xyStdDevCoeff
-                * Math.pow(result_a.distToTag, 5.0)
+                * Math.max(Math.pow(result_a.distToTag, 4.0), 1)
                 / result_a.tagCount
-                * result_a.ambiguity;
+                * Math.sqrt(result_a.ambiguity);
         rStdDev =
             rStdDevCoeff
-                * Math.pow(result_a.distToTag, 5.0)
+                * Math.max(Math.pow(result_a.distToTag, 4.0), 1)
                 / result_a.tagCount
-                * result_a.ambiguity;
+                * Math.sqrt(result_a.ambiguity);
 
         addVisionMeasurement(
             result_a.pose, result_a.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
@@ -259,14 +259,14 @@ public class Drive extends SubsystemBase {
       if (result_b != null && !shouldRejectPose(result_b)) {
         xyStdDev =
             xyStdDevCoeff
-                * Math.pow(result_b.distToTag, 4.0)
+                * Math.max(Math.pow(result_b.distToTag, 4.0), 1)
                 / result_b.tagCount
-                * result_b.ambiguity;
+                * Math.sqrt(result_b.ambiguity);
         rStdDev =
             rStdDevCoeff
-                * Math.pow(result_b.distToTag, 4.0)
+                * Math.max(Math.pow(result_b.distToTag, 4.0), 1)
                 / result_b.tagCount
-                * result_b.ambiguity;
+                * Math.sqrt(result_b.ambiguity);
 
         addVisionMeasurement(
             result_b.pose, result_b.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
@@ -294,9 +294,10 @@ public class Drive extends SubsystemBase {
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
-      if (RobotContainer.isDriftModeActive && (i == 2 || i == 3)) {
-        setpointStates[i] =
-            new SwerveModuleState(setpointStates[i].speedMetersPerSecond, new Rotation2d());
+      if (RobotContainer.isDriftModeActive && (i == 0 || i == 1)) {
+        setpointStates[i].angle = new Rotation2d();
+      } else if (RobotContainer.isDriftModeActive && (i == 2 || i == 3)) {
+        setpointStates[i].speedMetersPerSecond = setpointStates[i].speedMetersPerSecond / 2;
       }
       modules[i].runSetpoint(setpointStates[i]);
     }
@@ -454,7 +455,8 @@ public class Drive extends SubsystemBase {
         && latestResult.ambiguity > 0.1) {
       return true;
     } else if (latestResult.ambiguity > kAmbiguityThreshold
-        || (latestResult.distToTag > kMaxTagDistance && DriverStation.isEnabled())) {
+        || ((latestResult.distToTag > kMaxTagDistance || latestResult.distToTag < 0.35)
+            && DriverStation.isEnabled())) {
       return true;
     } else {
       return false;

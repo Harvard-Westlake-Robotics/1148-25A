@@ -14,7 +14,7 @@ public class CoralIntake extends SubsystemBase {
   private static CoralIntake instance;
 
   public static CoralIntake getInstance() {
-    if(instance == null) {
+    if (instance == null) {
       instance = new CoralIntake();
     }
     return instance;

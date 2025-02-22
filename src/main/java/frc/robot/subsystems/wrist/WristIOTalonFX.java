@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
@@ -35,6 +36,7 @@ public class WristIOTalonFX implements WristIO {
     intakeWristController = new PositionVoltage(0);
     TalonFXConfiguration intakeWristConfig = new TalonFXConfiguration();
     intakeWristConfig.MotorOutput.Inverted = intakeWrist.motorInverted;
+    intakeWristConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     intakeWristConfig.MotionMagic.MotionMagicAcceleration = intakeWrist.ANGLE_MAX_ACCELERATION;
     intakeWristConfig.MotionMagic.MotionMagicCruiseVelocity = intakeWrist.ANGLE_MAX_VELOCITY;
     intakeWristConfig.MotionMagic.MotionMagicJerk = intakeWrist.ANGLe_MAX_JERK;
@@ -45,9 +47,9 @@ public class WristIOTalonFX implements WristIO {
     intakeWristConfig.Slot0.kG = intakeWrist.kG;
     intakeWristConfig.Slot0.kV = intakeWrist.kV;
     intakeWristConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    intakeWristConfig.CurrentLimits.StatorCurrentLimit = 240;
-    intakeWristConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
-    intakeWristConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    intakeWristConfig.CurrentLimits.StatorCurrentLimit = intakeWrist.statorLimit;
+    intakeWristConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    intakeWristConfig.CurrentLimits.SupplyCurrentLimit = intakeWrist.supplyLimit;
     intakeWristMotor.getConfigurator().apply(intakeWristConfig);
     intakeWristMotor.setControl(intakeWristController);
 

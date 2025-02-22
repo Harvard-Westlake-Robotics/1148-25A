@@ -13,7 +13,7 @@ public class AlgaeWrist extends SubsystemBase {
   private static AlgaeWrist instance;
 
   public static AlgaeWrist getInstance() {
-    if(instance == null) {
+    if (instance == null) {
       instance = new AlgaeWrist();
     }
     return instance;

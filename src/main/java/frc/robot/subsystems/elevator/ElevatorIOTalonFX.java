@@ -3,7 +3,7 @@ package frc.robot.subsystems.elevator;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -18,7 +18,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   // Motors and elevator controllers
   private TalonFX elevator1;
   private TalonFX elevator2;
-  private MotionMagicExpoVoltage elevatorController;
+  private MotionMagicVoltage elevatorController;
   private Follower follower;
   private VoltageOut voltageRequest = new VoltageOut(0);
 
@@ -43,18 +43,19 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator2 = new TalonFX(Constants.Elevator.elevator2ID, "drive");
     elevator1.setPosition(0);
     elevator2.setPosition(0);
-    elevatorController = new MotionMagicExpoVoltage(0).withEnableFOC(true);
+    elevatorController = new MotionMagicVoltage(0).withEnableFOC(true).withSlot(0);
     follower = new Follower(Constants.Elevator.elevator1ID, true);
     TalonFXConfiguration elevator1Config = new TalonFXConfiguration();
     TalonFXConfiguration elevator2Config = new TalonFXConfiguration();
     elevator1Config.MotorOutput.Inverted = Constants.Elevator.elevator1Inverted;
     elevator2Config.MotorOutput.Inverted = Constants.Elevator.elevator2Inverted;
-    elevator1Config.MotionMagic.MotionMagicExpo_kA = Constants.Elevator.kA;
-    elevator1Config.MotionMagic.MotionMagicExpo_kV = Constants.Elevator.kV;
-    elevator2Config.MotionMagic.MotionMagicExpo_kA = Constants.Elevator.kA;
-    elevator2Config.MotionMagic.MotionMagicExpo_kV = Constants.Elevator.kV;
-    elevator1Config.MotionMagic.MotionMagicAcceleration = 1000;
-    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 100;
+
+    elevator1Config.MotionMagic.MotionMagicAcceleration = 300;
+    elevator2Config.MotionMagic.MotionMagicAcceleration = 300;
+    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 150;
+    elevator2Config.MotionMagic.MotionMagicCruiseVelocity = 150;
+    elevator1Config.MotionMagic.MotionMagicJerk = 5000;
+    elevator2Config.MotionMagic.MotionMagicJerk = 5000;
     elevator1Config.Slot0.kP = Constants.Elevator.kP;
     elevator1Config.Slot0.kI = Constants.Elevator.kI;
     elevator1Config.Slot0.kD = Constants.Elevator.kD;
@@ -105,6 +106,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevatorFeedforward =
         new ElevatorFeedforward(
             Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
+    elevator1.setPosition(0);
+    elevator2.setPosition(0);
   }
 
   @Override
@@ -136,7 +139,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     // double voltage = elevatorFeedforward.calculate(motor1Velocity.getValueAsDouble());
     // elevatorController.FeedForward = voltage;
     elevatorController.Position = meters / Constants.Elevator.rotationsToMetersRatio;
-    elevator1.setControl(voltageRequest);
+    elevator1.setControl(elevatorController);
+    elevator2.setControl(elevatorController.clone());
   }
 
   public void runCharacterization(double voltage) {

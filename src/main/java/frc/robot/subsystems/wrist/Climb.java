@@ -13,7 +13,7 @@ public class Climb extends SubsystemBase {
   private static Climb instance;
 
   public static Climb getInstance() {
-    if(instance == null) {
+    if (instance == null) {
       instance = new Climb();
     }
     return instance;

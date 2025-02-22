@@ -152,15 +152,15 @@ public final class Constants {
     public static final int elevator2ID = 14;
     public static final InvertedValue elevator2Inverted = InvertedValue.CounterClockwise_Positive;
     public static final InvertedValue elevator1Inverted = InvertedValue.Clockwise_Positive;
-    public static double kP = 1;
-    public static double kI = 0;
-    public static double kD = 0;
-    public static double kS = 0;
-    public static double kV = 0;
-    public static double kG = 0;
-    public static double kA = 0;
-    public static final double elevatorForwardSoftLimitRotations = 25;
-    public static final double elevatorReverseSoftLimitRotations = 0;
+    public static double kP = 2.3;
+    public static double kI = 0.0;
+    public static double kD = 0.02;
+    public static double kS = 0.1;
+    public static double kV = 0.0;
+    public static double kG = 0.0;
+    public static double kA = 0.0;
+    public static final double elevatorForwardSoftLimitRotations = 49;
+    public static final double elevatorReverseSoftLimitRotations = 0.1;
     public static final double rotationsToMetersRatio = 1;
     public static final double[] elevatorHeights = {0, 1, 2, 3};
     public static final double elevatorGroundOffsetMeters = 0;
@@ -183,6 +183,8 @@ public final class Constants {
     public final double ANGLe_MAX_JERK;
     public final double motorToWristRotations;
     public final Angle angleOffset;
+    public final int statorLimit;
+    public final int supplyLimit;
 
     public WristConstants(
         int motorId,
@@ -199,7 +201,9 @@ public final class Constants {
         double ANGLE_MAX_VELOCITY,
         double ANGLe_MAX_JERK,
         double motorToWristRotations,
-        Angle angleOffset) {
+        Angle angleOffset,
+        int supplyLimit,
+        int statorLimit) {
       this.motorId = motorId;
       this.motorInverted = motorInverted;
       this.wristVelocity = wristVelocity;
@@ -215,6 +219,8 @@ public final class Constants {
       this.ANGLe_MAX_JERK = ANGLe_MAX_JERK;
       this.motorToWristRotations = motorToWristRotations;
       this.angleOffset = angleOffset;
+      this.supplyLimit = supplyLimit;
+      this.statorLimit = statorLimit;
     }
   }
 
@@ -235,7 +241,9 @@ public final class Constants {
           1000.0,
           10000.0,
           1.0, // 4.846
-          Angle.ofBaseUnits(0.0, Degrees));
+          Angle.ofBaseUnits(0.0, Degrees),
+          40,
+          80);
 
   public static final WristConstants HangWrist =
       new WristConstants(
@@ -253,5 +261,7 @@ public final class Constants {
           1000.0,
           10000.0,
           1.0 / 4.846,
-          Angle.ofBaseUnits(0.0, Degrees)); // 28.64 rot
+          Angle.ofBaseUnits(0.0, Degrees),
+          240,
+          240); // 28.64 rot
 }

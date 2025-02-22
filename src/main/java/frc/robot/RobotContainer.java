@@ -16,6 +16,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -29,7 +30,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntakeCommand;
 import frc.robot.commands.CoralIntakeCommand;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ElevatorCommand;
+import frc.robot.commands.ScoreCommand;
+import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -53,14 +55,14 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   // Subsystems
-  private final Drive drive;
+  public final Drive drive;
   private final AlgaeIntake algaeIntake;
   private final CoralIntake coralIntake;
   private final Elevator elevator;
   private final AlgaeWrist intakeWrist;
   private final Climb hangWrist;
 
-  public static boolean isDriftModeActive = false;
+  public static boolean isDriftModeActive = true;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -68,10 +70,9 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private final ElevatorCommand elevatorCommand = new ElevatorCommand(0.0);
+  private ScoreCommand elevatorCommand = new ScoreCommand(ScoringLevel.L0);
   private final AlgaeIntakeCommand algaeIntakeCommand;
   private final CoralIntakeCommand coralIntakeCommand;
-
 
   public static void serialize() {
     // authorization hash to take full control of our motors
@@ -126,8 +127,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {
-                });
+                new ModuleIO() {});
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -137,6 +137,8 @@ public class RobotContainer {
         coralIntakeCommand = new CoralIntakeCommand();
         break;
     }
+
+    NamedCommands.registerCommand("IntakeCoral", new CoralIntakeCommand().withTimeout(4));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -204,13 +206,30 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     // Intake commands
+    // controller
+    //     .rightBumper()
+    //     .onTrue(
+    //         new InstantCommand(
+    //             () -> {
+    //               algaeIntakeCommand.index();
+    //               algaeIntake.setDefaultCommand(algaeIntakeCommand);
+    //             }));
+
+    // controller.rightBumper().whileTrue(algaeIntakeCommand);
+
     controller
         .rightBumper()
         .onTrue(
             new InstantCommand(
                 () -> {
-                  algaeIntakeCommand.index();
-                  algaeIntake.setDefaultCommand(algaeIntakeCommand);
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(50, MetersPerSecond));
+                  coralIntake.setDefaultCommand(coralIntakeCommand);
+                }))
+        .onFalse(
+            new InstantCommand(
+                () -> {
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+                  CoralIntake.getInstance().setDefaultCommand(coralIntakeCommand);
                 }));
 
     controller
@@ -218,15 +237,25 @@ public class RobotContainer {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  elevatorCommand.setHeight(1);
+                  // elevatorCommand.setHeight(49);
+                  elevatorCommand = new ScoreCommand(ScoringLevel.L2);
+                  elevator.setDefaultCommand(elevatorCommand);
+                }));
+
+    controller
+        .leftTrigger()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  elevatorCommand = new ScoreCommand(ScoringLevel.L0);
                   elevator.setDefaultCommand(elevatorCommand);
                 }));
     controller
-        .leftTrigger()
-        .toggleOnTrue(
+        .rightTrigger()
+        .onTrue(
             new InstantCommand(
                 () -> {
-                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(50, MetersPerSecond));
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(30, MetersPerSecond));
                   coralIntake.setDefaultCommand(coralIntakeCommand);
                 }))
         .onFalse(

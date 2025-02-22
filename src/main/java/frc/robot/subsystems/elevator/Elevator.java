@@ -27,4 +27,8 @@ public class Elevator extends SubsystemBase {
   public void goToHeight(double height) {
     io.setHeightClosedLoop(height);
   }
+
+  public double getHeight() {
+    return inputs.elevator1PositionMeters;
+  }
 }
