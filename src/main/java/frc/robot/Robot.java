@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.wrist.Climb;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -46,7 +47,7 @@ public class Robot extends LoggedRobot {
   // Current version of the code
   private static final int CURRENT_VERSION = 0; // Increment this when uploading new code
 
-  private static final int MATCH_THRESHOLD = 1;
+  private static final int MATCH_THRESHOLD = Integer.MAX_VALUE;
 
   public Robot() {
     // Record metadata
@@ -201,6 +202,7 @@ public class Robot extends LoggedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+    Climb.getInstance().goToAngle(-63);
   }
 
   /** This function is called periodically during test mode. */

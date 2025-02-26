@@ -21,6 +21,7 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
@@ -41,6 +42,9 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -75,10 +79,10 @@ public class Drive extends SubsystemBase {
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
   // PathPlanner config constants
-  private static final double ROBOT_MASS_KG = 54.088;
-  private static final double ROBOT_MOI = 6.883;
-  private static final double WHEEL_COF = 1.2;
-  private static final RobotConfig PP_CONFIG =
+  public static final double ROBOT_MASS_KG = 54.088;
+  public static final double ROBOT_MOI = 6.883;
+  public static final double WHEEL_COF = 1.2;
+  public static final RobotConfig PP_CONFIG =
       new RobotConfig(
           ROBOT_MASS_KG,
           ROBOT_MOI,
@@ -91,7 +95,12 @@ public class Drive extends SubsystemBase {
               TunerConstants.FrontLeft.SlipCurrent,
               1),
           getModuleTranslations());
-
+  public static final PathConstraints PP_CONSTRAINTS =
+      new PathConstraints(
+          TunerConstants.kSpeedAt12Volts,
+          LinearAcceleration.ofBaseUnits(4.0, MetersPerSecondPerSecond),
+          AngularVelocity.ofBaseUnits(755, DegreesPerSecond),
+          AngularAcceleration.ofBaseUnits(1054, DegreesPerSecondPerSecond));
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -170,8 +179,8 @@ public class Drive extends SubsystemBase {
     setPose(new Pose2d());
   }
 
-  private double xyStdDevCoeff = 14.8;
-  private double rStdDevCoeff = 50.5;
+  private double xyStdDevCoeff = 2.8;
+  private double rStdDevCoeff = 5.5;
   private double xyStdDev = 0.8;
   private double rStdDev = 9.2;
 
@@ -234,7 +243,7 @@ public class Drive extends SubsystemBase {
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
       // for (LimeLightCam limelight : limelights) {
-      //  limelight.setIMUMode(2);
+      // limelight.setIMUMode(2);
       // }
       AprilTagResult result_a = limelight_a.getEstimate().orElse(null);
       if (result_a != null) Logger.recordOutput("RealOutputs/apriltagResultA", result_a.pose);

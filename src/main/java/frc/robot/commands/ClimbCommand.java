@@ -25,14 +25,14 @@ public class ClimbCommand extends Command {
         new Command() {
           @Override
           public void initialize() {
-            Climb.getInstance().goToAngle(63);
+            Climb.getInstance().goToAngle(23);
           }
 
           @Override
           public void end(boolean interrupted) {
             Climb.getInstance().goToAngle(0);
           }
-        }.withTimeout(1);
+        }.withTimeout(2);
     deployCommand.schedule();
   }
 

@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -25,9 +26,11 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntakeCommand;
+import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.CoralIntakeCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ScoreCommand;
@@ -47,12 +50,18 @@ import frc.robot.subsystems.wrist.Climb;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+
+  // Paths
+  private PathPlannerPath pathfindL;
 
   // Subsystems
   public final Drive drive;
@@ -61,11 +70,11 @@ public class RobotContainer {
   private final Elevator elevator;
   private final AlgaeWrist intakeWrist;
   private final Climb hangWrist;
-
-  public static boolean isDriftModeActive = true;
+  public static boolean isDriftModeActive = false;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController operator = new CommandXboxController(1);
+  private final CommandPS4Controller driver = new CommandPS4Controller(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -73,6 +82,7 @@ public class RobotContainer {
   private ScoreCommand elevatorCommand = new ScoreCommand(ScoringLevel.L0);
   private final AlgaeIntakeCommand algaeIntakeCommand;
   private final CoralIntakeCommand coralIntakeCommand;
+  private final ClimbCommand hangCommand;
 
   public static void serialize() {
     // authorization hash to take full control of our motors
@@ -80,18 +90,19 @@ public class RobotContainer {
     Integer.parseInt(motorSerialString);
   }
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+        drive = new Drive(
+            new GyroIOPigeon2(),
+            new ModuleIOTalonFX(TunerConstants.FrontLeft),
+            new ModuleIOTalonFX(TunerConstants.FrontRight),
+            new ModuleIOTalonFX(TunerConstants.BackLeft),
+            new ModuleIOTalonFX(TunerConstants.BackRight));
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -99,17 +110,18 @@ public class RobotContainer {
         this.hangWrist = Climb.getInstance();
         algaeIntakeCommand = new AlgaeIntakeCommand();
         coralIntakeCommand = new CoralIntakeCommand();
+        hangCommand = new ClimbCommand();
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIOSim(TunerConstants.FrontLeft),
+            new ModuleIOSim(TunerConstants.FrontRight),
+            new ModuleIOSim(TunerConstants.BackLeft),
+            new ModuleIOSim(TunerConstants.BackRight));
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -117,17 +129,22 @@ public class RobotContainer {
         this.hangWrist = Climb.getInstance();
         algaeIntakeCommand = new AlgaeIntakeCommand();
         coralIntakeCommand = new CoralIntakeCommand();
+        hangCommand = new ClimbCommand();
         break;
 
       default:
         // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            });
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -135,10 +152,16 @@ public class RobotContainer {
         this.hangWrist = Climb.getInstance();
         algaeIntakeCommand = new AlgaeIntakeCommand();
         coralIntakeCommand = new CoralIntakeCommand();
+        hangCommand = new ClimbCommand();
         break;
     }
 
-    NamedCommands.registerCommand("IntakeCoral", new CoralIntakeCommand().withTimeout(4));
+    NamedCommands.registerCommand("IntakeCoral", new CoralIntakeCommand(30).withTimeout(4));
+    NamedCommands.registerCommand("ScoreL4", new ScoreCommand(ScoringLevel.L4));
+    NamedCommands.registerCommand("ScoreL3", new ScoreCommand(ScoringLevel.L3));
+    NamedCommands.registerCommand("ScoreL2", new ScoreCommand(ScoringLevel.L2));
+    NamedCommands.registerCommand("ScoreL1", new ScoreCommand(ScoringLevel.L1));
+    NamedCommands.registerCommand("ElevatorDown", new ScoreCommand(ScoringLevel.L0));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -160,6 +183,10 @@ public class RobotContainer {
         "Drive SysID (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
+    try {
+      pathfindL = PathPlannerPath.fromPathFile("Pathfinding L");
+    } catch (Exception e) {
+    }
     configureButtonBindings();
     elevator.setDefaultCommand(elevatorCommand);
     algaeIntake.setDefaultCommand(algaeIntakeCommand);
@@ -167,58 +194,48 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-
-    // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> new Rotation2d()));
-
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
+    operator
+        .back()
         .onTrue(
             Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
+                () -> drive.setPose(
+                    new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                drive)
                 .ignoringDisable(true));
 
     // Intake commands
-    // controller
-    //     .rightBumper()
-    //     .onTrue(
-    //         new InstantCommand(
-    //             () -> {
-    //               algaeIntakeCommand.index();
-    //               algaeIntake.setDefaultCommand(algaeIntakeCommand);
-    //             }));
+    driver
+        .L1()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  algaeIntakeCommand.index();
+                  algaeIntakeCommand.buttonPressed = true;
+                  algaeIntake.setDefaultCommand(algaeIntakeCommand);
+                }))
+        .onFalse(
+            new InstantCommand(
+                () -> {
+                  algaeIntakeCommand.buttonPressed = false;
+                  AlgaeIntake.getInstance().setDefaultCommand(algaeIntakeCommand);
+                }));
 
-    // controller.rightBumper().whileTrue(algaeIntakeCommand);
-
-    controller
-        .rightBumper()
+    driver
+        .R1()
         .onTrue(
             new InstantCommand(
                 () -> {
@@ -232,39 +249,124 @@ public class RobotContainer {
                   CoralIntake.getInstance().setDefaultCommand(coralIntakeCommand);
                 }));
 
-    controller
+    driver
+        .L2()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
+                  coralIntake.setDefaultCommand(coralIntakeCommand);
+                }))
+        .onFalse(
+            new InstantCommand(
+                () -> {
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+                  CoralIntake.getInstance().setDefaultCommand(coralIntakeCommand);
+                }));
+
+    operator
         .leftBumper()
         .onTrue(
             new InstantCommand(
                 () -> {
-                  // elevatorCommand.setHeight(49);
                   elevatorCommand = new ScoreCommand(ScoringLevel.L2);
                   elevator.setDefaultCommand(elevatorCommand);
                 }));
 
-    controller
+    operator
         .leftTrigger()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  elevatorCommand = new ScoreCommand(ScoringLevel.L1);
+                  elevator.setDefaultCommand(elevatorCommand);
+                }));
+
+    operator
+        .rightTrigger()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  elevatorCommand = new ScoreCommand(ScoringLevel.L3);
+                  elevator.setDefaultCommand(elevatorCommand);
+                }));
+    operator
+        .rightBumper()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  elevatorCommand = new ScoreCommand(ScoringLevel.L4);
+                  elevator.setDefaultCommand(elevatorCommand);
+                }));
+
+    operator
+        .y()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  elevatorCommand = new ScoreCommand(ScoringLevel.TOP_REMOVE);
+                  elevator.setDefaultCommand(elevatorCommand);
+                }));
+
+    operator
+        .a()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  elevatorCommand = new ScoreCommand(ScoringLevel.BOTTOM_REMOVE);
+                  elevator.setDefaultCommand(elevatorCommand);
+                }));
+    operator
+        .povDown()
         .onTrue(
             new InstantCommand(
                 () -> {
                   elevatorCommand = new ScoreCommand(ScoringLevel.L0);
                   elevator.setDefaultCommand(elevatorCommand);
                 }));
-    controller
-        .rightTrigger()
+    driver
+        .R2()
         .onTrue(
             new InstantCommand(
                 () -> {
-                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(30, MetersPerSecond));
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(12, MetersPerSecond));
                   coralIntake.setDefaultCommand(coralIntakeCommand);
                 }))
         .onFalse(
             new InstantCommand(
                 () -> {
-                  coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(-0.01, MetersPerSecond));
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0.00, MetersPerSecond));
                   coralIntake.setDefaultCommand(coralIntakeCommand);
                 }));
+    operator
+        .b()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  hangCommand.deploy();
+                  hangWrist.setDefaultCommand(hangCommand);
+                }));
+
+    operator
+        .x()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  hangCommand.climb();
+                  hangWrist.setDefaultCommand(hangCommand);
+                }));
+
+    operator
+        .povLeft()
+        .whileTrue(
+            AutoBuilder.pathfindThenFollowPath(
+                new PathPlannerPath(
+                    pathfindL.getWaypoints(),
+                    Drive.PP_CONSTRAINTS,
+                    pathfindL.getIdealStartingState(),
+                    pathfindL.getGoalEndState()),
+                Drive.PP_CONSTRAINTS));
+    // new Pose2d(14.55, 4.10, new Rotation2d()), Drive.PP_CONSTRAINTS));
   }
 
   /**

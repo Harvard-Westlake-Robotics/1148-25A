@@ -85,9 +85,10 @@ public class WristIOTalonFX implements WristIO {
   public void setAngle(double angle) {
     intakeWristController.Position = angle * Constants.IntakeWrist.motorToWristRotations;
     // intakeWristController.FeedForward =
-    //     intakeWristFeedforward.calculate(
-    //         angle * 2 * 3.14159265358924,
-    //         motorVelocity.getValueAsDouble() / Constants.IntakeWrist.motorToWristRotations);
+    // intakeWristFeedforward.calculate(
+    // angle * 2 * 3.14159265358924,
+    // motorVelocity.getValueAsDouble() /
+    // Constants.IntakeWrist.motorToWristRotations);
     intakeWristMotor.setControl(intakeWristController);
   }
 }

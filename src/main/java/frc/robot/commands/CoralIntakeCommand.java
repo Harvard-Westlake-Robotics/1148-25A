@@ -18,6 +18,13 @@ public class CoralIntakeCommand extends Command {
     this.sensor2Broken = CoralIntake.getInstance().getSensor2();
   }
 
+  public CoralIntakeCommand(double velocityMPS) {
+    addRequirements(CoralIntake.getInstance());
+    this.sensor1Broken = CoralIntake.getInstance().getSensor1();
+    this.sensor2Broken = CoralIntake.getInstance().getSensor2();
+    velocity = LinearVelocity.ofBaseUnits(velocityMPS, MetersPerSecond);
+  }
+
   @Override
   public void initialize() {
     velocity = LinearVelocity.ofBaseUnits(0.0, MetersPerSecond);
@@ -25,12 +32,13 @@ public class CoralIntakeCommand extends Command {
 
   @Override
   public void execute() {
-    if (sensor1Broken != null && sensor2Broken != null && Elevator.getInstance().getHeight() < 2) {
+    if (Elevator.getInstance().getHeight() < 5 && velocity.baseUnitMagnitude() > 0) {
       if (CoralIntake.getInstance().getSensor1() == true
           && CoralIntake.getInstance().getSensor2() == false) {
+        CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
         this.cancel();
       } else if (CoralIntake.getInstance().getSensor1() == false) {
-        setVelocity(LinearVelocity.ofBaseUnits(10, MetersPerSecond));
+        setVelocity(LinearVelocity.ofBaseUnits(4, MetersPerSecond));
         sensor2Broken = true;
       } else {
         CoralIntake.getInstance().setVelocity(velocity);
@@ -42,7 +50,7 @@ public class CoralIntakeCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+    CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(-0.8, MetersPerSecond));
   }
 
   @Override

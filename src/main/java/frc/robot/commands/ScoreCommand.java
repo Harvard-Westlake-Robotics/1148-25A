@@ -26,13 +26,13 @@ public class ScoreCommand extends Command {
     } else if (level == ScoringLevel.L3) {
       targetHeight = 31.48;
     } else if (level == ScoringLevel.L4) {
-      targetHeight = 49.40;
+      targetHeight = 53.40;
     } else if (level == ScoringLevel.TOP_REMOVE) {
-      targetHeight = 21.12;
+      targetHeight = 19.12;
     } else if (level == ScoringLevel.BOTTOM_REMOVE) {
-      targetHeight = 9.60;
+      targetHeight = 7.60;
     } else {
-      targetHeight = 1.0;
+      targetHeight = 0.2;
     }
     Elevator.getInstance().goToHeight(targetHeight);
   }

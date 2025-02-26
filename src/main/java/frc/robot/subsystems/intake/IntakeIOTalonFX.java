@@ -55,7 +55,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     intakeConfig.MotionMagic.MotionMagicAcceleration = intakeConstants.ANGLE_MAX_ACCELERATION;
     intakeConfig.MotionMagic.MotionMagicCruiseVelocity = intakeConstants.ANGLE_MAX_VELOCITY;
-    intakeConfig.MotionMagic.MotionMagicJerk = intakeConstants.ANGLe_MAX_JERK;
+    intakeConfig.MotionMagic.MotionMagicJerk = 0;
     intakeConfig.Slot0.kP = intakeConstants.kP;
     intakeConfig.Slot0.kI = intakeConstants.kI;
     intakeConfig.Slot0.kD = intakeConstants.kD;
@@ -65,9 +65,9 @@ public class IntakeIOTalonFX implements IntakeIO {
     intakeConfig.Slot1.kP = intakeConstants.positionkP;
     intakeConfig.Slot1.kD = intakeConstants.positionkP;
     intakeConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    intakeConfig.CurrentLimits.StatorCurrentLimit = 80;
+    intakeConfig.CurrentLimits.StatorCurrentLimit = 50;
     intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    intakeConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    intakeConfig.CurrentLimits.SupplyCurrentLimit = 30;
     intakeMotor.getConfigurator().apply(intakeConfig);
     intakeMotor.setControl(intakeController);
 

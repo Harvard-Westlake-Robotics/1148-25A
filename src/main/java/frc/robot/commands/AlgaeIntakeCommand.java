@@ -10,8 +10,10 @@ import frc.robot.subsystems.wrist.AlgaeWrist;
 
 public class AlgaeIntakeCommand extends Command {
   private LinearVelocity velocity;
+  private LinearVelocity velocity2 = LinearVelocity.ofBaseUnits(0, MetersPerSecond);
   private final double wristAngle = 2.2;
   private Integer index;
+  public boolean buttonPressed = false;
 
   public AlgaeIntakeCommand() {
     addRequirements(AlgaeIntake.getInstance(), AlgaeWrist.getInstance());
@@ -27,8 +29,9 @@ public class AlgaeIntakeCommand extends Command {
   public void execute() {
     if (index == 0) {
       velocity = LinearVelocity.ofBaseUnits(0.0, MetersPerSecond);
-      AlgaeIntake.getInstance().setVelocity(velocity);
+      AlgaeIntake.getInstance().setVelocity(velocity2);
       AlgaeWrist.getInstance().goToAngle(0);
+
     } else if (index == 1) {
       velocity = LinearVelocity.ofBaseUnits(Constants.AlgaeIntake.intakeVelocity, MetersPerSecond);
       AlgaeIntake.getInstance().setVelocity(velocity);
@@ -39,6 +42,9 @@ public class AlgaeIntakeCommand extends Command {
         AlgaeIntake.getInstance().runVoltage(1);
       }
       AlgaeWrist.getInstance().goToAngle(0.8);
+    } else if (index == 3) {
+      AlgaeIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(-100, MetersPerSecond));
+      AlgaeWrist.getInstance().goToAngle(0);
     } else {
       AlgaeIntake.getInstance().setVelocity(velocity);
     }
@@ -56,7 +62,7 @@ public class AlgaeIntakeCommand extends Command {
   }
 
   public void index() {
-    if (index >= 2) {
+    if (index >= 3) {
       index = 0;
     } else {
       index++;
