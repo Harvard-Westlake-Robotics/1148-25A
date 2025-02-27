@@ -50,10 +50,10 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator1Config.MotorOutput.Inverted = Constants.Elevator.elevator1Inverted;
     elevator2Config.MotorOutput.Inverted = Constants.Elevator.elevator2Inverted;
 
-    elevator1Config.MotionMagic.MotionMagicAcceleration = 300;
-    elevator2Config.MotionMagic.MotionMagicAcceleration = 300;
-    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 150;
-    elevator2Config.MotionMagic.MotionMagicCruiseVelocity = 150;
+    elevator1Config.MotionMagic.MotionMagicAcceleration = 100;
+    elevator2Config.MotionMagic.MotionMagicAcceleration = 100;
+    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 100;
+    elevator2Config.MotionMagic.MotionMagicCruiseVelocity = 100;
     elevator1Config.MotionMagic.MotionMagicJerk = 5000;
     elevator2Config.MotionMagic.MotionMagicJerk = 5000;
     elevator1Config.Slot0.kP = Constants.Elevator.kP;
