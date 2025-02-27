@@ -1,5 +1,6 @@
 package frc.robot.subsystems.elevator;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -7,6 +8,7 @@ public class Elevator extends SubsystemBase {
   private ElevatorIO io;
   private static Elevator instance = null;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
+  private DigitalInput dio = new DigitalInput(9);
 
   public static Elevator getInstance() {
     if (instance == null) {
@@ -22,6 +24,9 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Elevator", inputs);
+    if (!dio.get()) {
+      io.zeroMotors();
+    }
   }
 
   public void goToHeight(double height) {

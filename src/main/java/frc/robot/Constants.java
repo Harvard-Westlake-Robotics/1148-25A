@@ -110,7 +110,7 @@ public final class Constants {
           InvertedValue.CounterClockwise_Positive,
           100,
           -100,
-          1.969162,
+          1.669162,
           0.0,
           0.0,
           0.1761,
@@ -152,9 +152,9 @@ public final class Constants {
     public static final int elevator2ID = 14;
     public static final InvertedValue elevator2Inverted = InvertedValue.CounterClockwise_Positive;
     public static final InvertedValue elevator1Inverted = InvertedValue.Clockwise_Positive;
-    public static double kP = 2.3;
+    public static double kP = 2.0;
     public static double kI = 0.15;
-    public static double kD = 0.02;
+    public static double kD = 0.00;
     public static double kS = 0.1;
     public static double kV = 0.0;
     public static double kG = 0.0;
