@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Elevator Up",
+      "name": "Elevator Score",
       "waypointRelativePos": 0.47805536799459214,
       "endWaypointRelativePos": null,
       "command": {

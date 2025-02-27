@@ -19,6 +19,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   private TalonFX elevator1;
   private TalonFX elevator2;
   private MotionMagicVoltage elevatorController;
+  private MotionMagicVoltage elevator2Controller;
   private Follower follower;
   private VoltageOut voltageRequest = new VoltageOut(0);
 
@@ -44,16 +45,16 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator1.setPosition(0);
     elevator2.setPosition(0);
     elevatorController = new MotionMagicVoltage(0).withEnableFOC(true).withSlot(0);
-    follower = new Follower(Constants.Elevator.elevator1ID, true);
+    elevator2Controller = new MotionMagicVoltage(0).withEnableFOC(true).withSlot(0);
     TalonFXConfiguration elevator1Config = new TalonFXConfiguration();
     TalonFXConfiguration elevator2Config = new TalonFXConfiguration();
     elevator1Config.MotorOutput.Inverted = Constants.Elevator.elevator1Inverted;
     elevator2Config.MotorOutput.Inverted = Constants.Elevator.elevator2Inverted;
 
-    elevator1Config.MotionMagic.MotionMagicAcceleration = 300;
-    elevator2Config.MotionMagic.MotionMagicAcceleration = 300;
-    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 150;
-    elevator2Config.MotionMagic.MotionMagicCruiseVelocity = 150;
+    elevator1Config.MotionMagic.MotionMagicAcceleration = 200;
+    elevator2Config.MotionMagic.MotionMagicAcceleration = 200;
+    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 200;
+    elevator2Config.MotionMagic.MotionMagicCruiseVelocity = 200;
     elevator1Config.MotionMagic.MotionMagicJerk = 5000;
     elevator2Config.MotionMagic.MotionMagicJerk = 5000;
     elevator1Config.Slot0.kP = Constants.Elevator.kP;
@@ -91,7 +92,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator1.getConfigurator().apply(elevator1Config);
     elevator2.getConfigurator().apply(elevator2Config);
     elevator1.setControl(elevatorController);
-    elevator2.setControl(follower);
+    elevator2.setControl(elevator2Controller);
 
     motor1Position = elevator1.getPosition();
     motor1Velocity = elevator1.getVelocity();
@@ -136,15 +137,24 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
   @Override
   public void setHeightClosedLoop(double meters) {
-    // double voltage = elevatorFeedforward.calculate(motor1Velocity.getValueAsDouble());
+    // double voltage =
+    // elevatorFeedforward.calculate(motor1Velocity.getValueAsDouble());
     // elevatorController.FeedForward = voltage;
     elevatorController.Position = meters / Constants.Elevator.rotationsToMetersRatio;
+    elevator2Controller.Position = meters / Constants.Elevator.rotationsToMetersRatio;
+    elevatorController.FeedForward = elevatorFeedforward.calculate(0);
+    elevatorController.FeedForward = elevatorFeedforward.calculate(0);
     elevator1.setControl(elevatorController);
-    elevator2.setControl(elevatorController.clone());
+    elevator2.setControl(elevator2Controller);
   }
 
   public void runCharacterization(double voltage) {
     elevator1.setVoltage(voltage);
     elevator2.setVoltage(voltage);
+  }
+
+  public void zeroMotors() {
+    elevator1.setPosition(0);
+    elevator2.setPosition(0);
   }
 }

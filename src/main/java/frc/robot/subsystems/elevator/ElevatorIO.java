@@ -23,4 +23,6 @@ public interface ElevatorIO {
 
   /** Run the drive motor at the specified velocity. */
   public default void setHeightClosedLoop(double velocityRadPerSec) {}
+
+  public default void zeroMotors() {}
 }
