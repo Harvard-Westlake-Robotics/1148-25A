@@ -3,12 +3,12 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.0,
+        "x": 2.9,
         "y": 4.2
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.25,
+        "x": 3.15,
         "y": 4.2
       },
       "isLocked": false,
@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 3.2,
+        "x": 3.05,
         "y": 4.2
       },
       "prevControl": {
-        "x": 2.95,
+        "x": 2.8,
         "y": 4.2
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "End Pathfind L"
     }
   ],
   "rotationTargets": [],

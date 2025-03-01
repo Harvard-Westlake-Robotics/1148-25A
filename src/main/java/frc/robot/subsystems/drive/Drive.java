@@ -98,7 +98,7 @@ public class Drive extends SubsystemBase {
   public static final PathConstraints PP_CONSTRAINTS =
       new PathConstraints(
           TunerConstants.kSpeedAt12Volts,
-          LinearAcceleration.ofBaseUnits(4.0, MetersPerSecondPerSecond),
+          LinearAcceleration.ofBaseUnits(5.0, MetersPerSecondPerSecond),
           AngularVelocity.ofBaseUnits(755, DegreesPerSecond),
           AngularAcceleration.ofBaseUnits(1054, DegreesPerSecondPerSecond));
   static final Lock odometryLock = new ReentrantLock();
@@ -151,7 +151,7 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            new PIDConstants(6.3, 0.008, 0.00), new PIDConstants(5.0, 0.0, 0.0)),
+            new PIDConstants(6.28, 0.008, 0.00), new PIDConstants(5.0, 0.0, 0.0)),
         PP_CONFIG,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
@@ -179,7 +179,7 @@ public class Drive extends SubsystemBase {
     setPose(new Pose2d());
   }
 
-  private double xyStdDevCoeff = 2.8;
+  private double xyStdDevCoeff = 3.8;
   private double rStdDevCoeff = 5.5;
   private double xyStdDev = 0.8;
   private double rStdDev = 9.2;
@@ -252,12 +252,12 @@ public class Drive extends SubsystemBase {
       if (result_a != null && !shouldRejectPose(result_a)) {
         xyStdDev =
             xyStdDevCoeff
-                * Math.max(Math.pow(result_a.distToTag, 4.0), 1)
+                * Math.max(Math.pow(result_a.distToTag, 3.0), 1)
                 / result_a.tagCount
                 * Math.sqrt(result_a.ambiguity);
         rStdDev =
             rStdDevCoeff
-                * Math.max(Math.pow(result_a.distToTag, 4.0), 1)
+                * Math.max(Math.pow(result_a.distToTag, 3.0), 1)
                 / result_a.tagCount
                 * Math.sqrt(result_a.ambiguity);
 
@@ -268,12 +268,12 @@ public class Drive extends SubsystemBase {
       if (result_b != null && !shouldRejectPose(result_b)) {
         xyStdDev =
             xyStdDevCoeff
-                * Math.max(Math.pow(result_b.distToTag, 4.0), 1)
+                * Math.max(Math.pow(result_b.distToTag, 3.0), 1)
                 / result_b.tagCount
                 * Math.sqrt(result_b.ambiguity);
         rStdDev =
             rStdDevCoeff
-                * Math.max(Math.pow(result_b.distToTag, 4.0), 1)
+                * Math.max(Math.pow(result_b.distToTag, 3.0), 1)
                 / result_b.tagCount
                 * Math.sqrt(result_b.ambiguity);
 
@@ -440,10 +440,10 @@ public class Drive extends SubsystemBase {
     };
   }
 
-  private static final double kFieldBorderMargin = 0.1;
-  private static final double kMaxVisionCorrection = 2.0;
-  private static final double kMaxTagDistance = 2.0;
-  private static final double kAmbiguityThreshold = 0.2;
+  private static final double kFieldBorderMargin = 0.05;
+  private static final double kMaxVisionCorrection = 1.0;
+  private static final double kMaxTagDistance = 6.0;
+  private static final double kAmbiguityThreshold = 0.5;
 
   public boolean shouldRejectPose(AprilTagResult latestResult) {
     if (Units.radiansToDegrees(gyroInputs.yawVelocityRadPerSec) >= 720) {
@@ -455,16 +455,17 @@ public class Drive extends SubsystemBase {
       return true;
     } else if (Math.hypot(
             getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond)
-        > 3) {
+        > 4) {
       return true;
     } else if (Math.abs(
                 Math.hypot(getPose().getTranslation().getX(), getPose().getTranslation().getY())
                     - Math.hypot(latestResult.pose.getX(), latestResult.pose.getY()))
             > kMaxVisionCorrection
-        && latestResult.ambiguity > 0.1) {
+        && latestResult.ambiguity > 0.2) {
       return true;
     } else if (latestResult.ambiguity > kAmbiguityThreshold
-        || ((latestResult.distToTag > kMaxTagDistance || latestResult.distToTag < 0.35)
+        || (((latestResult.distToTag > kMaxTagDistance && latestResult.ambiguity > 0.2)
+                || latestResult.distToTag < 0.35)
             && DriverStation.isEnabled())) {
       return true;
     } else {

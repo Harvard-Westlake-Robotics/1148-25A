@@ -32,7 +32,7 @@ public class CoralIntakeCommand extends Command {
 
   @Override
   public void execute() {
-    if (Elevator.getInstance().getHeight() < 5 && velocity.baseUnitMagnitude() > 0) {
+    if (Elevator.getInstance().getHeight() < 1 && velocity.baseUnitMagnitude() > 0) {
       if (CoralIntake.getInstance().getSensor1() == true
           && CoralIntake.getInstance().getSensor2() == false) {
         CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));

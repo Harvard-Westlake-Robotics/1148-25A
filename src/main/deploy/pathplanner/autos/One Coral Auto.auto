@@ -9,6 +9,36 @@
           "data": {
             "pathName": "New Path real"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoScore L4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Source Path Real"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L Path Real"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoScore L4"
+          }
         }
       ]
     }
