@@ -234,7 +234,7 @@ public class RobotContainer {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(50, MetersPerSecond));
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(10, MetersPerSecond));
                   coralIntake.setDefaultCommand(coralIntakeCommand);
                 }))
         .onFalse(
@@ -364,6 +364,22 @@ public class RobotContainer {
     operator
         .povRight()
         .whileTrue(AutoBuilder.pathfindThenFollowPath(pathfindSource, Drive.PP_CONSTRAINTS));
+    driver
+        .circle()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  coralIntakeCommand.setEject(true);
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(50, MetersPerSecond));
+                  coralIntake.setDefaultCommand(coralIntakeCommand);
+                }))
+        .onFalse(
+            new InstantCommand(
+                () -> {
+                  coralIntakeCommand.setEject(false);
+                  coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0.00, MetersPerSecond));
+                  coralIntake.setDefaultCommand(coralIntakeCommand);
+                }));
     // new Pose2d(14.55, 4.10, new Rotation2d()), Drive.PP_CONSTRAINTS));
   }
 
