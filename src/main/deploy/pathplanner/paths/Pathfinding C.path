@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.9,
-        "y": 4.2
+        "x": 3.8590056818181817,
+        "y": 2.549204545454545
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.15,
-        "y": 4.2
+        "x": 3.984005681818182,
+        "y": 2.765710896400655
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.05,
-        "y": 4.2
+        "x": 3.94,
+        "y": 2.68
       },
       "prevControl": {
-        "x": 2.8,
-        "y": 4.2
+        "x": 3.815,
+        "y": 2.463493649053891
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": 180.0
+    "rotation": 59.99999999999999
   },
   "reversed": false,
   "folder": "Reef Stations",
   "idealStartingState": {
     "velocity": 1.0,
-    "rotation": 180.0
+    "rotation": 59.99999999999999
   },
   "useDefaultConstraints": true
 }
