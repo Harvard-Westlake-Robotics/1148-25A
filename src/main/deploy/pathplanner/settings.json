@@ -3,7 +3,8 @@
   "robotLength": 1.0,
   "holonomicMode": true,
   "pathFolders": [
-    "Reef Stations"
+    "Reef Stations",
+    "Source Stations"
   ],
   "autoFolders": [],
   "defaultMaxVel": 5.45,
