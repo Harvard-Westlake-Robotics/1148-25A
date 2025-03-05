@@ -12,6 +12,7 @@ public class CoralIntake extends SubsystemBase {
   private IntakeConstants constants;
   private String key;
   private static CoralIntake instance;
+  private boolean hasCoral;
 
   public static CoralIntake getInstance() {
     if (instance == null) {
@@ -33,6 +34,11 @@ public class CoralIntake extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs(key, inputs);
+    if (getSensor2() == false) {
+      hasCoral = true;
+    } else {
+      hasCoral = false;
+    }
   }
 
   public void setVelocity(LinearVelocity velocity) {
@@ -53,5 +59,9 @@ public class CoralIntake extends SubsystemBase {
 
   public Boolean getSensor2() {
     return io.getSensor2();
+  }
+
+  public Boolean hasCoral() {
+    return hasCoral;
   }
 }

@@ -13,9 +13,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -197,6 +200,7 @@ public class Robot extends LoggedRobot {
 
     Elevator.getInstance().setDefaultCommand(robotContainer.elevatorCommand);
     AlgaeIntake.getInstance().setDefaultCommand(robotContainer.algaeIntakeCommand);
+    robotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
     CoralIntake.getInstance().setDefaultCommand(robotContainer.coralIntakeCommand);
   }
 

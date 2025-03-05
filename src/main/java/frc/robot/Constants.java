@@ -160,7 +160,7 @@ public final class Constants {
     public static double kG = 0.0;
     public static double kA = 0.0;
     public static final double elevatorForwardSoftLimitRotations = 55;
-    public static final double elevatorReverseSoftLimitRotations = 0.1;
+    public static final double elevatorReverseSoftLimitRotations = 0.0;
     public static final double rotationsToMetersRatio = 1;
     public static final double[] elevatorHeights = {0, 1, 2, 3};
     public static final double elevatorGroundOffsetMeters = 0;
@@ -230,7 +230,7 @@ public final class Constants {
           18,
           InvertedValue.CounterClockwise_Positive,
           1000,
-          4.169162,
+          3.669162,
           0.0,
           0.0,
           0.000,

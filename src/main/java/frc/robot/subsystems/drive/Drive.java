@@ -66,6 +66,13 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
+
+  private static Drive instance;
+
+  public static Drive getInstance() {
+    return instance;
+  }
+
   // TunerConstants doesn't include these constants, so they are declared locally
   static final double ODOMETRY_FREQUENCY =
       new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
@@ -177,6 +184,11 @@ public class Drive extends SubsystemBase {
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
     setPose(new Pose2d());
+
+    Drive.instance = this;
+
+    // Setup NetworkTables communication
+    NetworkCommunicator.getInstance().init();
   }
 
   private double xyStdDevCoeff = 3.8;
