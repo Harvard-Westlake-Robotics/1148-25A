@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.ElevatorCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
@@ -150,6 +151,9 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     autonomousCommand = robotContainer.getAutonomousCommand();
+    if(!robotContainer.elevatorDeployed){
+      new ElevatorCommand(2).schedule();
+    }
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
@@ -198,10 +202,9 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
 
-    Elevator.getInstance().setDefaultCommand(robotContainer.elevatorCommand);
-    AlgaeIntake.getInstance().setDefaultCommand(robotContainer.algaeIntakeCommand);
-    robotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
-    CoralIntake.getInstance().setDefaultCommand(robotContainer.coralIntakeCommand);
+    if(!robotContainer.elevatorDeployed){
+      new ElevatorCommand(2).schedule();
+    }
   }
 
   /** This function is called periodically during operator control. */
