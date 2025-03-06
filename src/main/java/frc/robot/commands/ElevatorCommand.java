@@ -31,7 +31,7 @@ public class ElevatorCommand extends Command {
 
   @Override
   public boolean isFinished() {
-      return Math.abs(heightMeters - elevator.getHeight()) < 0.2;
+    return Math.abs(heightMeters - elevator.getHeight()) < 0.2;
   }
 
   public void setHeight(double heightMeters) {

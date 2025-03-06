@@ -493,6 +493,21 @@ public class Drive extends SubsystemBase {
       return 0;
     }
   }
+
+  public double distanceFromReefEdge() {
+    Translation2d robotTranslation =
+        getPose().getTranslation().plus(new Translation2d(-0.3556, getPose().getRotation()));
+    double distToReefCenter =
+        robotTranslation.getDistance(
+            new Translation2d(
+                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 4.5 : 13.05,
+                4.025));
+    return distToReefCenter - 1.1721;
+  }
+
+  public double getElevatorHeight() {
+    return distanceFromReefEdge() * (1 / Rotation2d.fromDegrees(40).getTan());
+  }
 }
 
 class InvalidRobotNameException extends RuntimeException {

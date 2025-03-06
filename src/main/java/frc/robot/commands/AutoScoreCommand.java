@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.CoralIntake;
 
@@ -39,7 +40,7 @@ public class AutoScoreCommand extends Command {
 
   @Override
   public void execute() {
-    Elevator.getInstance().goToHeight(targetHeight);
+    Elevator.getInstance().goToHeight(targetHeight + Drive.getInstance().getElevatorHeight());
     if (Math.abs(Elevator.getInstance().getHeight() - targetHeight) < 0.2) {
       CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(100, MetersPerSecond));
     }

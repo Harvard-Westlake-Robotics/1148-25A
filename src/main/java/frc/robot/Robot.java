@@ -13,12 +13,9 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,9 +24,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.ElevatorCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.intake.AlgaeIntake;
-import frc.robot.subsystems.intake.CoralIntake;
 import frc.robot.subsystems.wrist.Climb;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -151,7 +145,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     autonomousCommand = robotContainer.getAutonomousCommand();
-    if(!robotContainer.elevatorDeployed){
+    if (!robotContainer.elevatorDeployed) {
       new ElevatorCommand(2).schedule();
     }
 
@@ -202,7 +196,7 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
 
-    if(!robotContainer.elevatorDeployed){
+    if (!robotContainer.elevatorDeployed) {
       new ElevatorCommand(2).schedule();
     }
   }

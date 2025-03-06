@@ -13,20 +13,12 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -38,13 +30,13 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ScoreCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.LEDs.LED;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.drive.NetworkCommunicator;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.AlgaeIntake;
 import frc.robot.subsystems.intake.CoralIntake;
@@ -80,10 +72,10 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  public ScoreCommand elevatorCommand = new ScoreCommand(ScoringLevel.L0);
-  public AlgaeIntakeCommand algaeIntakeCommand;
-  public CoralIntakeCommand coralIntakeCommand;
-  public ClimbCommand hangCommand;
+  public static ScoreCommand elevatorCommand = new ScoreCommand(ScoringLevel.L0);
+  public static AlgaeIntakeCommand algaeIntakeCommand;
+  public static CoralIntakeCommand coralIntakeCommand;
+  public static ClimbCommand hangCommand;
 
   public boolean elevatorDeployed = false;
 
@@ -186,6 +178,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    LED.getInstance().Color(0, 255, 0);
   }
 
   /**

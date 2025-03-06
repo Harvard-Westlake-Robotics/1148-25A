@@ -28,6 +28,25 @@ public abstract class BaseCam {
     }
   }
 
+  public class NeuralDetectorResult {
+    public String className;
+    public double classID;
+    public double confidence;
+    public double ta;
+    public double tx;
+    public double ty;
+
+    public NeuralDetectorResult(
+        String className, double classID, double confidence, double ta, double tx, double ty) {
+      this.className = className;
+      this.classID = classID;
+      this.confidence = confidence;
+      this.ta = ta;
+      this.tx = tx;
+      this.ty = ty;
+    }
+  }
+
   public abstract Optional<AprilTagResult> getEstimate();
 
   Vector<N3> stdDeviations = VecBuilder.fill(0.7, 0.7, 2);

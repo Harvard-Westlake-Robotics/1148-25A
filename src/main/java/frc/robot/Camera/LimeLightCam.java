@@ -5,6 +5,7 @@ import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.Camera.BaseCam.NeuralDetectorResult;
 import java.util.Optional;
 
 /* Maybe in future remove limelightHelpers Dependency,
@@ -17,6 +18,7 @@ public class LimeLightCam extends BaseCam {
   private NetworkTable _ntTable;
 
   private boolean useMegaTag2 = false;
+  private boolean runNeuralNetwork = false;
 
   public LimeLightCam(String name, int[] TagsToCheck, boolean useMegaTag2) {
     this.name = name;
@@ -49,6 +51,12 @@ public class LimeLightCam extends BaseCam {
     this(name, new int[] {}, useMegaTag2);
   }
 
+  public void setNeuralNetwork(boolean running) {
+    this.runNeuralNetwork = running;
+    if (running) LimelightHelpers.setPipelineIndex(name, 1);
+    else LimelightHelpers.setPipelineIndex(name, 0);
+  }
+
   public void setIMUMode(int mode) {
     LimelightHelpers.SetIMUMode(name, mode);
   }
@@ -79,6 +87,9 @@ public class LimeLightCam extends BaseCam {
   }
 
   public Optional<AprilTagResult> getEstimate() {
+    if (runNeuralNetwork) {
+      return Optional.empty();
+    }
     LimelightHelpers.PoseEstimate latestEstimate;
     if (!useMegaTag2 || DriverStation.isDisabled()) {
       latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
@@ -99,5 +110,31 @@ public class LimeLightCam extends BaseCam {
             latestEstimate
                 .rawFiducials[0]
                 .ambiguity)); // Probably not the best but good enough for now
+  }
+
+  public Optional<NeuralDetectorResult[]> getDetections() {
+    if (!runNeuralNetwork) {
+      return Optional.empty();
+    }
+
+    LimelightHelpers.LimelightTarget_Detector[] latestResult;
+    latestResult = LimelightHelpers.getLatestResults(name).targets_Detector;
+
+    if (latestResult == null) return Optional.empty();
+    if (latestResult.length == 0) return Optional.empty();
+
+    NeuralDetectorResult[] results = new NeuralDetectorResult[latestResult.length];
+    for (int i = 0; i < results.length; i++) {
+      results[i] =
+          new NeuralDetectorResult(
+              latestResult[i].className,
+              latestResult[i].classID,
+              latestResult[i].confidence,
+              latestResult[i].ta,
+              latestResult[i].tx,
+              latestResult[i].ty);
+    }
+
+    return Optional.of(results);
   }
 }

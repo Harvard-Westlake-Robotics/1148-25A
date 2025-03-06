@@ -7,9 +7,9 @@ import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.CoralIntakeCommand;
-
-import java.util.ArrayList;
+import frc.robot.commands.ScoreCommand.ScoringLevel;
 import java.util.HashMap;
 
 public class NetworkCommunicator {
@@ -90,18 +90,48 @@ public class NetworkCommunicator {
   }
 
   public Command getCustomAuto() {
+    ScoringLevel level = ScoringLevel.L0;
     String[] autoCommands = getAutoCommands();
-    if(autoCommands.length == 0){
+    if (autoCommands.length == 0) {
       return new PathPlannerAuto(Commands.none());
     } else {
       Command auto = new SequentialCommandGroup();
-      auto = auto.andThen(AutoBuilder.pathfindThenFollowPath(paths.get(String.valueOf(autoCommands[0].charAt(0) + 'A')), Drive.PP_CONSTRAINTS));
-      //add in scoring height
-      for(int i = 1; i < autoCommands.length; i+=2) {
-        auto = auto.andThen(AutoBuilder.pathfindThenFollowPath(paths.get("S" + Integer.parseInt(autoCommands[i])), Drive.PP_CONSTRAINTS));
+      auto =
+          auto.andThen(
+              AutoBuilder.pathfindThenFollowPath(
+                  paths.get(String.valueOf(autoCommands[0].charAt(0) + 'A')),
+                  Drive.PP_CONSTRAINTS));
+      if (autoCommands[0].charAt(2) == '1') {
+        level = ScoringLevel.L1;
+      } else if (autoCommands[0].charAt(2) == '2') {
+        level = ScoringLevel.L2;
+      } else if (autoCommands[0].charAt(2) == '3') {
+        level = ScoringLevel.L3;
+      } else if (autoCommands[0].charAt(2) == '4') {
+        level = ScoringLevel.L4;
+      }
+      auto = auto.andThen(new AutoScoreCommand(level));
+      for (int i = 1; i < autoCommands.length; i += 2) {
+        auto =
+            auto.andThen(
+                AutoBuilder.pathfindThenFollowPath(
+                    paths.get("S" + Integer.parseInt(autoCommands[i])), Drive.PP_CONSTRAINTS));
         auto = auto.andThen(new CoralIntakeCommand(20));
-        auto = auto.andThen(AutoBuilder.pathfindThenFollowPath(paths.get(String.valueOf(autoCommands[i+1].charAt(0) + 'A')), Drive.PP_CONSTRAINTS));
-        //add in scoring height
+        auto =
+            auto.andThen(
+                AutoBuilder.pathfindThenFollowPath(
+                    paths.get(String.valueOf(autoCommands[i + 1].charAt(0) + 'A')),
+                    Drive.PP_CONSTRAINTS));
+        if (autoCommands[i].charAt(2) == '1') {
+          level = ScoringLevel.L1;
+        } else if (autoCommands[i].charAt(2) == '2') {
+          level = ScoringLevel.L2;
+        } else if (autoCommands[i].charAt(2) == '3') {
+          level = ScoringLevel.L3;
+        } else if (autoCommands[i].charAt(2) == '4') {
+          level = ScoringLevel.L4;
+        }
+        auto = auto.andThen(new AutoScoreCommand(level));
       }
       return auto;
     }
