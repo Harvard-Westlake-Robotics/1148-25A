@@ -61,6 +61,10 @@ public class CoralIntake extends SubsystemBase {
     return io.getSensor2();
   }
 
+  public Boolean getSensor3(){
+    return io.getSensor3();
+  }
+
   public Boolean hasCoral() {
     return hasCoral;
   }

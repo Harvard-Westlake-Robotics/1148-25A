@@ -32,4 +32,6 @@ public interface IntakeIO {
   public Boolean getSensor1();
 
   public Boolean getSensor2();
+
+  public Boolean getSensor3();
 }

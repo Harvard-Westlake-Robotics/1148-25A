@@ -33,8 +33,10 @@ public class CoralIntakeCommand extends Command {
       CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(100, MetersPerSecond));
     } else if (velocity.baseUnitMagnitude() > 0) {
       if (CoralIntake.getInstance().getSensor1() == false) {
-        velocity = LinearVelocity.ofBaseUnits(12, MetersPerSecond);
-        CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(12, MetersPerSecond));
+        if (CoralIntake.getInstance().getSensor3() == true){
+          velocity = LinearVelocity.ofBaseUnits(12, MetersPerSecond);
+          CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(12, MetersPerSecond));
+        }
       } else if (CoralIntake.getInstance().getSensor2() == false) {
         velocity = LinearVelocity.ofBaseUnits(0, MetersPerSecond);
         CoralIntake.getInstance().setVelocity(velocity);

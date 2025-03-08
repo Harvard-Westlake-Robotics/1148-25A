@@ -54,6 +54,7 @@ public final class Constants {
     public double positionkD;
     public int sensor1ID;
     public int sensor2ID;
+    public int sensor3ID;
 
     public final double ANGLE_MAX_ACCELERATION;
     public final double ANGLE_MAX_VELOCITY;
@@ -73,6 +74,7 @@ public final class Constants {
         double kA,
         int sensor1ID,
         int sensor2ID,
+        int sensor3ID,
         double positionkP,
         double positionkD,
         double ANGLE_MAX_ACCELERATION,
@@ -91,6 +93,7 @@ public final class Constants {
       this.kA = kA;
       this.sensor1ID = sensor1ID;
       this.sensor2ID = sensor2ID;
+      this.sensor3ID = sensor3ID;
       this.positionkP = positionkP;
       this.positionkD = positionkD;
       this.ANGLE_MAX_ACCELERATION = ANGLE_MAX_ACCELERATION;
@@ -118,6 +121,7 @@ public final class Constants {
           0.0,
           -1,
           -1,
+          -1,
           0.0,
           0.0,
           10000.0,
@@ -139,6 +143,7 @@ public final class Constants {
           0.0,
           4,
           1,
+          9,
           2.0,
           0.0,
           900000000.0,
