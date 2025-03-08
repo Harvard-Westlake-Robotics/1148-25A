@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.CoralIntakeCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
+import frc.robot.subsystems.intake.CoralIntake;
 import java.util.HashMap;
 
 public class NetworkCommunicator {
@@ -18,7 +19,10 @@ public class NetworkCommunicator {
   private StringArraySubscriber autoSub;
   private IntegerSubscriber teleopSubBranch;
   private IntegerSubscriber teleopSubStation;
+  private IntegerSubscriber teleopSubHeight;
+  private BooleanPublisher isAutoBooleanPublisher;
   private HashMap<String, PathPlannerPath> paths;
+  private boolean isAuto;
 
   private NetworkCommunicator() {}
 
@@ -52,15 +56,20 @@ public class NetworkCommunicator {
       // paths.put("S5", PathPlannerPath.fromPathFile("Pathfinding L"));
       // paths.put("S6", PathPlannerPath.fromPathFile("Pathfinding L"));
     } catch (Exception e) {
+      System.out.println(e);
     }
 
     ntInst = NetworkTableInstance.getDefault();
 
     NetworkTable table = ntInst.getTable("uidata");
+    isAuto = true;
 
-    autoSub = table.getStringArrayTopic("autocommands").subscribe(null);
-    teleopSubBranch = table.getIntegerTopic("teleopbranch").subscribe(-1);
-    teleopSubStation = table.getIntegerTopic("teleopstation").subscribe(-1);
+    autoSub = table.getStringArrayTopic("autocommands").subscribe(new String[0]);
+    teleopSubBranch = table.getIntegerTopic("teleopbranch").subscribe(1);
+    teleopSubStation = table.getIntegerTopic("teleopstation").subscribe(1);
+    teleopSubHeight = table.getIntegerTopic("teleopheight").subscribe(1);
+    isAutoBooleanPublisher = table.getBooleanTopic("isauto").publish();
+    isAutoBooleanPublisher.set(true);
   }
 
   public void close() {
@@ -85,8 +94,51 @@ public class NetworkCommunicator {
     return paths.get("S" + getTeleopStation());
   }
 
+  public void setIsAuto(boolean isAuto) {
+    this.isAuto = isAuto;
+    isAutoBooleanPublisher.set(isAuto);
+  }
+
   public PathPlannerPath getSelectedReefPath() {
-    return paths.get(String.valueOf((char) getTeleopBranch() + 'A'));
+    return paths.get("" + (char) (getTeleopBranch() + 'A'));
+  }
+
+  public ScoringLevel getSelectedHeight() {
+    if (teleopSubHeight.get() == 1) {
+      return ScoringLevel.L1;
+    } else if (teleopSubHeight.get() == 2) {
+      return ScoringLevel.L2;
+    } else if (teleopSubHeight.get() == 3) {
+      return ScoringLevel.L3;
+    } else if (teleopSubHeight.get() == 4) {
+      return ScoringLevel.L4;
+    } else return ScoringLevel.L0;
+  }
+
+  public Command getTeleopCommand() {
+    return new Command() {
+      private Command reefCommand =
+          AutoBuilder.pathfindThenFollowPath(getSelectedReefPath(), Drive.PP_CONSTRAINTS)
+              .andThen(new AutoScoreCommand(getSelectedHeight()));
+      private Command sourceCommand =
+          AutoBuilder.pathfindThenFollowPath(getSelectedSourcePath(), Drive.PP_CONSTRAINTS)
+              .andThen(new CoralIntakeCommand(20));
+
+      @Override
+      public void initialize() {
+        if (CoralIntake.getInstance().hasCoral()) {
+          reefCommand.schedule();
+        } else {
+          sourceCommand.schedule();
+        }
+      }
+
+      @Override
+      public void end(boolean interrupted) {
+        sourceCommand.cancel();
+        reefCommand.cancel();
+      }
+    };
   }
 
   public Command getCustomAuto() {

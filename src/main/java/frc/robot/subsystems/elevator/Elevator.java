@@ -8,7 +8,7 @@ public class Elevator extends SubsystemBase {
   private ElevatorIO io;
   private static Elevator instance = null;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-  private DigitalInput dio = new DigitalInput(9);
+  private DigitalInput dio = new DigitalInput(5);
 
   public static Elevator getInstance() {
     if (instance == null) {

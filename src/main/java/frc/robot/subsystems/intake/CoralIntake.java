@@ -34,7 +34,7 @@ public class CoralIntake extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs(key, inputs);
-    if (getSensor2() == false) {
+    if (!getSensor2()) {
       hasCoral = true;
     } else {
       hasCoral = false;

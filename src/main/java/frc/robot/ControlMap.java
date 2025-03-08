@@ -2,7 +2,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -10,9 +9,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.AutoScoreCommand;
-import frc.robot.commands.CoralIntakeCommand;
-import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.ScoreCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.subsystems.drive.Drive;
@@ -30,8 +26,7 @@ public class ControlMap {
     return instance;
   }
 
-  private ControlMap() {
-  }
+  private ControlMap() {}
 
   public void configurePreset1(CommandXboxController operator, CommandPS5Controller driver) {
     // Reset gyro to 0° when B button is pressed
@@ -39,12 +34,13 @@ public class ControlMap {
         .back()
         .onTrue(
             Commands.runOnce(
-                () -> Drive.getInstance()
-                    .setPose(
-                        new Pose2d(
-                            Drive.getInstance().getPose().getTranslation(),
-                            new Rotation2d())),
-                Drive.getInstance())
+                    () ->
+                        Drive.getInstance()
+                            .setPose(
+                                new Pose2d(
+                                    Drive.getInstance().getPose().getTranslation(),
+                                    new Rotation2d())),
+                    Drive.getInstance())
                 .ignoringDisable(true));
 
     // Intake commands
@@ -128,7 +124,8 @@ public class ControlMap {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L4); // TODO: Chase needs to implement
+                  RobotContainer.elevatorCommand =
+                      new ScoreCommand(ScoringLevel.L1); // TODO: Chase needs to implement
                   // a way to recieve selected
                   // scoring level
                   Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
@@ -220,22 +217,6 @@ public class ControlMap {
     // NetworkCommunicator.getInstance().getSelectedSourcePath(),
     // Drive.PP_CONSTRAINTS)
     // .andThen(new CoralIntakeCommand(20)));
-    driver
-        .L2()
-        .whileTrue(
-            new InstantCommand(
-                () -> {
-                  if (CoralIntake.getInstance().hasCoral()) {
-                    AutoBuilder.pathfindThenFollowPath(
-                        NetworkCommunicator.getInstance().getSelectedReefPath(),
-                        Drive.PP_CONSTRAINTS)
-                        .andThen(new AutoScoreCommand(ScoringLevel.L4));
-                  } else {
-                    AutoBuilder.pathfindThenFollowPath(
-                        NetworkCommunicator.getInstance().getSelectedSourcePath(),
-                        Drive.PP_CONSTRAINTS)
-                        .andThen(new CoralIntakeCommand(20));
-                  }
-                }));
+    driver.L2().whileTrue(NetworkCommunicator.getInstance().getTeleopCommand());
   }
 }

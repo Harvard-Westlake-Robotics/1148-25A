@@ -130,8 +130,10 @@ public class Drive extends SubsystemBase {
 
   private final LimeLightCam limelight_a = new LimeLightCam("limelight-a", false);
   private final LimeLightCam limelight_b = new LimeLightCam("limelight-b", false);
+  private final LimeLightCam limelight_c = new LimeLightCam("limelight-c", false);
 
-  private final LimeLightCam[] limelights = new LimeLightCam[] {limelight_a, limelight_b};
+  private final LimeLightCam[] limelights =
+      new LimeLightCam[] {limelight_a, limelight_b, limelight_c};
 
   public Drive(
       GyroIO gyroIO,
@@ -191,7 +193,7 @@ public class Drive extends SubsystemBase {
     NetworkCommunicator.getInstance().init();
   }
 
-  private double xyStdDevCoeff = 3.8;
+  private double xyStdDevCoeff = 2.5;
   private double rStdDevCoeff = 5.5;
   private double xyStdDev = 0.8;
   private double rStdDev = 9.2;
@@ -261,15 +263,17 @@ public class Drive extends SubsystemBase {
       if (result_a != null) Logger.recordOutput("RealOutputs/apriltagResultA", result_a.pose);
       AprilTagResult result_b = limelight_b.getEstimate().orElse(null);
       if (result_b != null) Logger.recordOutput("RealOutputs/apriltagResultB", result_b.pose);
+      AprilTagResult result_c = limelight_c.getEstimate().orElse(null);
+      if (result_c != null) Logger.recordOutput("RealOutputs/apriltagResultC", result_c.pose);
       if (result_a != null && !shouldRejectPose(result_a)) {
         xyStdDev =
             xyStdDevCoeff
-                * Math.max(Math.pow(result_a.distToTag, 3.0), 1)
+                * Math.max(Math.pow(result_a.distToTag, 2.0), 1)
                 / result_a.tagCount
                 * Math.sqrt(result_a.ambiguity);
         rStdDev =
             rStdDevCoeff
-                * Math.max(Math.pow(result_a.distToTag, 3.0), 1)
+                * Math.max(Math.pow(result_a.distToTag, 2.0), 1)
                 / result_a.tagCount
                 * Math.sqrt(result_a.ambiguity);
 
@@ -291,6 +295,22 @@ public class Drive extends SubsystemBase {
 
         addVisionMeasurement(
             result_b.pose, result_b.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
+      }
+
+      if (result_c != null && !shouldRejectPose(result_c)) {
+        xyStdDev =
+            xyStdDevCoeff
+                * Math.max(Math.pow(result_c.distToTag, 3.0), 1)
+                / result_c.tagCount
+                * Math.sqrt(result_c.ambiguity);
+        rStdDev =
+            rStdDevCoeff
+                * Math.max(Math.pow(result_c.distToTag, 3.0), 1)
+                / result_c.tagCount
+                * Math.sqrt(result_c.ambiguity);
+
+        addVisionMeasurement(
+            result_c.pose, result_c.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
       }
     }
 
@@ -454,8 +474,8 @@ public class Drive extends SubsystemBase {
 
   private static final double kFieldBorderMargin = 0.05;
   private static final double kMaxVisionCorrection = 1.0;
-  private static final double kMaxTagDistance = 6.0;
-  private static final double kAmbiguityThreshold = 0.5;
+  private static final double kMaxTagDistance = 8.0;
+  private static final double kAmbiguityThreshold = 0.6;
 
   public boolean shouldRejectPose(AprilTagResult latestResult) {
     if (Units.radiansToDegrees(gyroInputs.yawVelocityRadPerSec) >= 720) {

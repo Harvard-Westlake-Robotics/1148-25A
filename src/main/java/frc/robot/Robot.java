@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.ElevatorCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.NetworkCommunicator;
 import frc.robot.subsystems.wrist.Climb;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -116,6 +117,11 @@ public class Robot extends LoggedRobot {
     robotContainer = new RobotContainer();
   }
 
+  @Override
+  public void robotInit() {
+    NetworkCommunicator.getInstance().setIsAuto(true);
+  }
+
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
@@ -153,15 +159,22 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
     }
+    NetworkCommunicator.getInstance().setIsAuto(true);
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {}
 
+  @Override
+  public void autonomousExit() {
+    NetworkCommunicator.getInstance().setIsAuto(false);
+  }
+
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    NetworkCommunicator.getInstance().setIsAuto(false);
     int storedVersion = Preferences.getInt(VERSION_KEY, -1); // Default -1 if not set
     int matchCount = Preferences.getInt(MATCH_COUNT_KEY, 0);
 
