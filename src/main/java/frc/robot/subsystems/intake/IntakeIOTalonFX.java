@@ -38,6 +38,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   private final DigitalInput input1;
   private final DigitalInput input2;
+  private final DigitalInput input3;
 
   // Connection debouncers
   private final Debouncer motorConnectedDebounce = new Debouncer(0.5);
@@ -80,6 +81,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         intakeConstants.sensor1ID != -1 ? new DigitalInput(intakeConstants.sensor1ID) : null;
     this.input2 =
         intakeConstants.sensor2ID != -1 ? new DigitalInput(intakeConstants.sensor2ID) : null;
+    this.input3 =
+        intakeConstants.sensor3ID != -1 ? new DigitalInput(intakeConstants.sensor3ID) : null;
 
     intakeFeedforward =
         new SimpleMotorFeedforward(intakeConstants.kS, intakeConstants.kA, intakeConstants.kV);
@@ -141,6 +144,14 @@ public class IntakeIOTalonFX implements IntakeIO {
     intakePositionController.Position = rotations;
     intakePositionController.Slot = 1;
     intakeMotor.setControl(intakePositionController);
+  }
+
+  public Boolean getSensor3(){
+    if (input3 != null){
+      return input2.get();
+    } else {
+      return null;
+    }
   }
 
   public Boolean getSensor2() {
