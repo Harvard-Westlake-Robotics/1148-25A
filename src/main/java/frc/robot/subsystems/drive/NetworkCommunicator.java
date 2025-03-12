@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.CoralIntakeCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
-import frc.robot.subsystems.intake.CoralIntake;
+import frc.robot.commands.TeleopCommand;
 import java.util.HashMap;
 
 public class NetworkCommunicator {
@@ -51,6 +51,7 @@ public class NetworkCommunicator {
       paths.put("L", PathPlannerPath.fromPathFile("Pathfinding L"));
       paths.put("S1", PathPlannerPath.fromPathFile("Top Source 2"));
       paths.put("S2", PathPlannerPath.fromPathFile("Bottom Source 2"));
+      paths.put("P", PathPlannerPath.fromPathFile("Pathfinding Processor"));
       // paths.put("S3", PathPlannerPath.fromPathFile("Pathfinding L"));
       // paths.put("S4", PathPlannerPath.fromPathFile("Pathfinding L"));
       // paths.put("S5", PathPlannerPath.fromPathFile("Pathfinding L"));
@@ -115,30 +116,13 @@ public class NetworkCommunicator {
     } else return ScoringLevel.L0;
   }
 
-  public Command getTeleopCommand() {
-    return new Command() {
-      private Command reefCommand =
-          AutoBuilder.pathfindThenFollowPath(getSelectedReefPath(), Drive.PP_CONSTRAINTS)
-              .andThen(new AutoScoreCommand(getSelectedHeight()));
-      private Command sourceCommand =
-          AutoBuilder.pathfindThenFollowPath(getSelectedSourcePath(), Drive.PP_CONSTRAINTS)
-              .andThen(new CoralIntakeCommand(20));
+  public TeleopCommand teleopCommand;
 
-      @Override
-      public void initialize() {
-        if (CoralIntake.getInstance().hasCoral()) {
-          reefCommand.schedule();
-        } else {
-          sourceCommand.schedule();
-        }
-      }
-
-      @Override
-      public void end(boolean interrupted) {
-        sourceCommand.cancel();
-        reefCommand.cancel();
-      }
-    };
+  public TeleopCommand getTeleopCommand() {
+    if (teleopCommand == null) {
+      teleopCommand = new TeleopCommand();
+    }
+    return teleopCommand;
   }
 
   public Command getCustomAuto() {

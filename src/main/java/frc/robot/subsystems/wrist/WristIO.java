@@ -18,4 +18,6 @@ public interface WristIO {
   public default void setAngle(double angle) {}
 
   public default void runCharacterization(double volts) {}
+
+  public default void zeroPosition(double rotations) {}
 }

@@ -12,6 +12,15 @@ public class AlgaeIntake extends SubsystemBase {
   private IntakeConstants constants;
   private String key;
   private static AlgaeIntake instance;
+  private Boolean hasAlgae = false;
+
+  public Boolean getHasAlgae() {
+    return hasAlgae;
+  }
+
+  public void setHasAlgae(Boolean hasAlgae) {
+    this.hasAlgae = hasAlgae;
+  }
 
   public static AlgaeIntake getInstance() {
     if (instance == null) {
@@ -33,6 +42,7 @@ public class AlgaeIntake extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs(key, inputs);
+    hasAlgae = inputs.intakeAppliedVolts > 1.0 && inputs.intakeVelocityMPS < 0.2;
   }
 
   public void setVelocity(LinearVelocity velocity) {

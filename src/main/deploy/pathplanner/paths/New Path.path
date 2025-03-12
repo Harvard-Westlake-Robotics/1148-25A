@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.588217213114754,
-        "y": 1.9091700819672122
+        "x": 2.0,
+        "y": 7.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.838217213114754,
-        "y": 1.9091700819672122
+        "x": 3.0,
+        "y": 7.0
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.864,
-        "y": 3.833
+        "x": 3.635,
+        "y": 4.025
       },
       "prevControl": {
-        "x": 5.614,
-        "y": 3.833
+        "x": 2.635,
+        "y": 4.025
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "End Coral 1"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 5.0,
-    "maxAcceleration": 4.2,
+    "maxVelocity": 5.45,
+    "maxAcceleration": 4.4,
     "maxAngularVelocity": 755.0,
     "maxAngularAcceleration": 1054.0,
     "nominalVoltage": 12.0,
@@ -47,8 +47,8 @@
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0.0,
+    "velocity": 0,
     "rotation": 0.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

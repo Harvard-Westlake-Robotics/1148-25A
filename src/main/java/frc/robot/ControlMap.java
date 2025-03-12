@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.ScoreCommand;
@@ -217,6 +218,12 @@ public class ControlMap {
     // NetworkCommunicator.getInstance().getSelectedSourcePath(),
     // Drive.PP_CONSTRAINTS)
     // .andThen(new CoralIntakeCommand(20)));
-    driver.L2().whileTrue(NetworkCommunicator.getInstance().getTeleopCommand());
+    driver
+        .L2()
+        .whileTrue(
+            new SequentialCommandGroup(
+                new InstantCommand(
+                    () -> NetworkCommunicator.getInstance().getTeleopCommand().updateCommands()),
+                NetworkCommunicator.getInstance().getTeleopCommand()));
   }
 }

@@ -39,7 +39,7 @@ public class AlgaeIntakeCommand extends Command {
     } else if (index == 2) {
       velocity = LinearVelocity.ofBaseUnits(0, MetersPerSecond);
       if (AlgaeWrist.getInstance().getWristPosition() <= 1.1 + 0.1) {
-        AlgaeIntake.getInstance().runVoltage(1.3);
+        AlgaeIntake.getInstance().runVoltage(1.5);
       }
       AlgaeWrist.getInstance().goToAngle(1.1);
     } else if (index == 3) {

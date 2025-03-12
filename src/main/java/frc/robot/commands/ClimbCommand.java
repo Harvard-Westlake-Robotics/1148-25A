@@ -17,20 +17,20 @@ public class ClimbCommand extends Command {
 
   @Override
   public void initialize() {
-    climb.goToAngle(0);
+    climb.goToAngle(54);
   }
 
   @Override
   public void execute() {
-    if (deploy) {
-      climb.goToAngle(20);
-      if (climb.getWristPosition() > 15) {
-        deploy = false;
-      }
-    } else if (climbDown) {
-      climb.goToAngle(177.1);
-    } else {
+
+    if (climbDown) {
+      deploy = false;
+      climb.goToAngle(58);
+    } else if (deploy) {
       climb.goToAngle(0);
+
+    } else {
+      climb.goToAngle(54);
     }
   }
 

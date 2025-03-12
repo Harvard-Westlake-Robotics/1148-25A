@@ -146,8 +146,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     intakeMotor.setControl(intakePositionController);
   }
 
-  public Boolean getSensor3(){
-    if (input3 != null){
+  public Boolean getSensor3() {
+    if (input3 != null) {
       return input2.get();
     } else {
       return null;

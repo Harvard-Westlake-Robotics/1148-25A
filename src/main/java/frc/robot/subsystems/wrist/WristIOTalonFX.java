@@ -91,4 +91,9 @@ public class WristIOTalonFX implements WristIO {
     // Constants.IntakeWrist.motorToWristRotations);
     intakeWristMotor.setControl(intakeWristController);
   }
+
+  @Override
+  public void zeroPosition(double rotations) {
+    intakeWristMotor.setPosition(rotations);
+  }
 }

@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.14,
-        "y": 5.49
+        "x": 5.389,
+        "y": 5.247
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.265000000000001,
-        "y": 5.7065063509461105
+        "x": 5.514000000000001,
+        "y": 5.46350635094611
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.07,
-        "y": 5.36
+        "x": 5.325,
+        "y": 5.133
       },
       "prevControl": {
-        "x": 4.945,
-        "y": 5.143493649053891
+        "x": 5.2,
+        "y": 4.916493649053891
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Reef I"
     }
   ],
   "rotationTargets": [],
@@ -47,7 +47,7 @@
   "reversed": false,
   "folder": "Reef Stations",
   "idealStartingState": {
-    "velocity": 1.0,
+    "velocity": 0.5,
     "rotation": 59.99999999999999
   },
   "useDefaultConstraints": true

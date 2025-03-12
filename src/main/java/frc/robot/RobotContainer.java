@@ -37,6 +37,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.drive.NetworkCommunicator;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.AlgaeIntake;
 import frc.robot.subsystems.intake.CoralIntake;
@@ -209,6 +210,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    return NetworkCommunicator.getInstance().getCustomAuto();
   }
 }

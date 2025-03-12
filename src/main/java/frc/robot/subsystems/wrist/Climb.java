@@ -23,6 +23,8 @@ public class Climb extends SubsystemBase {
     this.constants = Constants.HangWrist;
     this.key = "Hang Wrist";
     io = new WristIOTalonFX(constants);
+    io.zeroPosition(54);
+    io.setAngle(54);
   }
 
   public WristConstants getConstants() {
