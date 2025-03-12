@@ -18,7 +18,7 @@ public class LED extends SubsystemBase {
   private CANdle _candle;
 
   private final int _ledOffset = 0;
-  private final int _numLed = 100;
+  private final int _numLed = 30;
 
   public static LED getInstance() {
     if (_LED == null) {
@@ -37,7 +37,7 @@ public class LED extends SubsystemBase {
 
     _candleConfiguration.statusLedOffWhenActive = true;
     _candleConfiguration.disableWhenLOS = false;
-    _candleConfiguration.stripType = LEDStripType.RGBW;
+    _candleConfiguration.stripType = LEDStripType.RGB;
     _candleConfiguration.brightnessScalar = 1.0;
     _candleConfiguration.vBatOutputMode = VBatOutputMode.On;
     _candleConfiguration.enableOptimizations = true;
