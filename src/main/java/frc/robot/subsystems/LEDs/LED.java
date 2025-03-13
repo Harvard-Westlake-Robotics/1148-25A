@@ -5,8 +5,6 @@ import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 import com.ctre.phoenix.led.CANdleConfiguration;
-import com.ctre.phoenix.led.LarsonAnimation;
-import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,8 +15,8 @@ public class LED extends SubsystemBase {
 
   private CANdle _candle;
 
-  private final int _ledOffset = 0;
-  private final int _numLed = 30;
+  public final int _ledOffset = 0;
+  public final int _numLed = 30;
 
   public static LED getInstance() {
     if (_LED == null) {
@@ -49,9 +47,6 @@ public class LED extends SubsystemBase {
       _candle.clearAnimation(i);
       _candle.clearStickyFaults();
     }
-    this.setDefaultCommand(
-        Animate(
-            new LarsonAnimation(255, 0, 0, 255, 0.3, _numLed, BounceMode.Front, 6, _ledOffset)));
   }
 
   @Override

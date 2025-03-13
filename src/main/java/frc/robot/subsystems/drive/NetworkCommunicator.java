@@ -24,7 +24,8 @@ public class NetworkCommunicator {
   private HashMap<String, PathPlannerPath> paths;
   private boolean isAuto;
 
-  private NetworkCommunicator() {}
+  private NetworkCommunicator() {
+  }
 
   public static NetworkCommunicator getInstance() {
     if (instance == null) {
@@ -49,8 +50,12 @@ public class NetworkCommunicator {
       paths.put("J", PathPlannerPath.fromPathFile("Pathfinding J"));
       paths.put("K", PathPlannerPath.fromPathFile("Pathfinding K"));
       paths.put("L", PathPlannerPath.fromPathFile("Pathfinding L"));
-      paths.put("S1", PathPlannerPath.fromPathFile("Top Source 2"));
+      paths.put("S1", PathPlannerPath.fromPathFile("Bottom Source 1"));
       paths.put("S2", PathPlannerPath.fromPathFile("Bottom Source 2"));
+      paths.put("S3", PathPlannerPath.fromPathFile("Bottom Source 3"));
+      paths.put("S4", PathPlannerPath.fromPathFile("Top Source 1"));
+      paths.put("S5", PathPlannerPath.fromPathFile("Top Source 2"));
+      paths.put("S6", PathPlannerPath.fromPathFile("Top Source 3"));
       paths.put("P", PathPlannerPath.fromPathFile("Pathfinding Processor"));
       // paths.put("S3", PathPlannerPath.fromPathFile("Pathfinding L"));
       // paths.put("S4", PathPlannerPath.fromPathFile("Pathfinding L"));
@@ -113,7 +118,8 @@ public class NetworkCommunicator {
       return ScoringLevel.L3;
     } else if (teleopSubHeight.get() == 4) {
       return ScoringLevel.L4;
-    } else return ScoringLevel.L0;
+    } else
+      return ScoringLevel.L0;
   }
 
   public TeleopCommand teleopCommand;
@@ -132,42 +138,29 @@ public class NetworkCommunicator {
       return new PathPlannerAuto(Commands.none());
     } else {
       Command auto = new SequentialCommandGroup();
-      auto =
-          auto.andThen(
+      for (int i = 0; i < autoCommands.length; i++) {
+        if (autoCommands[i].charAt(0) == 'S') {
+          auto = auto.andThen(
               AutoBuilder.pathfindThenFollowPath(
-                  paths.get(String.valueOf(autoCommands[0].charAt(0) + 'A')),
+                  paths.get(autoCommands[i]), Drive.PP_CONSTRAINTS));
+          auto = auto.andThen(new CoralIntakeCommand(20));
+        } else {
+          auto = auto.andThen(
+              AutoBuilder.pathfindThenFollowPath(
+                  paths.get("" + (char) (autoCommands[i].charAt(0))),
                   Drive.PP_CONSTRAINTS));
-      if (autoCommands[0].charAt(2) == '1') {
-        level = ScoringLevel.L1;
-      } else if (autoCommands[0].charAt(2) == '2') {
-        level = ScoringLevel.L2;
-      } else if (autoCommands[0].charAt(2) == '3') {
-        level = ScoringLevel.L3;
-      } else if (autoCommands[0].charAt(2) == '4') {
-        level = ScoringLevel.L4;
-      }
-      auto = auto.andThen(new AutoScoreCommand(level));
-      for (int i = 1; i < autoCommands.length; i += 2) {
-        auto =
-            auto.andThen(
-                AutoBuilder.pathfindThenFollowPath(
-                    paths.get("S" + Integer.parseInt(autoCommands[i])), Drive.PP_CONSTRAINTS));
-        auto = auto.andThen(new CoralIntakeCommand(20));
-        auto =
-            auto.andThen(
-                AutoBuilder.pathfindThenFollowPath(
-                    paths.get(String.valueOf(autoCommands[i + 1].charAt(0) + 'A')),
-                    Drive.PP_CONSTRAINTS));
-        if (autoCommands[i].charAt(2) == '1') {
-          level = ScoringLevel.L1;
-        } else if (autoCommands[i].charAt(2) == '2') {
-          level = ScoringLevel.L2;
-        } else if (autoCommands[i].charAt(2) == '3') {
-          level = ScoringLevel.L3;
-        } else if (autoCommands[i].charAt(2) == '4') {
-          level = ScoringLevel.L4;
+          if (autoCommands[i].charAt(2) == '1') {
+            level = ScoringLevel.L1;
+          } else if (autoCommands[i].charAt(2) == '2') {
+            level = ScoringLevel.L2;
+          } else if (autoCommands[i].charAt(2) == '3') {
+            level = ScoringLevel.L3;
+          } else if (autoCommands[i].charAt(2) == '4') {
+            level = ScoringLevel.L4;
+          }
+          auto = auto.andThen(new AutoScoreCommand(level));
         }
-        auto = auto.andThen(new AutoScoreCommand(level));
+
       }
       return auto;
     }
