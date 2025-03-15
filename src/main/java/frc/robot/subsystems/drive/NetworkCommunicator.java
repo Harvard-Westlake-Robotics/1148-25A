@@ -24,8 +24,7 @@ public class NetworkCommunicator {
   private HashMap<String, PathPlannerPath> paths;
   private boolean isAuto;
 
-  private NetworkCommunicator() {
-  }
+  private NetworkCommunicator() {}
 
   public static NetworkCommunicator getInstance() {
     if (instance == null) {
@@ -118,8 +117,7 @@ public class NetworkCommunicator {
       return ScoringLevel.L3;
     } else if (teleopSubHeight.get() == 4) {
       return ScoringLevel.L4;
-    } else
-      return ScoringLevel.L0;
+    } else return ScoringLevel.L0;
   }
 
   public TeleopCommand teleopCommand;
@@ -140,15 +138,16 @@ public class NetworkCommunicator {
       Command auto = new SequentialCommandGroup();
       for (int i = 0; i < autoCommands.length; i++) {
         if (autoCommands[i].charAt(0) == 'S') {
-          auto = auto.andThen(
-              AutoBuilder.pathfindThenFollowPath(
-                  paths.get(autoCommands[i]), Drive.PP_CONSTRAINTS));
+          auto =
+              auto.andThen(
+                  AutoBuilder.pathfindThenFollowPath(
+                      paths.get(autoCommands[i]), Drive.PP_CONSTRAINTS));
           auto = auto.andThen(new CoralIntakeCommand(20));
         } else {
-          auto = auto.andThen(
-              AutoBuilder.pathfindThenFollowPath(
-                  paths.get("" + (char) (autoCommands[i].charAt(0))),
-                  Drive.PP_CONSTRAINTS));
+          auto =
+              auto.andThen(
+                  AutoBuilder.pathfindThenFollowPath(
+                      paths.get("" + (char) (autoCommands[i].charAt(0))), Drive.PP_CONSTRAINTS));
           if (autoCommands[i].charAt(2) == '1') {
             level = ScoringLevel.L1;
           } else if (autoCommands[i].charAt(2) == '2') {
@@ -160,7 +159,6 @@ public class NetworkCommunicator {
           }
           auto = auto.andThen(new AutoScoreCommand(level));
         }
-
       }
       return auto;
     }

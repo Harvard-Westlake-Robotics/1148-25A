@@ -250,12 +250,13 @@ public class Robot extends LoggedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
-    Climb.getInstance().goToAngle(-63);
   }
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    Climb.getInstance().runVoltage(robotContainer.operator.getRightY() * 5);
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override

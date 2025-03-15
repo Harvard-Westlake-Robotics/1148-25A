@@ -6,7 +6,7 @@ import frc.robot.Constants.WristConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class AlgaeWrist extends SubsystemBase {
-  private WristIOTalonFX io;
+  private final WristIOTalonFX io;
   private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
   private WristConstants constants;
   private String key;

@@ -7,6 +7,10 @@ public class ClimbCommand extends Command {
   private Climb climb;
   private boolean deploy;
   private boolean climbDown;
+  private double climbAngle = 100 * 5;
+  private double zeroAngle = 25 * 5;
+  private double stowAngle = 90 * 5;
+  private boolean hasDeployed = false;
 
   public ClimbCommand() {
     this.addRequirements(Climb.getInstance());
@@ -17,20 +21,30 @@ public class ClimbCommand extends Command {
 
   @Override
   public void initialize() {
-    climb.goToAngle(54);
+    climb.goToAngle(climbAngle);
   }
 
   @Override
   public void execute() {
+    if (climb.getLimitSwitch() && !deploy) {
+      climbAngle = Climb.getInstance().getWristPosition();
+      zeroAngle = Climb.getInstance().getWristPosition();
+      stowAngle = Climb.getInstance().getWristPosition();
+    } else {
+      climbAngle = 93.5 * 5;
+      stowAngle = 90 * 5;
+      zeroAngle = 25 * 5;
+    }
 
     if (climbDown) {
       deploy = false;
-      climb.goToAngle(58);
+      climb.goToAngle(climbAngle);
     } else if (deploy) {
-      climb.goToAngle(0);
+      climb.goToAngle(zeroAngle);
+      hasDeployed = true;
 
     } else {
-      climb.goToAngle(54);
+      climb.goToAngle(stowAngle);
     }
   }
 
@@ -42,6 +56,10 @@ public class ClimbCommand extends Command {
   }
 
   public void climb() {
-    climbDown = !climbDown;
+    if (hasDeployed) climbDown = true;
+  }
+
+  public void incrementClimb() {
+    climbAngle++;
   }
 }

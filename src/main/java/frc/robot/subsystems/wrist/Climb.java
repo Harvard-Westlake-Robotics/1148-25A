@@ -1,16 +1,18 @@
 package frc.robot.subsystems.wrist;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.WristConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class Climb extends SubsystemBase {
-  private WristIOTalonFX io;
+  private final WristIOTalonFX io;
   private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
   private WristConstants constants;
   private String key;
   private static Climb instance;
+  private DigitalInput limitSwitch = new DigitalInput(0);
 
   public static Climb getInstance() {
     if (instance == null) {
@@ -23,8 +25,8 @@ public class Climb extends SubsystemBase {
     this.constants = Constants.HangWrist;
     this.key = "Hang Wrist";
     io = new WristIOTalonFX(constants);
-    io.zeroPosition(54);
-    io.setAngle(54);
+    io.zeroPosition(90 * 5);
+    io.setAngle(90 * 5);
   }
 
   public WristConstants getConstants() {
@@ -46,5 +48,9 @@ public class Climb extends SubsystemBase {
 
   public double getWristPosition() {
     return inputs.wristPositionMeters / constants.motorToWristRotations;
+  }
+
+  public boolean getLimitSwitch() {
+    return limitSwitch.get();
   }
 }

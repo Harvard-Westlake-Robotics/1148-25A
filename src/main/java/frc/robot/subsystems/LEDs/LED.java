@@ -16,7 +16,7 @@ public class LED extends SubsystemBase {
   private CANdle _candle;
 
   public final int _ledOffset = 0;
-  public final int _numLed = 30;
+  public final int _numLed = 31;
 
   public static LED getInstance() {
     if (_LED == null) {

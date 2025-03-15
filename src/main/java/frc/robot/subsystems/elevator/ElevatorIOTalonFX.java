@@ -138,8 +138,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     // double voltage =
     // elevatorFeedforward.calculate(motor1Velocity.getValueAsDouble());
     // elevatorController.FeedForward = voltage;
-    elevatorController.Position = meters / Constants.Elevator.rotationsToMetersRatio;
-    elevator2Controller.Position = meters / Constants.Elevator.rotationsToMetersRatio;
+    elevatorController.Position = meters; // / Constants.Elevator.rotationsToMetersRatio;
+    elevator2Controller.Position = meters; // / Constants.Elevator.rotationsToMetersRatio;
     elevatorController.FeedForward = elevatorFeedforward.calculate(0);
     elevatorController.FeedForward = elevatorFeedforward.calculate(0);
     elevator1.setControl(elevatorController);
@@ -154,5 +154,21 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   public void zeroMotors() {
     elevator1.setPosition(0);
     elevator2.setPosition(0);
+  }
+
+  public void setHeightMetersAdjusted(double meters) {
+    // double voltage =
+    // elevatorFeedforward.calculate(motor1Velocity.getValueAsDouble());
+    // elevatorController.FeedForward = voltage;
+    elevatorController.Position =
+        ((meters - Constants.Elevator.elevatorGroundOffsetMeters)
+            * Constants.Elevator.rotationsToMetersRatio);
+    elevator2Controller.Position =
+        ((meters - Constants.Elevator.elevatorGroundOffsetMeters)
+            * Constants.Elevator.rotationsToMetersRatio);
+    elevatorController.FeedForward = elevatorFeedforward.calculate(0);
+    elevatorController.FeedForward = elevatorFeedforward.calculate(0);
+    elevator1.setControl(elevatorController);
+    elevator2.setControl(elevator2Controller);
   }
 }

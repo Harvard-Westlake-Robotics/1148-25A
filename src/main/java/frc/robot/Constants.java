@@ -157,8 +157,8 @@ public final class Constants {
     public static final int elevator2ID = 14;
     public static final InvertedValue elevator2Inverted = InvertedValue.CounterClockwise_Positive;
     public static final InvertedValue elevator1Inverted = InvertedValue.Clockwise_Positive;
-    public static double kP = 2.0;
-    public static double kI = 0.15;
+    public static double kP = 2.1;
+    public static double kI = 0.18;
     public static double kD = 0.00;
     public static double kS = 0.1;
     public static double kV = 0.0;
@@ -166,9 +166,9 @@ public final class Constants {
     public static double kA = 0.0;
     public static final double elevatorForwardSoftLimitRotations = 55;
     public static final double elevatorReverseSoftLimitRotations = 0.0;
-    public static final double rotationsToMetersRatio = 1;
+    public static final double rotationsToMetersRatio = (1 / 0.042065) * 1.61;
     public static final double[] elevatorHeights = {0, 1, 2, 3};
-    public static final double elevatorGroundOffsetMeters = 0;
+    public static final double elevatorGroundOffsetMeters = 0.2125;
   }
 
   public static class WristConstants {
@@ -183,13 +183,13 @@ public final class Constants {
     public double kG;
     public double kA;
 
-    public final double ANGLE_MAX_ACCELERATION;
-    public final double ANGLE_MAX_VELOCITY;
-    public final double ANGLe_MAX_JERK;
-    public final double motorToWristRotations;
-    public final Angle angleOffset;
-    public final int statorLimit;
-    public final int supplyLimit;
+    public double ANGLE_MAX_ACCELERATION;
+    public double ANGLE_MAX_VELOCITY;
+    public double ANGLe_MAX_JERK;
+    public double motorToWristRotations;
+    public Angle angleOffset;
+    public int statorLimit;
+    public int supplyLimit;
 
     public WristConstants(
         int motorId,
@@ -234,7 +234,7 @@ public final class Constants {
       new WristConstants(
           18,
           InvertedValue.CounterClockwise_Positive,
-          1000,
+          100000,
           3.669162,
           0.0,
           0.0,
@@ -242,9 +242,9 @@ public final class Constants {
           0.0,
           0.0,
           0.0,
-          1000000.0,
           1000.0,
-          10000000.0,
+          1000.0,
+          1000.0,
           1.0, // 4.846
           Angle.ofBaseUnits(0.0, Degrees),
           40,
@@ -253,19 +253,19 @@ public final class Constants {
   public static final WristConstants HangWrist =
       new WristConstants(
           15,
-          InvertedValue.Clockwise_Positive,
-          100,
-          2.369162,
+          InvertedValue.CounterClockwise_Positive,
+          20,
+          3.269162,
           0.0,
           0.0,
-          0.1761,
-          0.12875,
+          0.0,
+          0.0,
           0.0,
           0.0,
           10000.0,
-          10000.0,
+          30.0 * 3,
           10000000.0,
-          1.0 / 4.846,
+          1.0,
           Angle.ofBaseUnits(0.0, Degrees),
           240,
           240); // 28.64 rot

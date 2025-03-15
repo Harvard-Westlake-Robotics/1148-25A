@@ -1,8 +1,9 @@
 package frc.robot.subsystems.wrist;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -18,7 +19,11 @@ import frc.robot.Constants.WristConstants;
 public class WristIOTalonFX implements WristIO {
   // Motors and wrist controllers
   private TalonFX intakeWristMotor;
-  private PositionVoltage intakeWristController;
+  private MotionMagicVoltage intakeWristController;
+
+  private WristConstants intakeWristOG;
+
+  private TalonFXConfiguration intakeWristConfig;
 
   private ArmFeedforward intakeWristFeedforward;
 
@@ -31,26 +36,36 @@ public class WristIOTalonFX implements WristIO {
   private final Debouncer motorConnectedDebounce = new Debouncer(0.5);
 
   public WristIOTalonFX(WristConstants intakeWrist) {
-    intakeWristMotor = new TalonFX(intakeWrist.motorId);
-    intakeWristMotor.setPosition(intakeWrist.angleOffset);
-    intakeWristController = new PositionVoltage(0);
-    TalonFXConfiguration intakeWristConfig = new TalonFXConfiguration();
-    intakeWristConfig.MotorOutput.Inverted = intakeWrist.motorInverted;
+    this.intakeWristOG = intakeWrist;
+    intakeWristMotor = new TalonFX(intakeWristOG.motorId);
+    intakeWristMotor.setPosition(intakeWristOG.angleOffset);
+    this.intakeWristController = new MotionMagicVoltage(0).withEnableFOC(true);
+    intakeWristConfig = new TalonFXConfiguration();
+    intakeWristConfig.MotorOutput.Inverted = intakeWristOG.motorInverted;
     intakeWristConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    intakeWristConfig.MotionMagic.MotionMagicAcceleration = intakeWrist.ANGLE_MAX_ACCELERATION;
-    intakeWristConfig.MotionMagic.MotionMagicCruiseVelocity = intakeWrist.ANGLE_MAX_VELOCITY;
-    intakeWristConfig.MotionMagic.MotionMagicJerk = intakeWrist.ANGLe_MAX_JERK;
-    intakeWristConfig.Slot0.kP = intakeWrist.kP;
-    intakeWristConfig.Slot0.kI = intakeWrist.kI;
-    intakeWristConfig.Slot0.kD = intakeWrist.kD;
-    intakeWristConfig.Slot0.kS = intakeWrist.kS;
-    intakeWristConfig.Slot0.kG = intakeWrist.kG;
-    intakeWristConfig.Slot0.kV = intakeWrist.kV;
+
+    intakeWristConfig.Slot0.kP = intakeWristOG.kP;
+    intakeWristConfig.Slot0.kI = intakeWristOG.kI;
+    intakeWristConfig.Slot0.kD = intakeWristOG.kD;
+    intakeWristConfig.Slot0.kS = intakeWristOG.kS;
+    intakeWristConfig.Slot0.kG = intakeWristOG.kG;
+    intakeWristConfig.Slot0.kV = intakeWristOG.kV;
     intakeWristConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    intakeWristConfig.CurrentLimits.StatorCurrentLimit = intakeWrist.statorLimit;
+    intakeWristConfig.CurrentLimits.StatorCurrentLimit = intakeWristOG.statorLimit;
     intakeWristConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    intakeWristConfig.CurrentLimits.SupplyCurrentLimit = intakeWrist.supplyLimit;
-    intakeWristMotor.getConfigurator().apply(intakeWristConfig);
+    intakeWristConfig.CurrentLimits.SupplyCurrentLimit = intakeWristOG.supplyLimit;
+    this.intakeWristConfig.MotionMagic.MotionMagicAcceleration =
+        this.intakeWristOG.ANGLE_MAX_ACCELERATION;
+    this.intakeWristConfig.MotionMagic.MotionMagicCruiseVelocity =
+        this.intakeWristOG.ANGLE_MAX_VELOCITY;
+    this.intakeWristConfig.MotionMagic.MotionMagicJerk = this.intakeWristOG.ANGLe_MAX_JERK;
+    this.intakeWristMotor.getConfigurator().apply(this.intakeWristConfig);
+    this.intakeWristMotor
+        .getConfigurator()
+        .apply(
+            new MotionMagicConfigs()
+                .withMotionMagicCruiseVelocity(intakeWristOG.ANGLE_MAX_VELOCITY)
+                .withMotionMagicAcceleration(intakeWristOG.ANGLE_MAX_ACCELERATION));
     intakeWristMotor.setControl(intakeWristController);
 
     motorPosition = intakeWristMotor.getPosition();
@@ -59,7 +74,7 @@ public class WristIOTalonFX implements WristIO {
     motorCurrent = intakeWristMotor.getStatorCurrent();
 
     intakeWristFeedforward =
-        new ArmFeedforward(intakeWrist.kS, intakeWrist.kV, intakeWrist.kG, intakeWrist.kA);
+        new ArmFeedforward(intakeWristOG.kS, intakeWristOG.kV, intakeWristOG.kG, intakeWristOG.kA);
   }
 
   @Override

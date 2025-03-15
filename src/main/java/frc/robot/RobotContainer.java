@@ -67,8 +67,8 @@ public class RobotContainer {
   public static boolean isDriftModeActive = false;
 
   // Controller
-  private final CommandXboxController operator = new CommandXboxController(1);
-  private final CommandPS5Controller driver = new CommandPS5Controller(0);
+  public final CommandXboxController operator = new CommandXboxController(1);
+  public final CommandPS5Controller driver = new CommandPS5Controller(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;

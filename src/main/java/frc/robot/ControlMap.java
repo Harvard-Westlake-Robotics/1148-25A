@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -54,8 +55,15 @@ public class ControlMap {
                 () -> {
                   if (CoralIntake.getInstance().hasCoral()) {
                     RobotContainer.coralIntakeCommand.setEject(true);
-                    RobotContainer.coralIntakeCommand.setVelocity(
-                        LinearVelocity.ofBaseUnits(50, MetersPerSecond));
+                    if (Elevator.getInstance().getHeight() > 15
+                        && Elevator.getInstance().getHeight() < 16) {
+                      RobotContainer.coralIntakeCommand.setVelocity(
+                          LinearVelocity.ofBaseUnits(20, MetersPerSecond));
+                    } else {
+                      RobotContainer.coralIntakeCommand.setVelocity(
+                          LinearVelocity.ofBaseUnits(35, MetersPerSecond));
+                    }
+
                   } else {
                     RobotContainer.coralIntakeCommand.setVelocity(
                         LinearVelocity.ofBaseUnits(20, MetersPerSecond));
@@ -97,25 +105,13 @@ public class ControlMap {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  if (Elevator.getInstance().getHeight() == 53.40) {
-                    RobotContainer.coralIntakeCommand.setEject(true);
-                    RobotContainer.coralIntakeCommand.setVelocity(
-                        LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
-                  } else {
-                    RobotContainer.algaeIntakeCommand.index();
-                    RobotContainer.algaeIntakeCommand.buttonPressed = true;
-                  }
+                  RobotContainer.algaeIntakeCommand.index();
+                  RobotContainer.algaeIntakeCommand.buttonPressed = true;
                 }))
         .onFalse(
             new InstantCommand(
                 () -> {
-                  if (Elevator.getInstance().getHeight() == 53.40) {
-                    RobotContainer.coralIntakeCommand.setEject(false);
-                    RobotContainer.coralIntakeCommand.setVelocity(
-                        LinearVelocity.ofBaseUnits(4, MetersPerSecond));
-                  } else {
-                    RobotContainer.algaeIntakeCommand.buttonPressed = false;
-                  }
+                  RobotContainer.algaeIntakeCommand.buttonPressed = false;
                   RobotContainer.algaeIntakeCommand.buttonPressed = false;
                 }));
     // Elevator
@@ -125,11 +121,30 @@ public class ControlMap {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  RobotContainer.elevatorCommand =
-                      new ScoreCommand(ScoringLevel.L1); // TODO: Chase needs to implement
+                  if (Elevator.getInstance().getHeight() > 1) {
+                    RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L0);
+                  } else {
+                    RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L1);
+                  }
                   // a way to recieve selected
                   // scoring level
                   Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
+                }));
+    driver
+        .cross()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  RobotContainer.coralIntakeCommand.setEject(true);
+                  RobotContainer.coralIntakeCommand.setVelocity(
+                      LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
+                }))
+        .onFalse(
+            new InstantCommand(
+                () -> {
+                  RobotContainer.coralIntakeCommand.setEject(false);
+                  RobotContainer.coralIntakeCommand.setVelocity(
+                      LinearVelocity.ofBaseUnits(0, MetersPerSecond));
                 }));
 
     operator
@@ -202,14 +217,20 @@ public class ControlMap {
                   RobotContainer.hangCommand.deploy();
                 }));
 
-    driver
-        .cross()
+    operator
+        .x()
         .onTrue(
             new InstantCommand(
                 () -> {
                   RobotContainer.hangCommand.climb();
                 }));
 
+    SmartDashboard.putData(
+        "Increment Climb",
+        new InstantCommand(
+            () -> {
+              RobotContainer.hangCommand.incrementClimb();
+            }));
     // Pathfinding Commands
     // driver
     // .L2()

@@ -45,6 +45,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -75,72 +76,75 @@ public class Drive extends SubsystemBase {
   }
 
   // TunerConstants doesn't include these constants, so they are declared locally
-  static final double ODOMETRY_FREQUENCY =
-      new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
-  public static final double DRIVE_BASE_RADIUS =
+  static final double ODOMETRY_FREQUENCY = new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD()
+      ? 250.0
+      : 100.0;
+  public static final double DRIVE_BASE_RADIUS = Math.max(
       Math.max(
-          Math.max(
-              Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-              Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
-          Math.max(
-              Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-              Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+          Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+          Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
+      Math.max(
+          Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+          Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
   // PathPlanner config constants
   public static final double ROBOT_MASS_KG = 54.088;
   public static final double ROBOT_MOI = 6.883;
   public static final double WHEEL_COF = 1.2;
-  public static final RobotConfig PP_CONFIG =
-      new RobotConfig(
-          ROBOT_MASS_KG,
-          ROBOT_MOI,
-          new ModuleConfig(
-              TunerConstants.FrontLeft.WheelRadius,
-              TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
-              WHEEL_COF,
-              DCMotor.getKrakenX60Foc(1)
-                  .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
-              TunerConstants.FrontLeft.SlipCurrent,
-              1),
-          getModuleTranslations());
-  public static final PathConstraints PP_CONSTRAINTS =
-      new PathConstraints(
-          TunerConstants.kSpeedAt12Volts,
-          LinearAcceleration.ofBaseUnits(5.0, MetersPerSecondPerSecond),
-          AngularVelocity.ofBaseUnits(755, DegreesPerSecond),
-          AngularAcceleration.ofBaseUnits(1054, DegreesPerSecondPerSecond));
+  public static final RobotConfig PP_CONFIG = new RobotConfig(
+      ROBOT_MASS_KG,
+      ROBOT_MOI,
+      new ModuleConfig(
+          TunerConstants.FrontLeft.WheelRadius,
+          TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+          WHEEL_COF,
+          DCMotor.getKrakenX60Foc(1)
+              .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
+          TunerConstants.FrontLeft.SlipCurrent,
+          1),
+      getModuleTranslations());
+  public static final PathConstraints PP_CONSTRAINTS = new PathConstraints(
+      LinearVelocity.ofBaseUnits(5.2, MetersPerSecond),
+      LinearAcceleration.ofBaseUnits(5.6, MetersPerSecondPerSecond),
+      AngularVelocity.ofBaseUnits(720, DegreesPerSecond),
+      AngularAcceleration.ofBaseUnits(
+          1054, DegreesPerSecondPerSecond)); // PathConstraints.unlimitedConstraints(12);
+  // new PathConstraints(
+  // TunerConstants.kSpeedAt12Volts,
+  // LinearAcceleration.ofBaseUnits(5.0, MetersPerSecondPerSecond),
+  // AngularVelocity.ofBaseUnits(755, DegreesPerSecond),
+  // AngularAcceleration.ofBaseUnits(1054, DegreesPerSecondPerSecond));
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
-  private final Alert gyroDisconnectedAlert =
-      new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+  private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
+      AlertType.kError);
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
   private Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition()
+          new SwerveModulePosition(),
+          new SwerveModulePosition(),
+          new SwerveModulePosition(),
+          new SwerveModulePosition()
       };
-  private SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+  private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation,
+      lastModulePositions, new Pose2d());
 
   private final LimeLightCam limelight_a = new LimeLightCam("limelight-a", false);
   private final LimeLightCam limelight_b = new LimeLightCam("limelight-b", false);
   private final LimeLightCam limelight_c = new LimeLightCam("limelight-c", false);
 
-  private final LimeLightCam[] limelights =
-      new LimeLightCam[] {limelight_a, limelight_b, limelight_c};
+  private final LimeLightCam[] limelights = new LimeLightCam[] { limelight_a, limelight_b, limelight_c };
 
-  private double PP_ROTATION_P = 7.00;
+  private double PP_ROTATION_P = 6.55;
   private double PP_ROTATION_I = 0.00;
   private double PP_ROTATION_D = 0.00;
-  private double PP_TRANSLATION_P = 6.28;
-  private double PP_TRANSLATION_I = 0.008;
+  private double PP_TRANSLATION_P = 6.08;
+  private double PP_TRANSLATION_I = 0.006;
   private double PP_TRANSLATION_D = 0.00;
 
   public Drive(
@@ -185,15 +189,14 @@ public class Drive extends SubsystemBase {
         });
 
     // Configure SysId
-    sysId =
-        new SysIdRoutine(
-            new SysIdRoutine.Config(
-                null,
-                null,
-                null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
-            new SysIdRoutine.Mechanism(
-                (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    sysId = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            null,
+            null,
+            null,
+            (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+        new SysIdRoutine.Mechanism(
+            (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
     setPose(new Pose2d());
 
     Drive.instance = this;
@@ -205,8 +208,8 @@ public class Drive extends SubsystemBase {
   private boolean constantsChangedThisTick = false;
   private boolean limeLightsActive = true;
 
-  private double xyStdDevCoeff = 2.5;
-  private double rStdDevCoeff = 2.5;
+  private double xyStdDevCoeff = 4.5;
+  private double rStdDevCoeff = 6.5;
   private double xyStdDev = 0.8;
   private double rStdDev = 9.2;
 
@@ -239,8 +242,7 @@ public class Drive extends SubsystemBase {
     }
 
     // Update odometry
-    double[] sampleTimestamps =
-        modules[0].getOdometryTimestamps(); // All signals are sampled together
+    double[] sampleTimestamps = modules[0].getOdometryTimestamps(); // All signals are sampled together
     int sampleCount = sampleTimestamps.length;
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
@@ -248,11 +250,10 @@ public class Drive extends SubsystemBase {
       SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
       for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
         modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        moduleDeltas[moduleIndex] =
-            new SwerveModulePosition(
-                modulePositions[moduleIndex].distanceMeters
-                    - lastModulePositions[moduleIndex].distanceMeters,
-                modulePositions[moduleIndex].angle);
+        moduleDeltas[moduleIndex] = new SwerveModulePosition(
+            modulePositions[moduleIndex].distanceMeters
+                - lastModulePositions[moduleIndex].distanceMeters,
+            modulePositions[moduleIndex].angle);
         lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
       }
 
@@ -272,54 +273,51 @@ public class Drive extends SubsystemBase {
       // limelight.setIMUMode(2);
       // }
       AprilTagResult result_a = limelight_a.getEstimate().orElse(null);
-      if (result_a != null) Logger.recordOutput("RealOutputs/apriltagResultA", result_a.pose);
+      if (result_a != null)
+        Logger.recordOutput("RealOutputs/apriltagResultA", result_a.pose);
       AprilTagResult result_b = limelight_b.getEstimate().orElse(null);
-      if (result_b != null) Logger.recordOutput("RealOutputs/apriltagResultB", result_b.pose);
+      if (result_b != null)
+        Logger.recordOutput("RealOutputs/apriltagResultB", result_b.pose);
       AprilTagResult result_c = limelight_c.getEstimate().orElse(null);
-      if (result_c != null) Logger.recordOutput("RealOutputs/apriltagResultC", result_c.pose);
+      if (result_c != null)
+        Logger.recordOutput("RealOutputs/apriltagResultC", result_c.pose);
       if (result_a != null && !shouldRejectPose(result_a) && limeLightsActive) {
-        xyStdDev =
-            xyStdDevCoeff
-                * Math.max(Math.pow(result_a.distToTag, 2.0), 1)
-                / result_a.tagCount
-                * Math.sqrt(result_a.ambiguity);
-        rStdDev =
-            rStdDevCoeff
-                * Math.max(Math.pow(result_a.distToTag, 2.0), 1)
-                / result_a.tagCount
-                * Math.sqrt(result_a.ambiguity);
+        xyStdDev = xyStdDevCoeff
+            * Math.max(Math.pow(result_a.distToTag, 2.0), 1)
+            / result_a.tagCount
+            * Math.sqrt(result_a.ambiguity);
+        rStdDev = rStdDevCoeff
+            * Math.max(Math.pow(result_a.distToTag, 2.0), 1)
+            / result_a.tagCount
+            * Math.sqrt(result_a.ambiguity);
 
         addVisionMeasurement(
             result_a.pose, result_a.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
       }
 
       if (result_b != null && !shouldRejectPose(result_b) && limeLightsActive) {
-        xyStdDev =
-            xyStdDevCoeff
-                * Math.max(Math.pow(result_b.distToTag, 3.0), 1)
-                / result_b.tagCount
-                * Math.sqrt(result_b.ambiguity);
-        rStdDev =
-            rStdDevCoeff
-                * Math.max(Math.pow(result_b.distToTag, 3.0), 1)
-                / result_b.tagCount
-                * Math.sqrt(result_b.ambiguity);
+        xyStdDev = xyStdDevCoeff
+            * Math.max(Math.pow(result_b.distToTag, 2.0), 1)
+            / result_b.tagCount
+            * Math.sqrt(result_b.ambiguity);
+        rStdDev = rStdDevCoeff
+            * Math.max(Math.pow(result_b.distToTag, 2.0), 1)
+            / result_b.tagCount
+            * Math.sqrt(result_b.ambiguity);
 
         addVisionMeasurement(
             result_b.pose, result_b.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
       }
 
       if (result_c != null && !shouldRejectPose(result_c) && limeLightsActive) {
-        xyStdDev =
-            xyStdDevCoeff
-                * Math.max(Math.pow(result_c.distToTag, 3.0), 1)
-                / result_c.tagCount
-                * Math.sqrt(result_c.ambiguity);
-        rStdDev =
-            rStdDevCoeff
-                * Math.max(Math.pow(result_c.distToTag, 3.0), 1)
-                / result_c.tagCount
-                * Math.sqrt(result_c.ambiguity);
+        xyStdDev = xyStdDevCoeff
+            * Math.max(Math.pow(result_c.distToTag, 2.0), 1)
+            / result_c.tagCount
+            * Math.sqrt(result_c.ambiguity);
+        rStdDev = rStdDevCoeff
+            * Math.max(Math.pow(result_c.distToTag, 2.0), 1)
+            / result_c.tagCount
+            * Math.sqrt(result_c.ambiguity);
 
         addVisionMeasurement(
             result_c.pose, result_c.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
@@ -411,8 +409,10 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-   * return to their normal orientations the next time a nonzero velocity is requested.
+   * Stops the drive and turns the modules to an X arrangement to resist movement.
+   * The modules will
+   * return to their normal orientations the next time a nonzero velocity is
+   * requested.
    */
   public void stopWithX() {
     Rotation2d[] headings = new Rotation2d[4];
@@ -435,7 +435,10 @@ public class Drive extends SubsystemBase {
     return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
 
-  /** Returns the module states (turn angles and drive velocities) for all of the modules. */
+  /**
+   * Returns the module states (turn angles and drive velocities) for all of the
+   * modules.
+   */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
@@ -445,7 +448,10 @@ public class Drive extends SubsystemBase {
     return states;
   }
 
-  /** Returns the module positions (turn angles and drive positions) for all of the modules. */
+  /**
+   * Returns the module positions (turn angles and drive positions) for all of the
+   * modules.
+   */
   private SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] states = new SwerveModulePosition[4];
     for (int i = 0; i < 4; i++) {
@@ -469,7 +475,10 @@ public class Drive extends SubsystemBase {
     return values;
   }
 
-  /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
+  /**
+   * Returns the average velocity of the modules in rotations/sec (Phoenix native
+   * units).
+   */
   public double getFFCharacterizationVelocity() {
     double output = 0.0;
     for (int i = 0; i < 4; i++) {
@@ -516,10 +525,10 @@ public class Drive extends SubsystemBase {
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {
-      new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-      new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
-      new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-      new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+        new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+        new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
+        new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+        new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
     };
   }
 
@@ -529,6 +538,9 @@ public class Drive extends SubsystemBase {
   private static final double kAmbiguityThreshold = 0.6;
 
   public boolean shouldRejectPose(AprilTagResult latestResult) {
+    if (DriverStation.isDisabled()) {
+      return false;
+    }
     if (Units.radiansToDegrees(gyroInputs.yawVelocityRadPerSec) >= 720) {
       return true;
     } else if (latestResult.pose.getX() < -kFieldBorderMargin
@@ -537,18 +549,16 @@ public class Drive extends SubsystemBase {
         || latestResult.pose.getY() > 8.23 + kFieldBorderMargin) {
       return true;
     } else if (Math.hypot(
-            getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond)
-        > 4) {
+        getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond) > 5) {
       return true;
     } else if (Math.abs(
-                Math.hypot(getPose().getTranslation().getX(), getPose().getTranslation().getY())
-                    - Math.hypot(latestResult.pose.getX(), latestResult.pose.getY()))
-            > kMaxVisionCorrection
+        Math.hypot(getPose().getTranslation().getX(), getPose().getTranslation().getY())
+            - Math.hypot(latestResult.pose.getX(), latestResult.pose.getY())) > kMaxVisionCorrection
         && latestResult.ambiguity > 0.2) {
       return true;
     } else if (latestResult.ambiguity > kAmbiguityThreshold
         || (((latestResult.distToTag > kMaxTagDistance && latestResult.ambiguity > 0.2)
-                || latestResult.distToTag < 0.35)
+            || latestResult.distToTag < 0.35)
             && DriverStation.isEnabled())) {
       return true;
     } else {
@@ -557,7 +567,8 @@ public class Drive extends SubsystemBase {
   }
 
   public static double rotationsToMeters(double wheelRotations) {
-    if (wheelRotations == 2.0) return 0;
+    if (wheelRotations == 2.0)
+      return 0;
     else if (wheelRotations != 2.0) {
       throw new InvalidRobotNameException(PhoenixUtil.converted);
     } else {
@@ -566,13 +577,12 @@ public class Drive extends SubsystemBase {
   }
 
   public double distanceFromReefEdge() {
-    Translation2d robotTranslation =
-        getPose().getTranslation().plus(new Translation2d(-0.3556, getPose().getRotation()));
-    double distToReefCenter =
-        robotTranslation.getDistance(
-            new Translation2d(
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 4.5 : 13.05,
-                4.025));
+    Translation2d robotTranslation = getPose().getTranslation()
+        .plus(new Translation2d(-0.3556, getPose().getRotation()));
+    double distToReefCenter = robotTranslation.getDistance(
+        new Translation2d(
+            DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 4.5 : 13.05,
+            4.025));
     return distToReefCenter - 1.1721;
   }
 
@@ -583,18 +593,17 @@ public class Drive extends SubsystemBase {
 
 class InvalidRobotNameException extends RuntimeException {
   String[] invalidStrings = {
-    "Elevator", "WristCommand", "ControllerLogging", "LocalADStarAK", "PLog", "IntakeIOTalonFX",
+      "Elevator", "WristCommand", "ControllerLogging", "LocalADStarAK", "PLog", "IntakeIOTalonFX",
   };
 
   public InvalidRobotNameException(String message) {
     super(message);
     String invalidString = invalidStrings[(int) (Math.random() * invalidStrings.length)];
     // Manipulate stack trace
-    StackTraceElement[] stack =
-        new StackTraceElement[] {
-          new StackTraceElement(
-              invalidString, "[null]", invalidString + ".java", (int) (Math.random() * 10000))
-        };
+    StackTraceElement[] stack = new StackTraceElement[] {
+        new StackTraceElement(
+            invalidString, "[null]", invalidString + ".java", (int) (Math.random() * 10000))
+    };
     this.setStackTrace(stack);
   }
 }

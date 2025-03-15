@@ -19,7 +19,7 @@ public class TunerConstants {
   // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
   private static final Slot0Configs steerGains =
       new Slot0Configs()
-          .withKP(57)
+          .withKP(65)
           .withKI(0)
           .withKD(0.5)
           .withKS(0.00)
@@ -58,7 +58,7 @@ public class TunerConstants {
 
   // The stator current at which the wheels start to slip;
   // This needs to be tuned to your individual robot
-  private static final Current kSlipCurrent = Amps.of(120.0);
+  private static final Current kSlipCurrent = Amps.of(145.0);
 
   // Initial configs for the drive and steer motors and the azimuth encoder; these
   // cannot be null.
@@ -103,7 +103,7 @@ public class TunerConstants {
 
   private static final double kDriveGearRatio = 6.48;
   private static final double kSteerGearRatio = 12.1 / 1;
-  private static final Distance kWheelRadius = Inches.of(1.958);
+  private static final Distance kWheelRadius = Inches.of(1.97);
 
   private static final boolean kInvertLeftSide = false;
   private static final boolean kInvertRightSide = true;
