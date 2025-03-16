@@ -107,8 +107,29 @@ public class IntakeIOTalonFX implements IntakeIO {
     intakeMotor.setControl(new VoltageOut(voltage));
   }
 
+  private boolean override = false;
+
+  public boolean isOverride() {
+    return override;
+  }
+
+  public void setOverride(boolean override) {
+    this.override = override;
+  }
+
   @Override
   public void runVelocity(LinearVelocity velocity) {
+    if (!override) {
+      intakeController.FeedForward =
+          intakeFeedforward.calculate(
+              velocity.in(MetersPerSecond) / intakeConstants.rotationsToMetersRatio);
+      intakeController.Velocity =
+          velocity.in(MetersPerSecond) / intakeConstants.rotationsToMetersRatio;
+      intakeMotor.setControl(intakeController);
+    }
+  }
+
+  public void runVelocityOverride(LinearVelocity velocity) {
     intakeController.FeedForward =
         intakeFeedforward.calculate(
             velocity.in(MetersPerSecond) / intakeConstants.rotationsToMetersRatio);

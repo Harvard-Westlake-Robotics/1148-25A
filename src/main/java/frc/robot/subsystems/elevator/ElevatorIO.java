@@ -27,4 +27,8 @@ public interface ElevatorIO {
   public default void setHeightMetersAdjusted(double meters) {}
 
   public default void zeroMotors() {}
+
+  public default void setIsOverriding(boolean isOverriding) {}
+
+  public default void setHeightClosedLoopOverride(double velocity) {}
 }

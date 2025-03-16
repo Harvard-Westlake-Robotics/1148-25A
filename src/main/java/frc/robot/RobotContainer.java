@@ -27,6 +27,7 @@ import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.CoralIntakeCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.RaiseElevatorCommand;
 import frc.robot.commands.ScoreCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.generated.TunerConstants;
@@ -148,10 +149,10 @@ public class RobotContainer {
     }
 
     NamedCommands.registerCommand("IntakeCoral", new CoralIntakeCommand(30).withTimeout(4));
-    NamedCommands.registerCommand("ScoreL4", new ScoreCommand(ScoringLevel.L4));
-    NamedCommands.registerCommand("ScoreL3", new ScoreCommand(ScoringLevel.L3));
-    NamedCommands.registerCommand("ScoreL2", new ScoreCommand(ScoringLevel.L2));
-    NamedCommands.registerCommand("ScoreL1", new ScoreCommand(ScoringLevel.L1));
+    NamedCommands.registerCommand("ScoreL4", new RaiseElevatorCommand(ScoringLevel.L4));
+    NamedCommands.registerCommand("ScoreL3", new RaiseElevatorCommand(ScoringLevel.L3));
+    NamedCommands.registerCommand("ScoreL2", new RaiseElevatorCommand(ScoringLevel.L2));
+    NamedCommands.registerCommand("ScoreL1", new RaiseElevatorCommand(ScoringLevel.L1));
     NamedCommands.registerCommand("ElevatorDown", new ScoreCommand(ScoringLevel.L0));
     NamedCommands.registerCommand("AutoScore L4", new AutoScoreCommand(ScoringLevel.L4));
     NamedCommands.registerCommand("AutoScore L3", new AutoScoreCommand(ScoringLevel.L3));
@@ -180,6 +181,10 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
     LED.getInstance().Color(0, 255, 0);
+    try {
+      pathfindL = PathPlannerPath.fromPathFile("Push");
+    } catch (Exception e) {
+    }
   }
 
   /**

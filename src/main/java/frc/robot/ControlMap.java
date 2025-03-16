@@ -6,12 +6,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.ScoreCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.NetworkCommunicator;
@@ -61,7 +60,7 @@ public class ControlMap {
                           LinearVelocity.ofBaseUnits(20, MetersPerSecond));
                     } else {
                       RobotContainer.coralIntakeCommand.setVelocity(
-                          LinearVelocity.ofBaseUnits(35, MetersPerSecond));
+                          LinearVelocity.ofBaseUnits(30, MetersPerSecond));
                     }
 
                   } else {
@@ -122,13 +121,13 @@ public class ControlMap {
             new InstantCommand(
                 () -> {
                   if (Elevator.getInstance().getHeight() > 1) {
-                    RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L0);
+                    RobotContainer.elevatorCommand.setHeight(ScoringLevel.L0);
                   } else {
-                    RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L1);
+                    RobotContainer.elevatorCommand.setHeight(ScoringLevel.L1);
                   }
                   // a way to recieve selected
                   // scoring level
-                  Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
+
                 }));
     driver
         .cross()
@@ -152,8 +151,7 @@ public class ControlMap {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L2);
-                  Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
+                  RobotContainer.elevatorCommand.setHeight(ScoringLevel.L2);
                 }));
 
     operator
@@ -161,8 +159,7 @@ public class ControlMap {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L1);
-                  Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
+                  RobotContainer.elevatorCommand.setHeight(ScoringLevel.L1);
                 }));
 
     operator
@@ -170,16 +167,14 @@ public class ControlMap {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L3);
-                  Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
+                  RobotContainer.elevatorCommand.setHeight(ScoringLevel.L3);
                 }));
     operator
         .rightBumper()
         .onTrue(
             new InstantCommand(
                 () -> {
-                  RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L4);
-                  Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
+                  RobotContainer.elevatorCommand.setHeight(ScoringLevel.L4);
                 }));
 
     operator
@@ -187,8 +182,7 @@ public class ControlMap {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.TOP_REMOVE);
-                  Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
+                  RobotContainer.elevatorCommand.setHeight(ScoringLevel.TOP_REMOVE);
                 }));
 
     operator
@@ -196,16 +190,14 @@ public class ControlMap {
         .onTrue(
             new InstantCommand(
                 () -> {
-                  RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.BOTTOM_REMOVE);
-                  Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
+                  RobotContainer.elevatorCommand.setHeight(ScoringLevel.BOTTOM_REMOVE);
                 }));
     operator
         .povDown()
         .onTrue(
             new InstantCommand(
                 () -> {
-                  RobotContainer.elevatorCommand = new ScoreCommand(ScoringLevel.L0);
-                  Elevator.getInstance().setDefaultCommand(RobotContainer.elevatorCommand);
+                  RobotContainer.elevatorCommand.setHeight(ScoringLevel.L0);
                 }));
 
     // Climb Commands
@@ -242,9 +234,43 @@ public class ControlMap {
     driver
         .L2()
         .whileTrue(
-            new SequentialCommandGroup(
-                new InstantCommand(
-                    () -> NetworkCommunicator.getInstance().getTeleopCommand().updateCommands()),
-                NetworkCommunicator.getInstance().getTeleopCommand()));
+            new Command() {
+              @Override
+              public void initialize() {
+                NetworkCommunicator.getInstance().getTeleopCommand().updateCommands();
+                NetworkCommunicator.getInstance().getTeleopCommand().schedule();
+              }
+
+              @Override
+              public void end(boolean interrupted) {
+                NetworkCommunicator.getInstance().getTeleopCommand().cancel();
+                Elevator.getInstance().goToHeight(0);
+                if (CoralIntake.getInstance().hasCoral()) {
+                  CoralIntake.getInstance()
+                      .setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+                } else {
+                  CoralIntake.getInstance()
+                      .setVelocity(LinearVelocity.ofBaseUnits(4, MetersPerSecond));
+                }
+                Drive.getInstance().stop();
+                if (Drive.getInstance().getCurrentCommand() != null) {
+                  Drive.getInstance().getCurrentCommand().cancel();
+                }
+                if (CoralIntake.getInstance().getCurrentCommand() != null) {
+                  CoralIntake.getInstance().getCurrentCommand().cancel();
+                }
+                if (Elevator.getInstance().getCurrentCommand() != null) {
+                  Elevator.getInstance().getCurrentCommand().cancel();
+                }
+              }
+            });
+    // new SequentialCommandGroup(
+    // new InstantCommand(
+    // () -> {
+    // NetworkCommunicator.getInstance().getTeleopCommand().updateCommands();
+    // CoralIntake.getInstance().removeDefaultCommand();
+    // Elevator.getInstance().removeDefaultCommand();
+    // }),
+    // NetworkCommunicator.getInstance().getTeleopCommand()));
   }
 }

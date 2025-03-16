@@ -51,12 +51,12 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator1Config.MotorOutput.Inverted = Constants.Elevator.elevator1Inverted;
     elevator2Config.MotorOutput.Inverted = Constants.Elevator.elevator2Inverted;
 
-    elevator1Config.MotionMagic.MotionMagicAcceleration = 150;
-    elevator2Config.MotionMagic.MotionMagicAcceleration = 150;
-    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 100;
-    elevator2Config.MotionMagic.MotionMagicCruiseVelocity = 100;
-    elevator1Config.MotionMagic.MotionMagicJerk = 9000;
-    elevator2Config.MotionMagic.MotionMagicJerk = 9000;
+    elevator1Config.MotionMagic.MotionMagicAcceleration = 170;
+    elevator2Config.MotionMagic.MotionMagicAcceleration = 170;
+    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 120;
+    elevator2Config.MotionMagic.MotionMagicCruiseVelocity = 120;
+    elevator1Config.MotionMagic.MotionMagicJerk = 900;
+    elevator2Config.MotionMagic.MotionMagicJerk = 900;
     elevator1Config.Slot0.kP = Constants.Elevator.kP;
     elevator1Config.Slot0.kI = Constants.Elevator.kI;
     elevator1Config.Slot0.kD = Constants.Elevator.kD;
@@ -138,6 +138,32 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     // double voltage =
     // elevatorFeedforward.calculate(motor1Velocity.getValueAsDouble());
     // elevatorController.FeedForward = voltage;
+    if (!isOverriding()) {
+      elevatorController.Position = meters; // / Constants.Elevator.rotationsToMetersRatio;
+      elevator2Controller.Position = meters; // / Constants.Elevator.rotationsToMetersRatio;
+      elevatorController.FeedForward = elevatorFeedforward.calculate(0);
+      elevatorController.FeedForward = elevatorFeedforward.calculate(0);
+      elevator1.setControl(elevatorController);
+      elevator2.setControl(elevator2Controller);
+    }
+  }
+
+  private boolean overriding;
+
+  public boolean isOverriding() {
+    return overriding;
+  }
+
+  @Override
+  public void setIsOverriding(boolean overriding) {
+    this.overriding = overriding;
+  }
+
+  @Override
+  public void setHeightClosedLoopOverride(double meters) {
+    // double voltage =
+    // elevatorFeedforward.calculate(motor1Velocity.getValueAsDouble());
+    // elevatorController.FeedForward = voltage;
     elevatorController.Position = meters; // / Constants.Elevator.rotationsToMetersRatio;
     elevator2Controller.Position = meters; // / Constants.Elevator.rotationsToMetersRatio;
     elevatorController.FeedForward = elevatorFeedforward.calculate(0);
@@ -154,21 +180,5 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   public void zeroMotors() {
     elevator1.setPosition(0);
     elevator2.setPosition(0);
-  }
-
-  public void setHeightMetersAdjusted(double meters) {
-    // double voltage =
-    // elevatorFeedforward.calculate(motor1Velocity.getValueAsDouble());
-    // elevatorController.FeedForward = voltage;
-    elevatorController.Position =
-        ((meters - Constants.Elevator.elevatorGroundOffsetMeters)
-            * Constants.Elevator.rotationsToMetersRatio);
-    elevator2Controller.Position =
-        ((meters - Constants.Elevator.elevatorGroundOffsetMeters)
-            * Constants.Elevator.rotationsToMetersRatio);
-    elevatorController.FeedForward = elevatorFeedforward.calculate(0);
-    elevatorController.FeedForward = elevatorFeedforward.calculate(0);
-    elevator1.setControl(elevatorController);
-    elevator2.setControl(elevator2Controller);
   }
 }

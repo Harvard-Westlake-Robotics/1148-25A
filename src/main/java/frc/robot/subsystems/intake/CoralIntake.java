@@ -7,7 +7,7 @@ import frc.robot.Constants.IntakeConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class CoralIntake extends SubsystemBase {
-  private IntakeIO io;
+  private IntakeIOTalonFX io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
   private IntakeConstants constants;
   private String key;
@@ -67,5 +67,17 @@ public class CoralIntake extends SubsystemBase {
 
   public Boolean hasCoral() {
     return hasCoral;
+  }
+
+  public void runOver(LinearVelocity v) {
+    io.runVelocityOverride(v);
+  }
+
+  public void setOverride(boolean over) {
+    io.setOverride(over);
+  }
+
+  public boolean isOverride() {
+    return io.isOverride();
   }
 }

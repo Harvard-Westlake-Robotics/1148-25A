@@ -6,9 +6,11 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.CoralIntakeCommand;
+import frc.robot.commands.RaiseElevatorCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.commands.TeleopCommand;
 import java.util.HashMap;
@@ -146,8 +148,10 @@ public class NetworkCommunicator {
         } else {
           auto =
               auto.andThen(
-                  AutoBuilder.pathfindThenFollowPath(
-                      paths.get("" + (char) (autoCommands[i].charAt(0))), Drive.PP_CONSTRAINTS));
+                  new ParallelCommandGroup(
+                      AutoBuilder.pathfindThenFollowPath(
+                          paths.get("" + (char) (autoCommands[i].charAt(0))), Drive.PP_CONSTRAINTS),
+                      new RaiseElevatorCommand(ScoringLevel.L1)));
           if (autoCommands[i].charAt(2) == '1') {
             level = ScoringLevel.L1;
           } else if (autoCommands[i].charAt(2) == '2') {
@@ -157,7 +161,10 @@ public class NetworkCommunicator {
           } else if (autoCommands[i].charAt(2) == '4') {
             level = ScoringLevel.L4;
           }
-          auto = auto.andThen(new AutoScoreCommand(level));
+          auto = auto.andThen(new Command() {}.withTimeout(0.2));
+          auto =
+              auto.andThen(
+                  new AutoScoreCommand(level, paths.get("" + (char) (autoCommands[i].charAt(0)))));
         }
       }
       return auto;

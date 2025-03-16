@@ -157,8 +157,8 @@ public final class Constants {
     public static final int elevator2ID = 14;
     public static final InvertedValue elevator2Inverted = InvertedValue.CounterClockwise_Positive;
     public static final InvertedValue elevator1Inverted = InvertedValue.Clockwise_Positive;
-    public static double kP = 2.1;
-    public static double kI = 0.18;
+    public static double kP = 2.0;
+    public static double kI = 0.1;
     public static double kD = 0.00;
     public static double kS = 0.1;
     public static double kV = 0.0;
@@ -166,7 +166,7 @@ public final class Constants {
     public static double kA = 0.0;
     public static final double elevatorForwardSoftLimitRotations = 55;
     public static final double elevatorReverseSoftLimitRotations = 0.0;
-    public static final double rotationsToMetersRatio = (1 / 0.042065) * 1.61;
+    public static final double rotationsToMetersRatio = (1);
     public static final double[] elevatorHeights = {0, 1, 2, 3};
     public static final double elevatorGroundOffsetMeters = 0.2125;
   }
@@ -267,6 +267,6 @@ public final class Constants {
           10000000.0,
           1.0,
           Angle.ofBaseUnits(0.0, Degrees),
-          240,
-          240); // 28.64 rot
+          340,
+          340); // 28.64 rot
 }

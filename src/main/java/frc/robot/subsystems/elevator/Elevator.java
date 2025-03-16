@@ -40,4 +40,12 @@ public class Elevator extends SubsystemBase {
   public double getHeight() {
     return inputs.elevator1PositionMeters;
   }
+
+  public void goToHeightOverride(double height) {
+    io.setHeightClosedLoopOverride(getHeight());
+  }
+
+  public void setOverride(boolean over) {
+    io.setIsOverriding(over);
+  }
 }

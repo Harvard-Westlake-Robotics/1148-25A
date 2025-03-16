@@ -7,8 +7,8 @@ public class ClimbCommand extends Command {
   private Climb climb;
   private boolean deploy;
   private boolean climbDown;
-  private double climbAngle = 100 * 5;
-  private double zeroAngle = 25 * 5;
+  private double climbAngle = 120 * 5;
+  private double zeroAngle = 450 - 270;
   private double stowAngle = 90 * 5;
   private boolean hasDeployed = false;
 
@@ -39,6 +39,11 @@ public class ClimbCommand extends Command {
     if (climbDown) {
       deploy = false;
       climb.goToAngle(climbAngle);
+      if (!climb.getLimitSwitch()) {
+        climb.runVoltage(10.5);
+      } else {
+        climb.runVoltage(0.3);
+      }
     } else if (deploy) {
       climb.goToAngle(zeroAngle);
       hasDeployed = true;
