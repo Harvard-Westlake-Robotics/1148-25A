@@ -1,12 +1,21 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
@@ -15,10 +24,11 @@ import frc.robot.subsystems.intake.CoralIntake;
 public class AutoScoreCommand extends Command {
   private ScoringLevel level;
   private double targetHeight = 0.0;
-  private PIDController xController;
-  private PIDController yController;
-  private PIDController thetaController;
+  private ProfiledPIDController xController;
+  private ProfiledPIDController yController;
+  private ProfiledPIDController thetaController;
   private Pose2d endPose;
+  private int tickCounter = 0;
 
   public AutoScoreCommand(ScoringLevel level) {
     this.addRequirements(CoralIntake.getInstance(), Elevator.getInstance());
@@ -43,13 +53,24 @@ public class AutoScoreCommand extends Command {
   }
 
   public AutoScoreCommand(ScoringLevel level, PathPlannerPath path) {
+    Drive.getInstance().setLimeLightsActive(false);
     this.addRequirements(CoralIntake.getInstance(), Elevator.getInstance(), Drive.getInstance());
+    if (CoralIntake.getInstance().getCurrentCommand() != null) {
+      CoralIntake.getInstance().getCurrentCommand().cancel();
+    }
+    RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
     this.level = level;
-    this.xController = new PIDController(2.2, 0, 0.00);
-    this.yController = new PIDController(2.2, 0, 0.00);
-    this.thetaController = new PIDController(1.0, 0, 0.00);
-    thetaController.enableContinuousInput(-180, 180);
-    this.endPose = path.getPathPoses().get(path.getPathPoses().size() - 1);
+    this.xController = new ProfiledPIDController(3.0, 0, 0.3, new Constraints(3.0, 5.0));
+    this.yController = new ProfiledPIDController(3.0, 0, 0.3, new Constraints(3.0, 5.0));
+    this.thetaController = new ProfiledPIDController(5.0, 0, 0.4, new Constraints(4.0, 10.0));
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    xController.setTolerance(0.01);
+    yController.setTolerance(0.01);
+    thetaController.setTolerance(0.05);
+    this.endPose = path.getPathPoses().get(2);
+    xController.reset(Drive.getInstance().getPose().getX());
+    yController.reset(Drive.getInstance().getPose().getY());
+    thetaController.reset(Drive.getInstance().getPose().getRotation().getRadians());
   }
 
   @Override
@@ -57,7 +78,7 @@ public class AutoScoreCommand extends Command {
     if (level == ScoringLevel.L1) {
       targetHeight = 15.5;
     } else if (level == ScoringLevel.L2) {
-      targetHeight = 20.85;
+      targetHeight = 20.45;
     } else if (level == ScoringLevel.L3) {
       targetHeight = 33.48;
     } else if (level == ScoringLevel.L4) {
@@ -77,47 +98,44 @@ public class AutoScoreCommand extends Command {
   public void execute() {
     Elevator.getInstance().goToHeight(targetHeight);
     System.out.println(targetHeight);
-    // if
-    // (endPose.getTranslation().getDistance(Drive.getInstance().getPose().getTranslation())
-    // > 0.05
-    // ||
-    // endPose.getRotation().minus(Drive.getInstance().getPose().getRotation()).getDegrees()
-    // > 0.5) {
-    // CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(0,
-    // MetersPerSecond));
-    // Drive.getInstance()
-    // .runVelocity(
-    // new ChassisSpeeds(
-    // LinearVelocity.ofBaseUnits(
-    // -xController.calculate(endPose.getX() -
-    // Drive.getInstance().getPose().getX()),
-    // MetersPerSecond),
-    // LinearVelocity.ofBaseUnits(
-    // -yController.calculate(endPose.getY() -
-    // Drive.getInstance().getPose().getY()),
-    // MetersPerSecond),
-    // AngularVelocity.ofBaseUnits(
-    // thetaController.calculate(
-    // endPose
-    // .getRotation()
-    // .minus(Drive.getInstance().getPose().getRotation())
-    // .getDegrees()),
-    // DegreesPerSecond)));
-    // } else {
-    if (Math.abs(targetHeight - Elevator.getInstance().getHeight()) < 1
-        || Elevator.getInstance().getHeight() > targetHeight) {
-      CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(40, MetersPerSecond));
-    } else {
+    if (Drive.getInstance().getPose().getTranslation().getDistance(endPose.getTranslation()) > 0.02
+        || Drive.getInstance().getRotation().getMeasure().isNear(endPose.getRotation().getMeasure(),
+            Angle.ofBaseUnits(0.5, Degrees))) {
+      Pose2d poseThisTick = Drive.getInstance().getPose();
       CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+      Drive.getInstance()
+          .runVelocity(
+              new ChassisSpeeds(
+                  LinearVelocity.ofBaseUnits(
+                      xController.calculate(poseThisTick.getX(), endPose.getX()),
+                      MetersPerSecond),
+                  LinearVelocity.ofBaseUnits(
+                      yController.calculate(poseThisTick.getY(), endPose.getY()),
+                      MetersPerSecond),
+                  AngularVelocity.ofBaseUnits(
+                      thetaController.calculate(poseThisTick.getRotation().getRadians(),
+                          endPose.getRotation().getRadians()),
+                      RadiansPerSecond)));
+    } else {
+      if ((Math.abs(targetHeight - Elevator.getInstance().getHeight()) < 1
+          || Elevator.getInstance().getHeight() > targetHeight)) {
+        if (tickCounter > 9)
+          CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(40, MetersPerSecond));
+        else
+          tickCounter++;
+      } else {
+        CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+      }
     }
-    // }
   }
 
   @Override
   public void end(boolean interrupted) {
+    RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(4, MetersPerSecond));
     Elevator.getInstance().goToHeight(0);
     CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(4, MetersPerSecond));
     Drive.getInstance().stop();
+    Drive.getInstance().setLimeLightsActive(true);
   }
 
   @Override

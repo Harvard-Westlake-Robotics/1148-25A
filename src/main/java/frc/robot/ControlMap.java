@@ -69,7 +69,6 @@ public class ControlMap {
                     RobotContainer.coralIntakeCommand.setEject(false);
                   }
                 }))
-        .whileTrue(RobotContainer.coralIntakeCommand)
         .onFalse(
             new InstantCommand(
                 () -> {
@@ -237,6 +236,16 @@ public class ControlMap {
             new Command() {
               @Override
               public void initialize() {
+                if (Drive.getInstance().getCurrentCommand() != null) {
+                  Drive.getInstance().getCurrentCommand().cancel();
+                }
+                if (CoralIntake.getInstance().getCurrentCommand() != null) {
+                  CoralIntake.getInstance().getCurrentCommand().cancel();
+                }
+                if (Elevator.getInstance().getCurrentCommand() != null) {
+                  Elevator.getInstance().getCurrentCommand().cancel();
+                }
+                RobotContainer.coralIntakeCommand.setEject(false);
                 NetworkCommunicator.getInstance().getTeleopCommand().updateCommands();
                 NetworkCommunicator.getInstance().getTeleopCommand().schedule();
               }

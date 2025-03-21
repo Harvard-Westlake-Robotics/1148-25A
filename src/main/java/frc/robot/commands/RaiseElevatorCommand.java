@@ -40,7 +40,7 @@ public class RaiseElevatorCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    return Math.abs(targetHeight - Elevator.getInstance().getHeight()) < 5;
+    return Math.abs(targetHeight - Elevator.getInstance().getHeight()) < 2;
   }
 
   public void setHeight(ScoringLevel level) {

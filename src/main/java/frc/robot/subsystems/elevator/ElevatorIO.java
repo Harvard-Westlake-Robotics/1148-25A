@@ -19,16 +19,25 @@ public interface ElevatorIO {
   }
 
   /** Updates the set of loggable inputs. */
-  public default void updateInputs(ElevatorIOInputs inputs) {}
+  public default void updateInputs(ElevatorIOInputs inputs) {
+  }
 
   /** Run the drive motor at the specified velocity. */
-  public default void setHeightClosedLoop(double velocityRadPerSec) {}
+  public default void setHeightClosedLoop(double velocityRadPerSec) {
+  }
 
-  public default void setHeightMetersAdjusted(double meters) {}
+  public default void setHeightMetersAdjusted(double meters) {
+  }
 
-  public default void zeroMotors() {}
+  public default void zeroMotors() {
+  }
 
-  public default void setIsOverriding(boolean isOverriding) {}
+  public default void setIsOverriding(boolean isOverriding) {
+  }
 
-  public default void setHeightClosedLoopOverride(double velocity) {}
+  public default void setHeightClosedLoopOverride(double velocity) {
+  }
+
+  public default void runCharacterization(double voltage) {
+  }
 }
