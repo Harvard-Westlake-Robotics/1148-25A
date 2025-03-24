@@ -144,4 +144,13 @@ public class Module {
   public double getFFCharacterizationVelocity() {
     return Units.radiansToRotations(inputs.driveVelocityRadPerSec);
   }
+
+  /**
+   * Gets the module's IO interface.
+   *
+   * @return The ModuleIO interface for this module
+   */
+  public ModuleIO getIO() {
+    return io;
+  }
 }

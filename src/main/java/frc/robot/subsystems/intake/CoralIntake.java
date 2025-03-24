@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -8,9 +10,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
-
-import static edu.wpi.first.units.Units.Volts;
-
 import org.littletonrobotics.junction.Logger;
 
 public class CoralIntake extends SubsystemBase {
@@ -33,10 +32,14 @@ public class CoralIntake extends SubsystemBase {
     this.constants = Constants.CoralIntake;
     this.key = "Coral Intake";
     io = new IntakeIOTalonFX(constants);
-    sysId = new SysIdRoutine(
-        new Config(null, null, null, (state) -> Logger.recordOutput("CoralIntake/SysIdState", state.toString())),
-        new Mechanism(
-            (voltage) -> runVoltage(voltage.in(Volts)), null, this));
+    sysId =
+        new SysIdRoutine(
+            new Config(
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("CoralIntake/SysIdState", state.toString())),
+            new Mechanism((voltage) -> runVoltage(voltage.in(Volts)), null, this));
   }
 
   public IntakeConstants getConstants() {
@@ -95,9 +98,7 @@ public class CoralIntake extends SubsystemBase {
 
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return run(() -> runVoltage(0.0))
-        .withTimeout(1.0)
-        .andThen(sysId.quasistatic(direction));
+    return run(() -> runVoltage(0.0)).withTimeout(1.0).andThen(sysId.quasistatic(direction));
   }
 
   /** Returns a command to run a dynamic test in the specified direction. */

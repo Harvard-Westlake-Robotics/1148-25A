@@ -42,8 +42,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   public ElevatorIOTalonFX() {
     elevator1 = new TalonFX(Constants.Elevator.elevator1ID, "drive");
     elevator2 = new TalonFX(Constants.Elevator.elevator2ID, "drive");
-    elevator1.setPosition(1);
-    elevator2.setPosition(1);
+    elevator1.setPosition(25);
+    elevator2.setPosition(25);
     elevatorController = new MotionMagicVoltage(0).withEnableFOC(true).withSlot(0);
     elevator2Controller = new MotionMagicVoltage(0).withEnableFOC(true).withSlot(0);
     TalonFXConfiguration elevator1Config = new TalonFXConfiguration();
@@ -51,12 +51,12 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator1Config.MotorOutput.Inverted = Constants.Elevator.elevator1Inverted;
     elevator2Config.MotorOutput.Inverted = Constants.Elevator.elevator2Inverted;
 
-    elevator1Config.MotionMagic.MotionMagicAcceleration = 190;
-    elevator2Config.MotionMagic.MotionMagicAcceleration = 190;
-    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 130;
-    elevator2Config.MotionMagic.MotionMagicCruiseVelocity = 130;
-    elevator1Config.MotionMagic.MotionMagicJerk = 900;
-    elevator2Config.MotionMagic.MotionMagicJerk = 900;
+    elevator1Config.MotionMagic.MotionMagicAcceleration = 390;
+    elevator2Config.MotionMagic.MotionMagicAcceleration = 390;
+    elevator1Config.MotionMagic.MotionMagicCruiseVelocity = 250;
+    elevator2Config.MotionMagic.MotionMagicCruiseVelocity = 250;
+    elevator1Config.MotionMagic.MotionMagicJerk = 990;
+    elevator2Config.MotionMagic.MotionMagicJerk = 990;
     elevator1Config.Slot0.kP = Constants.Elevator.kP;
     elevator1Config.Slot0.kI = Constants.Elevator.kI;
     elevator1Config.Slot0.kD = Constants.Elevator.kD;
@@ -78,13 +78,17 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator2Config.CurrentLimits.SupplyCurrentLimitEnable = true;
     elevator2Config.CurrentLimits.SupplyCurrentLimit = 50;
     elevator1Config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    elevator1Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Elevator.elevatorForwardSoftLimitRotations;
+    elevator1Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        Constants.Elevator.elevatorForwardSoftLimitRotations;
     elevator1Config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    elevator1Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Constants.Elevator.elevatorReverseSoftLimitRotations;
+    elevator1Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        Constants.Elevator.elevatorReverseSoftLimitRotations;
     elevator2Config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    elevator2Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Elevator.elevatorForwardSoftLimitRotations;
+    elevator2Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        Constants.Elevator.elevatorForwardSoftLimitRotations;
     elevator2Config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    elevator2Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Constants.Elevator.elevatorReverseSoftLimitRotations;
+    elevator2Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        Constants.Elevator.elevatorReverseSoftLimitRotations;
     elevator1.getConfigurator().apply(elevator1Config);
     elevator2.getConfigurator().apply(elevator2Config);
     elevator1.setControl(elevatorController);
@@ -100,24 +104,31 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     motor2AppliedVolts = elevator2.getMotorVoltage();
     motor2Current = elevator2.getStatorCurrent();
 
-    elevatorFeedforward = new ElevatorFeedforward(
-        Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
+    elevatorFeedforward =
+        new ElevatorFeedforward(
+            Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
   }
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    var elevator1Status = StatusSignal.refreshAll(motor1Position, motor1Velocity, motor1AppliedVolts, motor1Current);
-    var elevator2Status = StatusSignal.refreshAll(motor2Position, motor2Velocity, motor2AppliedVolts, motor2Current);
+    var elevator1Status =
+        StatusSignal.refreshAll(motor1Position, motor1Velocity, motor1AppliedVolts, motor1Current);
+    var elevator2Status =
+        StatusSignal.refreshAll(motor2Position, motor2Velocity, motor2AppliedVolts, motor2Current);
 
     inputs.elevator1Connected = motor1ConnectedDebounce.calculate(elevator1.isConnected());
-    inputs.elevator1PositionMeters = motor1Position.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
-    inputs.elevator1VelocityMPS = motor1Velocity.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
+    inputs.elevator1PositionMeters =
+        motor1Position.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
+    inputs.elevator1VelocityMPS =
+        motor1Velocity.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
     inputs.elevator1AppliedVolts = motor1AppliedVolts.getValueAsDouble();
     inputs.elevator1CurrentAmps = motor1Current.getValueAsDouble();
 
     inputs.elevator2Connected = motor2ConnectedDebounce.calculate(elevator2.isConnected());
-    inputs.elevator2PositionMeters = motor2Position.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
-    inputs.elevator2VelocityMPS = motor2Velocity.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
+    inputs.elevator2PositionMeters =
+        motor2Position.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
+    inputs.elevator2VelocityMPS =
+        motor2Velocity.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
     inputs.elevator2AppliedVolts = motor2AppliedVolts.getValueAsDouble();
     inputs.elevator2CurrentAmps = motor2Current.getValueAsDouble();
   }
@@ -170,5 +181,4 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator1.setPosition(0);
     elevator2.setPosition(0);
   }
-
 }

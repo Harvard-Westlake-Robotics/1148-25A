@@ -148,7 +148,7 @@ public class NetworkCommunicator {
                       paths.get(autoCommands[i]), Drive.PP_CONSTRAINTS));
           auto =
               auto.andThen(
-                  new CoralIntakeCommand(20).onlyWhile(CoralIntake.getInstance()::getSensor3));
+                  new CoralIntakeCommand(6).onlyWhile(CoralIntake.getInstance()::getSensor3));
         } else {
           auto =
               auto.andThen(
@@ -157,7 +157,7 @@ public class NetworkCommunicator {
                           paths.get("" + (char) (autoCommands[i].charAt(0))), Drive.PP_CONSTRAINTS),
                       i == 0
                           ? new RaiseElevatorCommand(ScoringLevel.L1)
-                          : new CoralIntakeCommand(20)
+                          : new CoralIntakeCommand(6)
                               .andThen(new RaiseElevatorCommand(ScoringLevel.L1))));
           if (autoCommands[i].charAt(2) == '1') {
             level = ScoringLevel.L1;

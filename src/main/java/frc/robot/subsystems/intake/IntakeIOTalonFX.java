@@ -31,6 +31,8 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   private SimpleMotorFeedforward intakeFeedforward;
 
+  private TalonFXConfiguration intakeConfig;
+
   private final StatusSignal<Angle> motorPosition;
   private final StatusSignal<AngularVelocity> motorVelocity;
   private final StatusSignal<Voltage> motorAppliedVolts;
@@ -66,10 +68,11 @@ public class IntakeIOTalonFX implements IntakeIO {
     intakeConfig.Slot1.kP = intakeConstants.positionkP;
     intakeConfig.Slot1.kD = intakeConstants.positionkP;
     intakeConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    intakeConfig.CurrentLimits.StatorCurrentLimit = 110;
+    intakeConfig.CurrentLimits.StatorCurrentLimit = 120;
     intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    intakeConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    intakeConfig.CurrentLimits.SupplyCurrentLimit = 50;
     intakeMotor.getConfigurator().apply(intakeConfig);
+    this.intakeConfig = intakeConfig;
     intakeMotor.setControl(intakeController);
 
     motorPosition = intakeMotor.getPosition();
@@ -119,6 +122,9 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void runVelocity(LinearVelocity velocity) {
+    intakeConfig.MotionMagic.MotionMagicCruiseVelocity = 9999;
+    intakeConfig.MotionMagic.MotionMagicAcceleration = 9999;
+    intakeMotor.getConfigurator().apply(intakeConfig);
     if (!override) {
       intakeController.FeedForward =
           intakeFeedforward.calculate(
@@ -161,6 +167,9 @@ public class IntakeIOTalonFX implements IntakeIO {
   }
 
   public void push(double rotations) {
+    intakeConfig.MotionMagic.MotionMagicCruiseVelocity = 20;
+    intakeConfig.MotionMagic.MotionMagicAcceleration = 9999;
+    intakeMotor.getConfigurator().apply(intakeConfig);
     intakeMotor.setPosition(0);
     intakePositionController.Position = rotations;
     intakePositionController.Slot = 1;

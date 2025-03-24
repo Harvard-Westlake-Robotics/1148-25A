@@ -21,27 +21,30 @@ public class TeleopCommand extends Command {
               NetworkCommunicator.getInstance().getSelectedReefPath(), Drive.PP_CONSTRAINTS)
           .andThen(
               new AutoScoreCommand(
-                      NetworkCommunicator.getInstance().getSelectedHeight(),
-                      NetworkCommunicator.getInstance().getSelectedReefPath())
-                  .until(() -> cancel));
+                  NetworkCommunicator.getInstance().getSelectedHeight(),
+                  NetworkCommunicator.getInstance().getSelectedReefPath()));
   private Command sourceCommand =
       AutoBuilder.pathfindThenFollowPath(
               NetworkCommunicator.getInstance().getSelectedSourcePath(), Drive.PP_CONSTRAINTS)
-          .andThen(new CoralIntakeCommand(20).until(() -> cancel));
+          .andThen(new CoralIntakeCommand(6));
 
   @Override
   public void initialize() {
     updateCommands();
+    if (CoralIntake.getInstance().getCurrentCommand() != null)
+      CoralIntake.getInstance().getCurrentCommand().cancel();
     if (CoralIntake.getInstance().hasCoral()) {
       reefCommand.schedule();
     } else {
+      if (CoralIntake.getInstance().getCurrentCommand() != null) {
+        CoralIntake.getInstance().getCurrentCommand().cancel();
+      }
       sourceCommand.schedule();
     }
   }
 
   @Override
   public void end(boolean interrupted) {
-    cancel = true;
     sourceCommand.cancel();
     reefCommand.cancel();
   }
@@ -59,6 +62,6 @@ public class TeleopCommand extends Command {
     sourceCommand =
         AutoBuilder.pathfindThenFollowPath(
                 NetworkCommunicator.getInstance().getSelectedSourcePath(), Drive.PP_CONSTRAINTS)
-            .andThen(new CoralIntakeCommand(20));
+            .andThen(new CoralIntakeCommand(6));
   }
 }

@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.LEDs.LED;
 import frc.robot.subsystems.drive.Drive;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -286,6 +288,32 @@ public class DriveCommands {
                               + formatter.format(Units.metersToInches(wheelRadius))
                               + " inches");
                     })));
+  }
+
+  /**
+   * Toggles drift mode and applies appropriate motor configurations.
+   *
+   * @param drive The drive subsystem
+   * @return A command that toggles drift mode
+   */
+  public static Command toggleDriftMode(Drive drive) {
+    return Commands.runOnce(
+        () -> {
+          // Toggle drift mode state
+          RobotContainer.isDriftModeActive = !RobotContainer.isDriftModeActive;
+
+          // Update motor configurations for drift mode
+          for (int i = 0; i < 4; i++) {
+            drive.updateModuleConfiguration(i);
+          }
+
+          // Display status on dashboard
+          if (RobotContainer.isDriftModeActive) {
+            LED.getInstance().Color(255, 0, 0); // Red when drift mode is active
+          } else {
+            LED.getInstance().Color(0, 255, 0); // Green when normal mode
+          }
+        });
   }
 
   private static class WheelRadiusCharacterizationState {
