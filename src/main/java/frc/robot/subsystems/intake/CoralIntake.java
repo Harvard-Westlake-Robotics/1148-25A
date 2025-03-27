@@ -1,5 +1,6 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -10,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
 public class CoralIntake extends SubsystemBase {
@@ -53,6 +55,9 @@ public class CoralIntake extends SubsystemBase {
       hasCoral = true;
     } else {
       hasCoral = false;
+    }
+    if (!hasCoral && !RobotContainer.coralIntakeCommand.isEject()) {
+      RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(6, MetersPerSecond));
     }
   }
 

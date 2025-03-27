@@ -18,6 +18,15 @@ public class LimeLightCam extends BaseCam {
   private NetworkTable _ntTable;
 
   private boolean useMegaTag2 = false;
+
+  public boolean isUseMegaTag2() {
+    return useMegaTag2;
+  }
+
+  public void setUseMegaTag2(boolean useMegaTag2) {
+    this.useMegaTag2 = useMegaTag2;
+  }
+
   private boolean runNeuralNetwork = false;
 
   public LimeLightCam(String name, int[] TagsToCheck, boolean useMegaTag2) {

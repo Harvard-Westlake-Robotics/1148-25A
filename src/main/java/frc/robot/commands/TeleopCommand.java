@@ -1,19 +1,23 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import frc.robot.RobotContainer;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.NetworkCommunicator;
-import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.CoralIntake;
 
 public class TeleopCommand extends Command {
   private boolean cancel = false;
 
   public TeleopCommand() {
-    this.addRequirements(Elevator.getInstance(), Drive.getInstance(), CoralIntake.getInstance());
+    // this.addRequirements(Elevator.getInstance(), Drive.getInstance(),
+    // CoralIntake.getInstance());
   }
 
   private Command reefCommand =
@@ -31,14 +35,14 @@ public class TeleopCommand extends Command {
   @Override
   public void initialize() {
     updateCommands();
-    if (CoralIntake.getInstance().getCurrentCommand() != null)
-      CoralIntake.getInstance().getCurrentCommand().cancel();
     if (CoralIntake.getInstance().hasCoral()) {
+      reefCommand.addRequirements(getRequirements());
+      sourceCommand.cancel();
       reefCommand.schedule();
     } else {
-      if (CoralIntake.getInstance().getCurrentCommand() != null) {
-        CoralIntake.getInstance().getCurrentCommand().cancel();
-      }
+      RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(6, MetersPerSecond));
+      sourceCommand.addRequirements(getRequirements());
+      reefCommand.cancel();
       sourceCommand.schedule();
     }
   }

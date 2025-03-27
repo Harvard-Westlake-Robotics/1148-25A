@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.RobotContainer;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
@@ -23,30 +22,32 @@ import frc.robot.subsystems.intake.CoralIntake;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Command to automatically score game pieces at specified heights. This command handles both the
- * elevator movement and drive positioning. It includes safety checks, timeouts, and error handling.
+ * Command to automatically score game pieces at specified heights. This command
+ * handles both the
+ * elevator movement and drive positioning. It includes safety checks, timeouts,
+ * and error handling.
  */
 public class AutoScoreCommand extends Command {
   // Constants for position and timing
-  private static final double POSITION_TOLERANCE = 0.02; // meters
-  private static final double ROTATION_TOLERANCE = 0.15; // degrees
-  private static final double ELEVATOR_TOLERANCE = 1.0; // meters
+  public static double POSITION_TOLERANCE = 0.02; // meters
+  public static double ROTATION_TOLERANCE = 0.40; // degrees
+  private static final double ELEVATOR_TOLERANCE = 0.8; // meters
   private static final double SCORING_DELAY_TICKS = 2;
-  private static final double SCORING_VELOCITY = 20.0; // meters per second
-  private static final double DEFAULT_VELOCITY = 4.0; // meters per second
+  private static final double SCORING_VELOCITY = 100.0; // meters per second
+  private static final double DEFAULT_VELOCITY = 6.0; // meters per second
   private static final double COMMAND_TIMEOUT = 10.0; // seconds
 
   // PID controller constants
-  private static final double X_PID_P = 3.0;
-  private static final double X_PID_D = 0.0;
-  private static final double Y_PID_P = 3.0;
-  private static final double Y_PID_D = 0.0;
-  private static final double THETA_PID_P = 3.6;
-  private static final double THETA_PID_D = 0.0;
-  private static final double MAX_VELOCITY = 5.0;
-  private static final double MAX_ACCELERATION = 5.0;
-  private static final double MAX_ANGULAR_VELOCITY = 5.0;
-  private static final double MAX_ANGULAR_ACCELERATION = 12.0;
+  public static double X_PID_P = 18.7;
+  public static double X_PID_D = 0.05;
+  public static double Y_PID_P = 18.7;
+  public static double Y_PID_D = 0.05;
+  public static double THETA_PID_P = 9.9;
+  public static double THETA_PID_D = 0.1;
+  private static final double MAX_VELOCITY = 2.0;
+  private static final double MAX_ACCELERATION = 2.5;
+  private static final double MAX_ANGULAR_VELOCITY = 2.0;
+  private static final double MAX_ANGULAR_ACCELERATION = 2.5;
 
   private final ScoringLevel level;
   private double targetHeight = 0.0;
@@ -69,18 +70,15 @@ public class AutoScoreCommand extends Command {
     this.timeoutTimer = new Timer();
 
     // Initialize controllers with constants
-    this.xController =
-        new ProfiledPIDController(
-            X_PID_P, 0, X_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
-    this.yController =
-        new ProfiledPIDController(
-            Y_PID_P, 0, Y_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
-    this.thetaController =
-        new ProfiledPIDController(
-            THETA_PID_P,
-            0,
-            THETA_PID_D,
-            new Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
+    this.xController = new ProfiledPIDController(
+        X_PID_P, 0.00, X_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
+    this.yController = new ProfiledPIDController(
+        Y_PID_P, 0.00, Y_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
+    this.thetaController = new ProfiledPIDController(
+        THETA_PID_P,
+        0,
+        THETA_PID_D,
+        new Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
     // Set up controllers
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -99,7 +97,7 @@ public class AutoScoreCommand extends Command {
    * Creates a new AutoScoreCommand with path following capability.
    *
    * @param level The scoring level to move to
-   * @param path The path to follow to the scoring position
+   * @param path  The path to follow to the scoring position
    */
   public AutoScoreCommand(ScoringLevel level, PathPlannerPath path) {
     this.addRequirements(CoralIntake.getInstance(), Elevator.getInstance(), Drive.getInstance());
@@ -113,21 +111,19 @@ public class AutoScoreCommand extends Command {
     if (Drive.getInstance().getCurrentCommand() != null) {
       Drive.getInstance().getCurrentCommand().cancel();
     }
-    RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+    // RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0,
+    // MetersPerSecond));
 
     // Initialize controllers with constants
-    this.xController =
-        new ProfiledPIDController(
-            X_PID_P, 0, X_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
-    this.yController =
-        new ProfiledPIDController(
-            Y_PID_P, 0, Y_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
-    this.thetaController =
-        new ProfiledPIDController(
-            THETA_PID_P,
-            0,
-            THETA_PID_D,
-            new Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
+    this.xController = new ProfiledPIDController(
+        X_PID_P, 0, X_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
+    this.yController = new ProfiledPIDController(
+        Y_PID_P, 0, Y_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
+    this.thetaController = new ProfiledPIDController(
+        THETA_PID_P,
+        0,
+        THETA_PID_D,
+        new Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
     // Set up controllers
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -140,21 +136,20 @@ public class AutoScoreCommand extends Command {
 
     // Safely get end pose from path
     if (path != null) {
-      this.endPose =
-          new Pose2d(
-              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                  ? path.getPathPoses()
-                      .get(path.getPathPoses().size() - 1)
-                      .getTranslation()
-                      .plus(new Translation2d(0.04, path.getGoalEndState().rotation()))
-                  : path.flipPath()
-                      .getPathPoses()
-                      .get(path.getPathPoses().size() - 1)
-                      .getTranslation()
-                      .plus(new Translation2d(0.04, path.flipPath().getGoalEndState().rotation())),
-              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                  ? path.getGoalEndState().rotation()
-                  : path.flipPath().getGoalEndState().rotation());
+      this.endPose = new Pose2d(
+          DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+              ? path.getPathPoses()
+                  .get(path.getPathPoses().size() - 1)
+                  .getTranslation()
+                  .plus(new Translation2d(0.04, path.getGoalEndState().rotation()))
+              : path.flipPath()
+                  .getPathPoses()
+                  .get(path.getPathPoses().size() - 1)
+                  .getTranslation()
+                  .plus(new Translation2d(0.04, path.flipPath().getGoalEndState().rotation())),
+          DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+              ? path.getGoalEndState().rotation()
+              : path.flipPath().getGoalEndState().rotation());
     } else {
       throw new IllegalArgumentException("Path must contain at least 3 poses");
     }
@@ -178,10 +173,10 @@ public class AutoScoreCommand extends Command {
         targetHeight = 15.5;
         break;
       case L2:
-        targetHeight = 22.45;
+        targetHeight = 21.3;
         break;
       case L3:
-        targetHeight = 33.28;
+        targetHeight = 32.68;
         break;
       case L4:
         targetHeight = 53.40;
@@ -203,7 +198,7 @@ public class AutoScoreCommand extends Command {
     xController.reset(Drive.getInstance().getPose().getX());
     yController.reset(Drive.getInstance().getPose().getY());
     thetaController.reset(Drive.getInstance().getPose().getRotation().getRadians());
-    Drive.getInstance().setLimeLightsActive(true);
+    Drive.getInstance().setSdMultiplier(8);
     // Reset command state
     tickCounter = 0;
     hasElevatorError = false;
@@ -218,6 +213,7 @@ public class AutoScoreCommand extends Command {
 
   @Override
   public void execute() {
+
     // Check for timeout
     if (timeoutTimer.get() > COMMAND_TIMEOUT) {
       this.cancel();
@@ -247,22 +243,23 @@ public class AutoScoreCommand extends Command {
   private void handlePathFollowing() {
     Pose2d currentPose = Drive.getInstance().getPose();
     double distanceToTarget = currentPose.getTranslation().getDistance(endPose.getTranslation());
-    double rotationError =
-        Math.abs(currentPose.getRotation().getRadians() - endPose.getRotation().getRadians());
+    double rotationError = Math.abs(currentPose.getRotation().getRadians() - endPose.getRotation().getRadians());
 
     if (distanceToTarget > POSITION_TOLERANCE
         || rotationError > Math.toRadians(ROTATION_TOLERANCE)) {
+      Logger.recordOutput("RealOutputs/x_error", xController.getPositionError());
+      Logger.recordOutput("RealOutputs/y_error", yController.getPositionError());
+      Logger.recordOutput("RealOutputs/theta_error", thetaController.getPositionError());
       // Move to target position
-      ChassisSpeeds speeds =
-          new ChassisSpeeds(
-              LinearVelocity.ofBaseUnits(
-                  xController.calculate(currentPose.getX(), endPose.getX()), MetersPerSecond),
-              LinearVelocity.ofBaseUnits(
-                  yController.calculate(currentPose.getY(), endPose.getY()), MetersPerSecond),
-              AngularVelocity.ofBaseUnits(
-                  thetaController.calculate(
-                      currentPose.getRotation().getRadians(), endPose.getRotation().getRadians()),
-                  RadiansPerSecond));
+      ChassisSpeeds speeds = new ChassisSpeeds(
+          LinearVelocity.ofBaseUnits(
+              xController.calculate(currentPose.getX(), endPose.getX()), MetersPerSecond),
+          LinearVelocity.ofBaseUnits(
+              yController.calculate(currentPose.getY(), endPose.getY()), MetersPerSecond),
+          AngularVelocity.ofBaseUnits(
+              thetaController.calculate(
+                  currentPose.getRotation().getRadians(), endPose.getRotation().getRadians()),
+              RadiansPerSecond));
       Drive.getInstance()
           .runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -291,11 +288,11 @@ public class AutoScoreCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     // Reset robot state
-    RobotContainer.coralIntakeCommand.setVelocity(
-        LinearVelocity.ofBaseUnits(DEFAULT_VELOCITY, MetersPerSecond));
+    // RobotContainer.coralIntakeCommand.setVelocity(
+    // LinearVelocity.ofBaseUnits(DEFAULT_VELOCITY, MetersPerSecond));
     Elevator.getInstance().goToHeight(0);
     Drive.getInstance().stop();
-    Drive.getInstance().setLimeLightsActive(true);
+    Drive.getInstance().setSdMultiplier(1);
 
     // Log any errors
     if (hasElevatorError) {

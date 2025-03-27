@@ -10,10 +10,14 @@ public class CoralIntakeCommand extends Command {
   private LinearVelocity velocity;
   private boolean eject;
 
+  public boolean isEject() {
+    return eject;
+  }
+
   public CoralIntakeCommand() {
     addRequirements(CoralIntake.getInstance());
     this.eject = false;
-    velocity = LinearVelocity.ofBaseUnits(4, MetersPerSecond);
+    velocity = LinearVelocity.ofBaseUnits(0, MetersPerSecond);
   }
 
   public CoralIntakeCommand(double velocityMPS) {
@@ -24,6 +28,13 @@ public class CoralIntakeCommand extends Command {
 
   @Override
   public void initialize() {
+    // if (CoralIntake.getInstance().getCurrentCommand() != null
+    // && CoralIntake.getInstance().getCurrentCommand() != this) {
+    // CoralIntake.getInstance().getCurrentCommand().cancel();
+    // }
+    if (CoralIntake.getInstance().hasCoral() && eject == false) {
+      velocity = LinearVelocity.ofBaseUnits(-0.01, MetersPerSecond);
+    }
     CoralIntake.getInstance().setVelocity(velocity);
   }
 
@@ -32,26 +43,27 @@ public class CoralIntakeCommand extends Command {
     if (eject) {
       CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(100, MetersPerSecond));
     } else if (velocity.baseUnitMagnitude() > 0) {
-      if (CoralIntake.getInstance().getSensor1() == false) {
-        if (CoralIntake.getInstance().getSensor3() == true) {
-          velocity = LinearVelocity.ofBaseUnits(10, MetersPerSecond);
+      if (!CoralIntake.getInstance().getSensor1()) {
+        if (!CoralIntake.getInstance().getSensor2()) {
+          CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(6, MetersPerSecond));
+        } else if (CoralIntake.getInstance().getSensor3()) {
           CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(10, MetersPerSecond));
         }
-      } else if (CoralIntake.getInstance().getSensor2() == false) {
-        velocity = LinearVelocity.ofBaseUnits(0, MetersPerSecond);
-        CoralIntake.getInstance().setVelocity(velocity);
-        this.cancel();
-      } else {
-        CoralIntake.getInstance().setVelocity(velocity);
+
+      } else if (!CoralIntake.getInstance().getSensor2()) {
+        CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
       }
-    } else {
+
+    } else if (CoralIntake.getInstance().getSensor2()) {
       CoralIntake.getInstance().setVelocity(velocity);
     }
   }
 
   @Override
   public void end(boolean interrupted) {
+    //
     CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+    // CoralIntake.getInstance().push(0);
   }
 
   @Override

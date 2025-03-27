@@ -55,8 +55,8 @@ import java.util.Queue;
 public class ModuleIOTalonFX implements ModuleIO {
   // Constants for drift mode
   private static final double DRIFT_CURRENT_LIMIT_STATOR =
-      60; // Higher current limit for more torque during drift
-  private static final double DRIFT_CURRENT_LIMIT_SUPPLY = 40; // Supply current limit
+      240; // Higher current limit for more torque during drift
+  private static final double DRIFT_CURRENT_LIMIT_SUPPLY = 100; // Supply current limit
 
   private final SwerveModuleConstants<
           TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
@@ -71,9 +71,11 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final boolean isFrontModule;
 
   // Voltage control requests
-  private final VoltageOut voltageRequest = new VoltageOut(0);
-  private final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
-  private final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0);
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
+  private final PositionVoltage positionVoltageRequest =
+      new PositionVoltage(0.0).withEnableFOC(true);
+  private final VelocityVoltage velocityVoltageRequest =
+      new VelocityVoltage(0.0).withEnableFOC(true);
 
   // Torque-current control requests
   private final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);
@@ -111,7 +113,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     this.constants = constants;
 
     // Determine if this is a front module based on location
-    this.isFrontModule = (constants.LocationY > 0);
+    this.isFrontModule = (constants.LocationY < 0);
 
     driveTalon = new TalonFX(constants.DriveMotorId, TunerConstants.DrivetrainConstants.CANBusName);
     turnTalon = new TalonFX(constants.SteerMotorId, TunerConstants.DrivetrainConstants.CANBusName);
@@ -119,6 +121,9 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // Configure drive motor
     var driveConfig = constants.DriveMotorInitialConfigs;
+    driveConfig.MotionMagic.MotionMagicAcceleration = 9999;
+    driveConfig.MotionMagic.MotionMagicCruiseVelocity = 9999;
+    driveConfig.MotionMagic.MotionMagicJerk = 9999;
     configureDriveMotor(driveConfig);
     tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig, 0.25));
     tryUntilOk(5, () -> driveTalon.setPosition(0.0, 0.25));

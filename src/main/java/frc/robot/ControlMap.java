@@ -49,13 +49,13 @@ public class ControlMap {
     // Coral Intake
     driver
         .R2()
-        .onTrue(
+        .whileTrue(
             new InstantCommand(
                 () -> {
                   if (CoralIntake.getInstance().hasCoral()) {
                     RobotContainer.coralIntakeCommand.setEject(true);
-                    if (Elevator.getInstance().getHeight() > 15
-                        && Elevator.getInstance().getHeight() < 16) {
+                    if (Elevator.getInstance().getHeight() > 14
+                        && Elevator.getInstance().getHeight() < 17) {
                       RobotContainer.coralIntakeCommand.setVelocity(
                           LinearVelocity.ofBaseUnits(20, MetersPerSecond));
                     } else {
@@ -85,17 +85,19 @@ public class ControlMap {
 
     driver
         .square()
-        .toggleOnTrue(
+        .whileTrue(
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
+                      LinearVelocity.ofBaseUnits(20, MetersPerSecond));
+                  RobotContainer.coralIntakeCommand.setEject(true);
                 }))
-        .toggleOnFalse(
+        .onFalse(
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
                       LinearVelocity.ofBaseUnits(4, MetersPerSecond));
+                  RobotContainer.coralIntakeCommand.setEject(false);
                 }));
     // Algae Intake
     driver
@@ -236,11 +238,10 @@ public class ControlMap {
             new Command() {
               @Override
               public void initialize() {
+                // this.addRequirements(
+                // CoralIntake.getInstance(), Drive.getInstance(), Elevator.getInstance());
                 if (Drive.getInstance().getCurrentCommand() != null) {
                   Drive.getInstance().getCurrentCommand().cancel();
-                }
-                if (CoralIntake.getInstance().getCurrentCommand() != null) {
-                  CoralIntake.getInstance().getCurrentCommand().cancel();
                 }
                 if (Elevator.getInstance().getCurrentCommand() != null) {
                   Elevator.getInstance().getCurrentCommand().cancel();
@@ -254,13 +255,6 @@ public class ControlMap {
               public void end(boolean interrupted) {
                 NetworkCommunicator.getInstance().getTeleopCommand().cancel();
                 Elevator.getInstance().goToHeight(0);
-                if (CoralIntake.getInstance().hasCoral()) {
-                  CoralIntake.getInstance()
-                      .setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
-                } else {
-                  CoralIntake.getInstance()
-                      .setVelocity(LinearVelocity.ofBaseUnits(4, MetersPerSecond));
-                }
                 Drive.getInstance().stop();
                 if (Drive.getInstance().getCurrentCommand() != null) {
                   Drive.getInstance().getCurrentCommand().cancel();

@@ -167,8 +167,8 @@ public class IntakeIOTalonFX implements IntakeIO {
   }
 
   public void push(double rotations) {
-    intakeConfig.MotionMagic.MotionMagicCruiseVelocity = 20;
-    intakeConfig.MotionMagic.MotionMagicAcceleration = 9999;
+    intakeConfig.MotionMagic.MotionMagicCruiseVelocity = 70;
+    intakeConfig.MotionMagic.MotionMagicAcceleration = 400;
     intakeMotor.getConfigurator().apply(intakeConfig);
     intakeMotor.setPosition(0);
     intakePositionController.Position = rotations;

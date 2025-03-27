@@ -27,7 +27,8 @@ public class NetworkCommunicator {
   private HashMap<String, PathPlannerPath> paths;
   private boolean isAuto;
 
-  private NetworkCommunicator() {}
+  private NetworkCommunicator() {
+  }
 
   public static NetworkCommunicator getInstance() {
     if (instance == null) {
@@ -120,7 +121,8 @@ public class NetworkCommunicator {
       return ScoringLevel.L3;
     } else if (teleopSubHeight.get() == 4) {
       return ScoringLevel.L4;
-    } else return ScoringLevel.L0;
+    } else
+      return ScoringLevel.L0;
   }
 
   public TeleopCommand teleopCommand;
@@ -142,23 +144,20 @@ public class NetworkCommunicator {
       auto = auto.andThen(new RaiseElevatorCommand(ScoringLevel.L0));
       for (int i = 0; i < autoCommands.length; i++) {
         if (autoCommands[i].charAt(0) == 'S') {
-          auto =
-              auto.andThen(
-                  AutoBuilder.pathfindThenFollowPath(
-                      paths.get(autoCommands[i]), Drive.PP_CONSTRAINTS));
-          auto =
-              auto.andThen(
-                  new CoralIntakeCommand(6).onlyWhile(CoralIntake.getInstance()::getSensor3));
+          auto = auto.andThen(
+              AutoBuilder.pathfindThenFollowPath(
+                  paths.get(autoCommands[i]), Drive.PP_CONSTRAINTS));
+          auto = auto.andThen(
+              new CoralIntakeCommand(6).until(() -> !CoralIntake.getInstance().getSensor1()));
         } else {
-          auto =
-              auto.andThen(
-                  new ParallelCommandGroup(
-                      AutoBuilder.pathfindThenFollowPath(
-                          paths.get("" + (char) (autoCommands[i].charAt(0))), Drive.PP_CONSTRAINTS),
-                      i == 0
-                          ? new RaiseElevatorCommand(ScoringLevel.L1)
-                          : new CoralIntakeCommand(6)
-                              .andThen(new RaiseElevatorCommand(ScoringLevel.L1))));
+          auto = auto.andThen(
+              new ParallelCommandGroup(
+                  AutoBuilder.pathfindThenFollowPath(
+                      paths.get("" + (char) (autoCommands[i].charAt(0))), Drive.PP_CONSTRAINTS),
+                  i == 0
+                      ? new RaiseElevatorCommand(ScoringLevel.L1)
+                      : new CoralIntakeCommand(6)
+                          .andThen(new RaiseElevatorCommand(ScoringLevel.L1))));
           if (autoCommands[i].charAt(2) == '1') {
             level = ScoringLevel.L1;
           } else if (autoCommands[i].charAt(2) == '2') {
@@ -168,10 +167,10 @@ public class NetworkCommunicator {
           } else if (autoCommands[i].charAt(2) == '4') {
             level = ScoringLevel.L4;
           }
-          auto = auto.andThen(new Command() {}.withTimeout(0.1));
-          auto =
-              auto.andThen(
-                  new AutoScoreCommand(level, paths.get("" + (char) (autoCommands[i].charAt(0)))));
+          auto = auto.andThen(new Command() {
+          }.withTimeout(0.1));
+          auto = auto.andThen(
+              new AutoScoreCommand(level, paths.get("" + (char) (autoCommands[i].charAt(0)))));
         }
       }
       return auto;
