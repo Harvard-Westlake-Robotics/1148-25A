@@ -39,7 +39,7 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Elevator", inputs);
-    if (!dio.get()) {
+    if (!dio.get() && inputs.elevator1PositionMeters >= 0.05) {
       io.zeroMotors();
     }
   }
@@ -78,5 +78,9 @@ public class Elevator extends SubsystemBase {
   /** Returns a command to run a dynamic test in the specified direction. */
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
+  }
+
+  public double getTarget() {
+    return io.getTarget();
   }
 }

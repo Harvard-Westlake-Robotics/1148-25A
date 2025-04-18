@@ -49,12 +49,20 @@ public class CoralIntake extends SubsystemBase {
   }
 
   public void periodic() {
+    Logger.recordOutput("Sensor 1", getSensor1());
+    Logger.recordOutput("Sensor 2", getSensor2());
+    Logger.recordOutput("Sensor 3", getSensor3());
     io.updateInputs(inputs);
     Logger.processInputs(key, inputs);
-    if (!getSensor2()) {
+    if (!getSensor2() && getSensor1()) {
       hasCoral = true;
     } else {
       hasCoral = false;
+    }
+    if (frc.robot.subsystems.elevator.Elevator.getInstance().getTarget() == 19.32
+        || frc.robot.subsystems.elevator.Elevator.getInstance().getTarget() == 7.80) {
+      RobotContainer.coralIntakeCommand.setVelocity(
+          LinearVelocity.ofBaseUnits(17, MetersPerSecond));
     }
     if (!hasCoral && !RobotContainer.coralIntakeCommand.isEject()) {
       RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(6, MetersPerSecond));

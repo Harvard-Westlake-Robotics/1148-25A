@@ -121,6 +121,28 @@ public class LimeLightCam extends BaseCam {
                 .ambiguity)); // Probably not the best but good enough for now
   }
 
+  public Optional<AprilTagResult> getEstimateMT2() {
+    if (runNeuralNetwork) {
+      return Optional.empty();
+    }
+    LimelightHelpers.PoseEstimate latestEstimate;
+    latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
+
+    if (latestEstimate == null) return Optional.empty();
+
+    if (latestEstimate.tagCount == 0) return Optional.empty();
+
+    return Optional.of(
+        new AprilTagResult(
+            latestEstimate.pose,
+            latestEstimate.timestampSeconds,
+            latestEstimate.avgTagDist,
+            latestEstimate.tagCount,
+            latestEstimate
+                .rawFiducials[0]
+                .ambiguity)); // Probably not the best but good enough for now
+  }
+
   public Optional<NeuralDetectorResult[]> getDetections() {
     if (!runNeuralNetwork) {
       return Optional.empty();

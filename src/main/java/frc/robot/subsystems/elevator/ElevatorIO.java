@@ -33,4 +33,8 @@ public interface ElevatorIO {
   public default void setHeightClosedLoopOverride(double velocity) {}
 
   public default void runCharacterization(double voltage) {}
+
+  public default double getTarget() {
+    return 0.0;
+  }
 }

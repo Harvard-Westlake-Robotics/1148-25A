@@ -181,4 +181,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator1.setPosition(0);
     elevator2.setPosition(0);
   }
+
+  public double getTarget() {
+    return elevatorController.Position;
+  }
 }

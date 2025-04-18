@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.GroundIntakeCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.NetworkCommunicator;
@@ -96,24 +97,36 @@ public class ControlMap {
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(4, MetersPerSecond));
+                      LinearVelocity.ofBaseUnits(6, MetersPerSecond));
+                  RobotContainer.coralIntakeCommand.setEject(false);
+                }));
+    operator
+        .povRight()
+        .whileTrue(
+            new InstantCommand(
+                () -> {
+                  RobotContainer.coralIntakeCommand.setVelocity(
+                      LinearVelocity.ofBaseUnits(20, MetersPerSecond));
+                  RobotContainer.coralIntakeCommand.setEject(true);
+                }))
+        .onFalse(
+            new InstantCommand(
+                () -> {
+                  RobotContainer.coralIntakeCommand.setVelocity(
+                      LinearVelocity.ofBaseUnits(6, MetersPerSecond));
                   RobotContainer.coralIntakeCommand.setEject(false);
                 }));
     // Algae Intake
     driver
         .L1()
-        .onTrue(
-            new InstantCommand(
-                () -> {
-                  RobotContainer.algaeIntakeCommand.index();
-                  RobotContainer.algaeIntakeCommand.buttonPressed = true;
-                }))
-        .onFalse(
-            new InstantCommand(
-                () -> {
-                  RobotContainer.algaeIntakeCommand.buttonPressed = false;
-                  RobotContainer.algaeIntakeCommand.buttonPressed = false;
-                }));
+        .whileTrue(new GroundIntakeCommand(LinearVelocity.ofBaseUnits(6.5, MetersPerSecond)));
+
+    driver
+        .povUp()
+        .whileTrue(new GroundIntakeCommand(LinearVelocity.ofBaseUnits(-6.5, MetersPerSecond)));
+    driver
+        .povLeft()
+        .whileTrue(new GroundIntakeCommand(LinearVelocity.ofBaseUnits(-4, MetersPerSecond)));
     // Elevator
 
     driver
@@ -124,7 +137,7 @@ public class ControlMap {
                   if (Elevator.getInstance().getHeight() > 1) {
                     RobotContainer.elevatorCommand.setHeight(ScoringLevel.L0);
                   } else {
-                    RobotContainer.elevatorCommand.setHeight(ScoringLevel.L1);
+                    RobotContainer.elevatorCommand.setHeight(ScoringLevel.L4);
                   }
                   // a way to recieve selected
                   // scoring level

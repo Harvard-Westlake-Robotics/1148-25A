@@ -13,9 +13,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -25,11 +28,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.AlgaeIntakeCommand;
 import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.CoralIntakeCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.GroundIntakeCommand;
 import frc.robot.commands.RaiseElevatorCommand;
 import frc.robot.commands.ScoreCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
@@ -50,12 +53,9 @@ import frc.robot.subsystems.wrist.Climb;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
- * the robot (including
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
@@ -82,7 +82,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> preAutoChooser;
 
   public static ScoreCommand elevatorCommand = new ScoreCommand(ScoringLevel.L0);
-  public static AlgaeIntakeCommand algaeIntakeCommand;
+  public static GroundIntakeCommand algaeIntakeCommand;
   public static CoralIntakeCommand coralIntakeCommand;
   public static ClimbCommand hangCommand;
 
@@ -94,67 +94,62 @@ public class RobotContainer {
     Integer.parseInt(motorSerialString);
   }
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        drive = new Drive(
-            new GyroIOPigeon2(),
-            new ModuleIOTalonFX(TunerConstants.FrontLeft),
-            new ModuleIOTalonFX(TunerConstants.FrontRight),
-            new ModuleIOTalonFX(TunerConstants.BackLeft),
-            new ModuleIOTalonFX(TunerConstants.BackRight));
+        drive =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
         this.intakeWrist = AlgaeWrist.getInstance();
         this.hangWrist = Climb.getInstance();
-        algaeIntakeCommand = new AlgaeIntakeCommand();
+        algaeIntakeCommand = new GroundIntakeCommand();
         coralIntakeCommand = new CoralIntakeCommand();
         hangCommand = new ClimbCommand();
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
-        drive = new Drive(
-            new GyroIO() {
-            },
-            new ModuleIOSim(TunerConstants.FrontLeft),
-            new ModuleIOSim(TunerConstants.FrontRight),
-            new ModuleIOSim(TunerConstants.BackLeft),
-            new ModuleIOSim(TunerConstants.BackRight));
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
         this.intakeWrist = AlgaeWrist.getInstance();
         this.hangWrist = Climb.getInstance();
-        algaeIntakeCommand = new AlgaeIntakeCommand();
+        algaeIntakeCommand = new GroundIntakeCommand();
         coralIntakeCommand = new CoralIntakeCommand();
         hangCommand = new ClimbCommand();
         break;
 
       default:
         // Replayed robot, disable IO implementations
-        drive = new Drive(
-            new GyroIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            });
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
         this.intakeWrist = AlgaeWrist.getInstance();
         this.hangWrist = Climb.getInstance();
-        algaeIntakeCommand = new AlgaeIntakeCommand();
+        algaeIntakeCommand = new GroundIntakeCommand();
         coralIntakeCommand = new CoralIntakeCommand();
         hangCommand = new ClimbCommand();
         break;
@@ -212,22 +207,21 @@ public class RobotContainer {
     preAutoChooser.addDefaultOption("None", Commands.none());
     preAutoChooser.addOption("Push", AutoBuilder.followPath(pathfindL));
     SmartDashboard.putData("Pre Auto Chooser", preAutoChooser.getSendableChooser());
-    Command stowCommand = new Command() {
-      @Override
-      public void initialize() {
-        hangCommand.stow();
-      }
-    };
+    Command stowCommand =
+        new Command() {
+          @Override
+          public void initialize() {
+            hangCommand.stow();
+          }
+        };
     stowCommand.runsWhenDisabled();
     SmartDashboard.putData("Stow Hang", stowCommand.withTimeout(0.1));
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be
-   * created by
+   * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
-   * it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
@@ -237,9 +231,9 @@ public class RobotContainer {
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
     elevatorCommand = new ScoreCommand(ScoringLevel.L0);
     elevator.setDefaultCommand(elevatorCommand);
-    coralIntakeCommand = new CoralIntakeCommand(6);
+    coralIntakeCommand = new CoralIntakeCommand(10);
     coralIntake.setDefaultCommand(coralIntakeCommand);
-    algaeIntakeCommand = new AlgaeIntakeCommand();
+    algaeIntakeCommand = new GroundIntakeCommand(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
     algaeIntake.setDefaultCommand(algaeIntakeCommand);
     hangCommand = new ClimbCommand();
     hangWrist.setDefaultCommand(hangCommand);
@@ -256,8 +250,11 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return preAutoChooser.get().andThen(new Command() {
-    }.withTimeout(0.3)
-        .andThen(NetworkCommunicator.getInstance().getCustomAuto()));
+    // return autoChooser.get();
+    return preAutoChooser
+        .get()
+        .andThen(
+            new Command() {}.withTimeout(0.3)
+                .andThen(NetworkCommunicator.getInstance().getCustomAuto()));
   }
 }

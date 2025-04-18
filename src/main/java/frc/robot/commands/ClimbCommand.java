@@ -8,7 +8,7 @@ public class ClimbCommand extends Command {
   private boolean deploy;
   private boolean climbDown;
   private double climbAngle = 120 * 5;
-  private double zeroAngle = 450 - 270 - 30;
+  private double zeroAngle = 250;
   private double stowAngle = 90 * 5;
   private boolean hasDeployed = false;
 
@@ -33,7 +33,7 @@ public class ClimbCommand extends Command {
     } else {
       climbAngle = 93.5 * 5;
       stowAngle = 90 * 5;
-      zeroAngle = 25 * 5 - 30;
+      zeroAngle = 250;
     }
 
     if (climbDown) {
@@ -54,16 +54,14 @@ public class ClimbCommand extends Command {
   }
 
   @Override
-  public void end(boolean interrupted) {
-  }
+  public void end(boolean interrupted) {}
 
   public void deploy() {
     deploy = true;
   }
 
   public void climb() {
-    if (hasDeployed)
-      climbDown = true;
+    if (hasDeployed) climbDown = true;
   }
 
   public void incrementClimb() {
