@@ -509,6 +509,7 @@ public class Drive extends SubsystemBase {
     }
   }
 
+  // Resets the variance for everything
   private void resetVarianceLimits() {
     X_MT1_VARIENCE_MAX = 0;
     X_MT1_VARIENCE_MIN = 0;
