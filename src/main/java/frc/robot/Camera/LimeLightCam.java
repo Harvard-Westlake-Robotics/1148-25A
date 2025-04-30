@@ -100,7 +100,7 @@ public class LimeLightCam extends BaseCam {
       return Optional.empty();
     }
     LimelightHelpers.PoseEstimate latestEstimate;
-    if (!useMegaTag2 || DriverStation.isDisabled()) {
+    if (DriverStation.isDisabled()) {
       latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
     } else {
       latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
