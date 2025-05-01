@@ -210,19 +210,6 @@ public class Drive extends SubsystemBase {
   private static final double REEF_CENTER_RADIUS = 1.1721;
   private static final double ELEVATOR_ANGLE_DEGREES = 40.0;
 
-  private static double X_MT1_VARIENCE_MAX = 0;
-  private static double X_MT1_VARIENCE_MIN = 0;
-  private static double X_MT2_VARIENCE_MAX = 0;
-  private static double X_MT2_VARIENCE_MIN = 0;
-  private static double Y_MT1_VARIENCE_MAX = 0;
-  private static double Y_MT1_VARIENCE_MIN = 0;
-  private static double Y_MT2_VARIENCE_MAX = 0;
-  private static double Y_MT2_VARIENCE_MIN = 0;
-  private static double T_MT1_VARIENCE_MAX = 0;
-  private static double T_MT1_VARIENCE_MIN = 0;
-  private static double T_MT2_VARIENCE_MAX = 0;
-  private static double T_MT2_VARIENCE_MIN = 0;
-
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -365,72 +352,69 @@ public class Drive extends SubsystemBase {
       // if (result_c != null) Logger.recordOutput("RealOutputs/apriltagResultC",
       // result_c.pose);
 
-      AprilTagResult result_a_MT2 = limelight_a.getEstimate().orElse(null);
-      if (result_a_MT2 != null) {
-        Logger.recordOutput("RealOutputs/apriltagResultA", result_a_MT2.pose);
-        logVariance(result_a_MT2, "aprilTagResultA");
+      AprilTagResult result_a = limelight_a.getEstimate().orElse(null);
+      if (result_a != null) {
+        Logger.recordOutput("RealOutputs/apriltagResultA", result_a.pose);
       }
-      AprilTagResult result_b_MT2 = limelight_b.getEstimate().orElse(null);
-      if (result_b_MT2 != null) {
-        Logger.recordOutput("RealOutputs/apriltagResultB", result_b_MT2.pose);
-        // logVariance(result_b_MT2, "aprilTagResultB");
+      AprilTagResult result_b = limelight_b.getEstimate().orElse(null);
+      if (result_b != null) {
+        Logger.recordOutput("RealOutputs/apriltagResultB", result_b.pose);
       }
-      AprilTagResult result_c_MT2 = limelight_c.getEstimate().orElse(null);
-      if (result_c_MT2 != null) {
-        Logger.recordOutput("RealOutputs/apriltagResultC", result_c_MT2.pose);
-        // logVariance(result_c_MT2, "aprilTagResultC");
+      AprilTagResult result_c = limelight_c.getEstimate().orElse(null);
+      if (result_c != null) {
+        Logger.recordOutput("RealOutputs/apriltagResultC", result_c.pose);
       }
-      if (result_a_MT2 != null && !shouldRejectPose(result_a_MT2) && limeLightsActive) {
+      if (result_a != null && !shouldRejectPose(result_a) && limeLightsActive) {
         xyStdDev =
             xyStdDevCoeff
-                * Math.max(Math.pow(result_a_MT2.distToTag, 2.0), 0.5)
-                / result_a_MT2.tagCount
-                * Math.sqrt(result_a_MT2.ambiguity)
+                * Math.max(Math.pow(result_a.distToTag, 2.0), 0.5)
+                / result_a.tagCount
+                * Math.sqrt(result_a.ambiguity)
                 * sdMultiplier;
         rStdDev =
             rStdDevCoeff
-                * Math.max(Math.pow(result_a_MT2.distToTag, 2.0), 0.5)
-                / result_a_MT2.tagCount
-                * Math.sqrt(result_a_MT2.ambiguity)
+                * Math.max(Math.pow(result_a.distToTag, 2.0), 0.5)
+                / result_a.tagCount
+                * Math.sqrt(result_a.ambiguity)
                 * sdMultiplier;
 
         addVisionMeasurement(
-            result_a_MT2.pose, result_a_MT2.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
+            result_a.pose, result_a.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
 
-        if (result_b_MT2 != null && !shouldRejectPose(result_b_MT2) && limeLightsActive) {
+        if (result_b != null && !shouldRejectPose(result_b) && limeLightsActive) {
           xyStdDev =
               xyStdDevCoeff
-                  * Math.max(Math.pow(result_b_MT2.distToTag, 2.0), 0.5)
-                  / result_b_MT2.tagCount
-                  * Math.sqrt(result_b_MT2.ambiguity)
+                  * Math.max(Math.pow(result_b.distToTag, 2.0), 0.5)
+                  / result_b.tagCount
+                  * Math.sqrt(result_b.ambiguity)
                   * sdMultiplier;
           rStdDev =
               rStdDevCoeff
-                  * Math.max(Math.pow(result_b_MT2.distToTag, 2.0), 0.5)
-                  / result_b_MT2.tagCount
-                  * Math.sqrt(result_b_MT2.ambiguity)
+                  * Math.max(Math.pow(result_b.distToTag, 2.0), 0.5)
+                  / result_b.tagCount
+                  * Math.sqrt(result_b.ambiguity)
                   * sdMultiplier;
 
           addVisionMeasurement(
-              result_b_MT2.pose, result_b_MT2.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
+              result_b.pose, result_b.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
         }
 
-        if (result_c_MT2 != null && !shouldRejectPose(result_c_MT2) && limeLightsActive) {
+        if (result_c != null && !shouldRejectPose(result_c) && limeLightsActive) {
           xyStdDev =
               xyStdDevCoeff
-                  * Math.max(Math.pow(result_c_MT2.distToTag, 2.0), 0.5)
-                  / result_c_MT2.tagCount
-                  * Math.sqrt(result_c_MT2.ambiguity)
+                  * Math.max(Math.pow(result_c.distToTag, 2.0), 0.5)
+                  / result_c.tagCount
+                  * Math.sqrt(result_c.ambiguity)
                   * sdMultiplier;
           rStdDev =
               rStdDevCoeff
-                  * Math.max(Math.pow(result_c_MT2.distToTag, 2.0), 0.5)
-                  / result_c_MT2.tagCount
-                  * Math.sqrt(result_c_MT2.ambiguity)
+                  * Math.max(Math.pow(result_c.distToTag, 2.0), 0.5)
+                  / result_c.tagCount
+                  * Math.sqrt(result_c.ambiguity)
                   * sdMultiplier;
 
           addVisionMeasurement(
-              result_c_MT2.pose, result_c_MT2.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
+              result_c.pose, result_c.time, VecBuilder.fill(xyStdDev, xyStdDev, rStdDev));
         }
       }
 
@@ -439,111 +423,6 @@ public class Drive extends SubsystemBase {
 
       updateDashboardValues();
     }
-  }
-
-  // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight
-  private void logVariance(AprilTagResult limelightResult, String limelightName) {
-    if (limelightResult != null) {
-      if (DriverStation.isDisabled()) {
-        if (limelightResult.pose.getX() > X_MT1_VARIENCE_MAX) {
-          X_MT1_VARIENCE_MAX = limelightResult.pose.getX();
-        }
-        if (limelightResult.pose.getX() < X_MT1_VARIENCE_MIN) {
-          X_MT1_VARIENCE_MIN = limelightResult.pose.getX();
-        }
-        if (limelightResult.pose.getY() > Y_MT1_VARIENCE_MAX) {
-          Y_MT1_VARIENCE_MAX = limelightResult.pose.getY();
-        }
-        if (limelightResult.pose.getY() < Y_MT1_VARIENCE_MIN) {
-          Y_MT1_VARIENCE_MIN = limelightResult.pose.getY();
-        }
-        if (limelightResult.pose.getRotation().getRadians() > T_MT1_VARIENCE_MAX) {
-          T_MT1_VARIENCE_MAX = limelightResult.pose.getRotation().getRadians();
-        }
-        if (limelightResult.pose.getRotation().getRadians() < T_MT1_VARIENCE_MIN) {
-          T_MT1_VARIENCE_MIN = limelightResult.pose.getRotation().getRadians();
-        }
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT1/XVarience",
-            X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN);
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT1/XStdDev",
-            Math.sqrt(X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN));
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT1/YVarience",
-            Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN);
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT1/YStdDev",
-            Math.sqrt(Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN));
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT1/AngleVarience",
-            T_MT1_VARIENCE_MAX - T_MT1_VARIENCE_MIN);
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT1/AngleStdDev",
-            Math.sqrt(T_MT1_VARIENCE_MAX - T_MT1_VARIENCE_MIN));
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT1/ambiguity", limelightResult.ambiguity);
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT1/tagDistance", limelightResult.distToTag);
-      } else {
-        if (limelightResult.pose.getX() > X_MT2_VARIENCE_MAX) {
-          X_MT2_VARIENCE_MAX = limelightResult.pose.getX();
-        }
-        if (limelightResult.pose.getX() < X_MT2_VARIENCE_MIN) {
-          X_MT2_VARIENCE_MIN = limelightResult.pose.getX();
-        }
-        if (limelightResult.pose.getX() > Y_MT2_VARIENCE_MAX) {
-          Y_MT2_VARIENCE_MAX = limelightResult.pose.getY();
-        }
-        if (limelightResult.pose.getY() < Y_MT2_VARIENCE_MIN) {
-          Y_MT2_VARIENCE_MIN = limelightResult.pose.getY();
-        }
-        if (limelightResult.pose.getRotation().getRadians() > T_MT2_VARIENCE_MAX) {
-          T_MT2_VARIENCE_MAX = limelightResult.pose.getRotation().getRadians();
-        }
-        if (limelightResult.pose.getRotation().getRadians() < T_MT2_VARIENCE_MIN) {
-          T_MT2_VARIENCE_MIN = limelightResult.pose.getRotation().getRadians();
-        }
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT2/XVarience",
-            X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN);
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT2/XStdDev",
-            Math.sqrt(X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN));
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT2/YVarience",
-            Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN);
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT2/YStdDev",
-            Math.sqrt(Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN));
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT2/AngleVarience",
-            T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN);
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT2/AngleStdDev",
-            Math.sqrt(T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN));
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT2/ambiguity", limelightResult.ambiguity);
-        Logger.recordOutput(
-            "RealOutputs/" + limelightName + "/MT2/tagDistance", limelightResult.distToTag);
-      }
-    }
-  }
-
-  // Resets the variance for everything
-  private void resetVarianceLimits() {
-    X_MT1_VARIENCE_MAX = 0;
-    X_MT1_VARIENCE_MIN = 0;
-    X_MT2_VARIENCE_MAX = 0;
-    X_MT2_VARIENCE_MIN = 0;
-    Y_MT1_VARIENCE_MAX = 0;
-    Y_MT1_VARIENCE_MIN = 0;
-    Y_MT2_VARIENCE_MAX = 0;
-    Y_MT2_VARIENCE_MIN = 0;
-    T_MT1_VARIENCE_MAX = 0;
-    T_MT1_VARIENCE_MIN = 0;
-    T_MT2_VARIENCE_MAX = 0;
-    T_MT2_VARIENCE_MIN = 0;
   }
 
   /** Updates dashboard values for tuning. */
