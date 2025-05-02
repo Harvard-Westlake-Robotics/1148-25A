@@ -7,7 +7,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Camera.BaseCam.NeuralDetectorResult;
 import java.util.Optional;
-
 import org.littletonrobotics.junction.Logger;
 
 /* Maybe in future remove limelightHelpers Dependency,
@@ -42,6 +41,22 @@ public class LimeLightCam extends BaseCam {
     this.useMegaTag2 = useMegaTag2;
   }
 
+  // Resets the variance for everything
+  public void resetVarience(){
+      X_MT1_VARIENCE_MAX = Integer.MIN_VALUE;
+      X_MT1_VARIENCE_MIN = Integer.MAX_VALUE;
+      X_MT2_VARIENCE_MAX = Integer.MIN_VALUE;
+      X_MT2_VARIENCE_MIN = Integer.MAX_VALUE;
+      Y_MT1_VARIENCE_MAX = Integer.MIN_VALUE;
+      Y_MT1_VARIENCE_MIN = Integer.MAX_VALUE;
+      Y_MT2_VARIENCE_MAX = Integer.MIN_VALUE;
+      Y_MT2_VARIENCE_MIN = Integer.MAX_VALUE;
+      T_MT1_VARIENCE_MAX = Integer.MIN_VALUE;
+      T_MT1_VARIENCE_MIN = Integer.MAX_VALUE;
+      T_MT2_VARIENCE_MAX = Integer.MIN_VALUE;
+      T_MT2_VARIENCE_MIN = Integer.MAX_VALUE;
+  }
+
   private boolean runNeuralNetwork = false;
 
   public LimeLightCam(String name, int[] TagsToCheck, boolean useMegaTag2) {
@@ -53,21 +68,9 @@ public class LimeLightCam extends BaseCam {
 
     for (int port = 5800; port <= 5809; port++) {
       PortForwarder.add(port + 10 * LimeLightCount, String.format("%s.local", this.name), port);
+    }
 
-    // Resets the variance for everything
-    X_MT1_VARIENCE_MAX = 0;
-    X_MT1_VARIENCE_MIN = 0;
-    X_MT2_VARIENCE_MAX = 0;
-    X_MT2_VARIENCE_MIN = 0;
-    Y_MT1_VARIENCE_MAX = 0;
-    Y_MT1_VARIENCE_MIN = 0;
-    Y_MT2_VARIENCE_MAX = 0;
-    Y_MT2_VARIENCE_MIN = 0;
-    T_MT1_VARIENCE_MAX = 0;
-    T_MT1_VARIENCE_MIN = 0;
-    T_MT2_VARIENCE_MAX = 0;
-    T_MT2_VARIENCE_MIN = 0;
-  }
+    resetVarience();
 
     _ntTable = NetworkTableInstance.getDefault().getTable(name);
 
@@ -84,37 +87,13 @@ public class LimeLightCam extends BaseCam {
   public LimeLightCam(String name) {
     this(name, new int[] {}, false);
 
-    // Resets the variance for everything
-    X_MT1_VARIENCE_MAX = 0;
-    X_MT1_VARIENCE_MIN = 0;
-    X_MT2_VARIENCE_MAX = 0;
-    X_MT2_VARIENCE_MIN = 0;
-    Y_MT1_VARIENCE_MAX = 0;
-    Y_MT1_VARIENCE_MIN = 0;
-    Y_MT2_VARIENCE_MAX = 0;
-    Y_MT2_VARIENCE_MIN = 0;
-    T_MT1_VARIENCE_MAX = 0;
-    T_MT1_VARIENCE_MIN = 0;
-    T_MT2_VARIENCE_MAX = 0;
-    T_MT2_VARIENCE_MIN = 0;
+    resetVarience();
   }
 
   public LimeLightCam(String name, boolean useMegaTag2) {
     this(name, new int[] {}, useMegaTag2);
 
-    // Resets the variance for everything
-    X_MT1_VARIENCE_MAX = 0;
-    X_MT1_VARIENCE_MIN = 0;
-    X_MT2_VARIENCE_MAX = 0;
-    X_MT2_VARIENCE_MIN = 0;
-    Y_MT1_VARIENCE_MAX = 0;
-    Y_MT1_VARIENCE_MIN = 0;
-    Y_MT2_VARIENCE_MAX = 0;
-    Y_MT2_VARIENCE_MIN = 0;
-    T_MT1_VARIENCE_MAX = 0;
-    T_MT1_VARIENCE_MIN = 0;
-    T_MT2_VARIENCE_MAX = 0;
-    T_MT2_VARIENCE_MIN = 0;
+    resetVarience();
   }
 
   public void setNeuralNetwork(boolean running) {
@@ -187,29 +166,21 @@ public class LimeLightCam extends BaseCam {
       T_MT1_VARIENCE_MIN = latestEstimate.pose.getRotation().getRadians();
     }
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/XVarience",
-        X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN);
+        "RealOutputs/" + name + "/MT1/XVarience", X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN);
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/XStdDev",
-        Math.sqrt(X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN));
+        "RealOutputs/" + name + "/MT1/XStdDev", Math.sqrt(X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN));
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/YVarience",
-        Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN);
+        "RealOutputs/" + name + "/MT1/YVarience", Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN);
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/YStdDev",
-        Math.sqrt(Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN));
+        "RealOutputs/" + name + "/MT1/YStdDev", Math.sqrt(Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN));
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/AngleVarience",
-        T_MT1_VARIENCE_MAX - T_MT1_VARIENCE_MIN);
+        "RealOutputs/" + name + "/MT1/AngleVarience", T_MT1_VARIENCE_MAX - T_MT1_VARIENCE_MIN);
     Logger.recordOutput(
         "RealOutputs/" + name + "/MT1/AngleStdDev",
         Math.sqrt(T_MT1_VARIENCE_MAX - T_MT1_VARIENCE_MIN));
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/ambiguity", latestEstimate
-        .rawFiducials[0]
-        .ambiguity);
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/tagDistance", latestEstimate.avgTagDist);
+        "RealOutputs/" + name + "/MT1/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
+    Logger.recordOutput("RealOutputs/" + name + "/MT1/tagDistance", latestEstimate.avgTagDist);
 
     return Optional.of(
         new AprilTagResult(
@@ -253,27 +224,21 @@ public class LimeLightCam extends BaseCam {
       T_MT2_VARIENCE_MIN = latestEstimate.pose.getRotation().getRadians();
     }
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/XVarience",
-        X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN);
+        "RealOutputs/" + name + "/MT2/XVarience", X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN);
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/XStdDev",
-        Math.sqrt(X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN));
+        "RealOutputs/" + name + "/MT2/XStdDev", Math.sqrt(X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN));
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/YVarience",
-        Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN);
+        "RealOutputs/" + name + "/MT2/YVarience", Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN);
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/YStdDev",
-        Math.sqrt(Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN));
+        "RealOutputs/" + name + "/MT2/YStdDev", Math.sqrt(Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN));
     Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/AngleVarience",
-        T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN);
+        "RealOutputs/" + name + "/MT2/AngleVarience", T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN);
     Logger.recordOutput(
         "RealOutputs/" + name + "/MT2/AngleStdDev",
         Math.sqrt(T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN));
     Logger.recordOutput(
         "RealOutputs/" + name + "/MT2/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/tagDistance", latestEstimate.avgTagDist);
+    Logger.recordOutput("RealOutputs/" + name + "/MT2/tagDistance", latestEstimate.avgTagDist);
 
     return Optional.of(
         new AprilTagResult(
