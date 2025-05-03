@@ -352,6 +352,9 @@ public class Drive extends SubsystemBase {
       // if (result_c != null) Logger.recordOutput("RealOutputs/apriltagResultC",
       // result_c.pose);
 
+      Logger.recordOutput("Odometry/Velocity/LinearVelocity", getLinearVelocity());
+      Logger.recordOutput("Odometry/Velocity/AngularVelocity", getAngularVelocity());
+
       AprilTagResult result_a = limelight_a.getEstimate().orElse(null);
       if (result_a != null) {
         Logger.recordOutput("RealOutputs/apriltagResultA", result_a.pose);
@@ -840,6 +843,17 @@ public class Drive extends SubsystemBase {
     };
   }
 
+  private double getLinearVelocity() {
+    ChassisSpeeds speeds = getChassisSpeeds();
+    double linearSpeed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    return linearSpeed;
+  }
+
+  private double getAngularVelocity() {
+    double angularVelocity = gyroInputs.yawVelocityRadPerSec;
+    return Units.degreesToRadians(angularVelocity);
+  }
+
   /**
    * Determines if a vision pose should be rejected based on various criteria.
    *
@@ -887,13 +901,6 @@ public class Drive extends SubsystemBase {
         || pose.getX() > FIELD_WIDTH_METERS + FIELD_BORDER_MARGIN_METERS
         || pose.getY() < -FIELD_BORDER_MARGIN_METERS
         || pose.getY() > FIELD_HEIGHT_METERS + FIELD_BORDER_MARGIN_METERS;
-  }
-
-  /** Checks if the robot is moving too fast for reliable vision. */
-  private boolean isMovingTooFast() {
-    ChassisSpeeds speeds = getChassisSpeeds();
-    double linearSpeed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-    return linearSpeed > MAX_SPEED_FOR_VISION_METERS_PER_SEC;
   }
 
   /** Checks if the vision correction would be too large. */

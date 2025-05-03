@@ -42,19 +42,19 @@ public class LimeLightCam extends BaseCam {
   }
 
   // Resets the variance for everything
-  public void resetVarience(){
-      X_MT1_VARIENCE_MAX = Integer.MIN_VALUE;
-      X_MT1_VARIENCE_MIN = Integer.MAX_VALUE;
-      X_MT2_VARIENCE_MAX = Integer.MIN_VALUE;
-      X_MT2_VARIENCE_MIN = Integer.MAX_VALUE;
-      Y_MT1_VARIENCE_MAX = Integer.MIN_VALUE;
-      Y_MT1_VARIENCE_MIN = Integer.MAX_VALUE;
-      Y_MT2_VARIENCE_MAX = Integer.MIN_VALUE;
-      Y_MT2_VARIENCE_MIN = Integer.MAX_VALUE;
-      T_MT1_VARIENCE_MAX = Integer.MIN_VALUE;
-      T_MT1_VARIENCE_MIN = Integer.MAX_VALUE;
-      T_MT2_VARIENCE_MAX = Integer.MIN_VALUE;
-      T_MT2_VARIENCE_MIN = Integer.MAX_VALUE;
+  public void resetVarience() {
+    X_MT1_VARIENCE_MAX = Integer.MIN_VALUE;
+    X_MT1_VARIENCE_MIN = Integer.MAX_VALUE;
+    X_MT2_VARIENCE_MAX = Integer.MIN_VALUE;
+    X_MT2_VARIENCE_MIN = Integer.MAX_VALUE;
+    Y_MT1_VARIENCE_MAX = Integer.MIN_VALUE;
+    Y_MT1_VARIENCE_MIN = Integer.MAX_VALUE;
+    Y_MT2_VARIENCE_MAX = Integer.MIN_VALUE;
+    Y_MT2_VARIENCE_MIN = Integer.MAX_VALUE;
+    T_MT1_VARIENCE_MAX = Integer.MIN_VALUE;
+    T_MT1_VARIENCE_MIN = Integer.MAX_VALUE;
+    T_MT2_VARIENCE_MAX = Integer.MIN_VALUE;
+    T_MT2_VARIENCE_MIN = Integer.MAX_VALUE;
   }
 
   private boolean runNeuralNetwork = false;
@@ -146,41 +146,83 @@ public class LimeLightCam extends BaseCam {
 
     if (latestEstimate.tagCount == 0) return Optional.empty();
 
-    // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight
-    if (latestEstimate.pose.getX() > X_MT1_VARIENCE_MAX) {
-      X_MT1_VARIENCE_MAX = latestEstimate.pose.getX();
+    if (DriverStation.isDisabled()) {
+      // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight
+      if (latestEstimate.pose.getX() > X_MT1_VARIENCE_MAX) {
+        X_MT1_VARIENCE_MAX = latestEstimate.pose.getX();
+      }
+      if (latestEstimate.pose.getX() < X_MT1_VARIENCE_MIN) {
+        X_MT1_VARIENCE_MIN = latestEstimate.pose.getX();
+      }
+      if (latestEstimate.pose.getY() > Y_MT1_VARIENCE_MAX) {
+        Y_MT1_VARIENCE_MAX = latestEstimate.pose.getY();
+      }
+      if (latestEstimate.pose.getY() < Y_MT1_VARIENCE_MIN) {
+        Y_MT1_VARIENCE_MIN = latestEstimate.pose.getY();
+      }
+      if (latestEstimate.pose.getRotation().getRadians() > T_MT1_VARIENCE_MAX) {
+        T_MT1_VARIENCE_MAX = latestEstimate.pose.getRotation().getRadians();
+      }
+      if (latestEstimate.pose.getRotation().getRadians() < T_MT1_VARIENCE_MIN) {
+        T_MT1_VARIENCE_MIN = latestEstimate.pose.getRotation().getRadians();
+      }
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT1/XVarience", X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN);
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT1/XStdDev",
+          Math.sqrt(X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN));
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT1/YVarience", Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN);
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT1/YStdDev",
+          Math.sqrt(Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN));
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT1/AngleVarience", T_MT1_VARIENCE_MAX - T_MT1_VARIENCE_MIN);
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT1/AngleStdDev",
+          Math.sqrt(T_MT1_VARIENCE_MAX - T_MT1_VARIENCE_MIN));
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT1/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
+      Logger.recordOutput("RealOutputs/" + name + "/MT1/tagDistance", latestEstimate.avgTagDist);
+    } else {
+      // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight
+      if (latestEstimate.pose.getX() > X_MT2_VARIENCE_MAX) {
+        X_MT2_VARIENCE_MAX = latestEstimate.pose.getX();
+      }
+      if (latestEstimate.pose.getX() < X_MT2_VARIENCE_MIN) {
+        X_MT2_VARIENCE_MIN = latestEstimate.pose.getX();
+      }
+      if (latestEstimate.pose.getX() > Y_MT2_VARIENCE_MAX) {
+        Y_MT2_VARIENCE_MAX = latestEstimate.pose.getY();
+      }
+      if (latestEstimate.pose.getY() < Y_MT2_VARIENCE_MIN) {
+        Y_MT2_VARIENCE_MIN = latestEstimate.pose.getY();
+      }
+      if (latestEstimate.pose.getRotation().getRadians() > T_MT2_VARIENCE_MAX) {
+        T_MT2_VARIENCE_MAX = latestEstimate.pose.getRotation().getRadians();
+      }
+      if (latestEstimate.pose.getRotation().getRadians() < T_MT2_VARIENCE_MIN) {
+        T_MT2_VARIENCE_MIN = latestEstimate.pose.getRotation().getRadians();
+      }
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT2/XVarience", X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN);
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT2/XStdDev",
+          Math.sqrt(X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN));
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT2/YVarience", Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN);
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT2/YStdDev",
+          Math.sqrt(Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN));
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT2/AngleVarience", T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN);
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT2/AngleStdDev",
+          Math.sqrt(T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN));
+      Logger.recordOutput(
+          "RealOutputs/" + name + "/MT2/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
+      Logger.recordOutput("RealOutputs/" + name + "/MT2/tagDistance", latestEstimate.avgTagDist);
     }
-    if (latestEstimate.pose.getX() < X_MT1_VARIENCE_MIN) {
-      X_MT1_VARIENCE_MIN = latestEstimate.pose.getX();
-    }
-    if (latestEstimate.pose.getY() > Y_MT1_VARIENCE_MAX) {
-      Y_MT1_VARIENCE_MAX = latestEstimate.pose.getY();
-    }
-    if (latestEstimate.pose.getY() < Y_MT1_VARIENCE_MIN) {
-      Y_MT1_VARIENCE_MIN = latestEstimate.pose.getY();
-    }
-    if (latestEstimate.pose.getRotation().getRadians() > T_MT1_VARIENCE_MAX) {
-      T_MT1_VARIENCE_MAX = latestEstimate.pose.getRotation().getRadians();
-    }
-    if (latestEstimate.pose.getRotation().getRadians() < T_MT1_VARIENCE_MIN) {
-      T_MT1_VARIENCE_MIN = latestEstimate.pose.getRotation().getRadians();
-    }
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/XVarience", X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN);
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/XStdDev", Math.sqrt(X_MT1_VARIENCE_MAX - X_MT1_VARIENCE_MIN));
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/YVarience", Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN);
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/YStdDev", Math.sqrt(Y_MT1_VARIENCE_MAX - Y_MT1_VARIENCE_MIN));
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/AngleVarience", T_MT1_VARIENCE_MAX - T_MT1_VARIENCE_MIN);
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/AngleStdDev",
-        Math.sqrt(T_MT1_VARIENCE_MAX - T_MT1_VARIENCE_MIN));
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT1/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
-    Logger.recordOutput("RealOutputs/" + name + "/MT1/tagDistance", latestEstimate.avgTagDist);
 
     return Optional.of(
         new AprilTagResult(
@@ -203,42 +245,6 @@ public class LimeLightCam extends BaseCam {
     if (latestEstimate == null) return Optional.empty();
 
     if (latestEstimate.tagCount == 0) return Optional.empty();
-
-    // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight
-    if (latestEstimate.pose.getX() > X_MT2_VARIENCE_MAX) {
-      X_MT2_VARIENCE_MAX = latestEstimate.pose.getX();
-    }
-    if (latestEstimate.pose.getX() < X_MT2_VARIENCE_MIN) {
-      X_MT2_VARIENCE_MIN = latestEstimate.pose.getX();
-    }
-    if (latestEstimate.pose.getX() > Y_MT2_VARIENCE_MAX) {
-      Y_MT2_VARIENCE_MAX = latestEstimate.pose.getY();
-    }
-    if (latestEstimate.pose.getY() < Y_MT2_VARIENCE_MIN) {
-      Y_MT2_VARIENCE_MIN = latestEstimate.pose.getY();
-    }
-    if (latestEstimate.pose.getRotation().getRadians() > T_MT2_VARIENCE_MAX) {
-      T_MT2_VARIENCE_MAX = latestEstimate.pose.getRotation().getRadians();
-    }
-    if (latestEstimate.pose.getRotation().getRadians() < T_MT2_VARIENCE_MIN) {
-      T_MT2_VARIENCE_MIN = latestEstimate.pose.getRotation().getRadians();
-    }
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/XVarience", X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN);
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/XStdDev", Math.sqrt(X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN));
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/YVarience", Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN);
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/YStdDev", Math.sqrt(Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN));
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/AngleVarience", T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN);
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/AngleStdDev",
-        Math.sqrt(T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN));
-    Logger.recordOutput(
-        "RealOutputs/" + name + "/MT2/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
-    Logger.recordOutput("RealOutputs/" + name + "/MT2/tagDistance", latestEstimate.avgTagDist);
 
     return Optional.of(
         new AprilTagResult(
