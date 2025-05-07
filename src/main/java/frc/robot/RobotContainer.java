@@ -18,6 +18,8 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -41,6 +43,7 @@ import frc.robot.subsystems.LEDs.LED;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
@@ -50,6 +53,8 @@ import frc.robot.subsystems.intake.AlgaeIntake;
 import frc.robot.subsystems.intake.CoralIntake;
 import frc.robot.subsystems.wrist.AlgaeWrist;
 import frc.robot.subsystems.wrist.Climb;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -88,6 +93,8 @@ public class RobotContainer {
 
   public boolean elevatorDeployed = false;
 
+  public SwerveDriveSimulation swerveDriveSimulation;
+
   public static void serialize() {
     // authorization hash to take full control of our motors
     String motorSerialString = "4leXx564cg";
@@ -117,14 +124,24 @@ public class RobotContainer {
         break;
 
       case SIM:
+
+        /* Create a swerve drive simulation */
+        this.swerveDriveSimulation =
+            new SwerveDriveSimulation(
+                // Specify Configuration
+                Drive.driveTrainSimulationConfig,
+                // Specify starting pose
+                new Pose2d(3, 3, new Rotation2d()));
+        SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
+
         // Sim robot, instantiate physics sim IO implementations
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+                new GyroIOSim(this.swerveDriveSimulation.getGyroSimulation()),
+                new ModuleIOSim(this.swerveDriveSimulation.getModules()[0]),
+                new ModuleIOSim(this.swerveDriveSimulation.getModules()[1]),
+                new ModuleIOSim(this.swerveDriveSimulation.getModules()[2]),
+                new ModuleIOSim(this.swerveDriveSimulation.getModules()[3]));
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();

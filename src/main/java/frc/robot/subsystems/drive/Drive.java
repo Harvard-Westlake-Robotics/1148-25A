@@ -64,6 +64,9 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -210,6 +213,29 @@ public class Drive extends SubsystemBase {
   private static final double REEF_CENTER_RADIUS = 1.1721;
   private static final double ELEVATOR_ANGLE_DEGREES = 40.0;
 
+  // Create and configure a drivetrain simulation configuration
+  public static final DriveTrainSimulationConfig driveTrainSimulationConfig =
+      DriveTrainSimulationConfig.Default()
+          // Specify gyro type (for realistic gyro drifting and error simulation)
+          .withGyro(COTS.ofPigeon2())
+          // Specify swerve module (for realistic swerve dynamics)
+          .withSwerveModule(
+              new SwerveModuleSimulationConfig(
+                  DCMotor.getKrakenX60(1), // Drive motor is a Kraken X60
+                  DCMotor.getFalcon500(1), // Steer motor is a Falcon 500
+                  TunerConstants.FrontLeft.DriveMotorGearRatio, // Drive motor gear ratio.
+                  TunerConstants.FrontLeft.SteerMotorGearRatio, // Steer motor gear ratio.
+                  Volts.of(
+                      TunerConstants.FrontLeft.DriveFrictionVoltage), // Drive friction voltage.
+                  Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage), // Steer friction voltage
+                  Inches.of(TunerConstants.FrontLeft.WheelRadius), // Wheel radius
+                  KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia), // Steer MOI
+                  1.2)) // Wheel COF
+          // Configures the track length and track width (spacing between swerve modules)
+          .withTrackLengthTrackWidth(Inches.of(21), Inches.of(21))
+          // Configures the bumper size (dimensions of the robot bumper)
+          .withBumperSize(Inches.of(33.6), Inches.of(33.6));
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -217,6 +243,7 @@ public class Drive extends SubsystemBase {
       ModuleIO blModuleIO,
       ModuleIO brModuleIO) {
     this.gyroIO = gyroIO;
+
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
     modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
