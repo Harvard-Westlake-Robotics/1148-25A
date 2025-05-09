@@ -69,7 +69,7 @@ public class Robot extends LoggedRobot {
     SimulatedArena.getInstance(); // Required to initialize MapleSim
 
     SimulatedArena.getInstance()
-        .addGamePiece(new ReefscapeCoralOnField(new Pose2d(4, 4, Rotation2d.fromDegrees(90))));
+        .addGamePiece(new ReefscapeCoralOnField(new Pose2d(3, 3, Rotation2d.fromDegrees(90))));
   }
 
   public Robot() {
@@ -287,23 +287,19 @@ public class Robot extends LoggedRobot {
 
     RobotContainer.getSwerveDriveSimulation()
         .setSimulationWorldPose(
-            new Pose2d(3.0, 3.0, Rotation2d.fromDegrees(90))); // x, y in meters, heading in degrees
+            new Pose2d(4.0, 6.0, Rotation2d.fromDegrees(90))); // x, y in meters, heading in degrees
 
     setSimulatedField();
-
-    Logger.recordOutput(
-        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
-    Logger.recordOutput(
-        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
   }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
     SimulatedArena.getInstance().simulationPeriodic();
-    // Get the positions of the notes (both on the field and in the air)
-    Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");
     // Publish to telemetry using AdvantageKit
-    Logger.recordOutput("FieldSimulation/NotesPositions", notesPoses);
+    Logger.recordOutput(
+        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+    Logger.recordOutput(
+        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
   }
 }
