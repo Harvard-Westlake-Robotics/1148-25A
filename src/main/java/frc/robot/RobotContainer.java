@@ -91,9 +91,15 @@ public class RobotContainer {
   public static CoralIntakeCommand coralIntakeCommand;
   public static ClimbCommand hangCommand;
 
-  public boolean elevatorDeployed = false;
+  public static SwerveDriveSimulation swerveDriveSimulation =
+      new SwerveDriveSimulation(
+          Drive.driveTrainSimulationConfig, new Pose2d(3, 3, new Rotation2d()));
 
-  public SwerveDriveSimulation swerveDriveSimulation;
+  public static SwerveDriveSimulation getSwerveDriveSimulation() {
+    return swerveDriveSimulation;
+  }
+
+  public boolean elevatorDeployed = false;
 
   public static void serialize() {
     // authorization hash to take full control of our motors
@@ -124,24 +130,20 @@ public class RobotContainer {
         break;
 
       case SIM:
-
-        /* Create a swerve drive simulation */
-        this.swerveDriveSimulation =
-            new SwerveDriveSimulation(
-                // Specify Configuration
-                Drive.driveTrainSimulationConfig,
-                // Specify starting pose
-                new Pose2d(3, 3, new Rotation2d()));
-        SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
-
         // Sim robot, instantiate physics sim IO implementations
         drive =
             new Drive(
-                new GyroIOSim(this.swerveDriveSimulation.getGyroSimulation()),
-                new ModuleIOSim(this.swerveDriveSimulation.getModules()[0]),
-                new ModuleIOSim(this.swerveDriveSimulation.getModules()[1]),
-                new ModuleIOSim(this.swerveDriveSimulation.getModules()[2]),
-                new ModuleIOSim(this.swerveDriveSimulation.getModules()[3]));
+                new GyroIOSim(swerveDriveSimulation.getGyroSimulation()),
+                new ModuleIOSim(swerveDriveSimulation.getModules()[0]),
+                new ModuleIOSim(swerveDriveSimulation.getModules()[1]),
+                new ModuleIOSim(swerveDriveSimulation.getModules()[2]),
+                new ModuleIOSim(swerveDriveSimulation.getModules()[3]));
+
+        // Register the drive simulation from your Drive subsystem
+        SimulatedArena.getInstance()
+            .addDriveTrainSimulation(
+                swerveDriveSimulation); // Or just swerveDriveSimulation if public
+
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();

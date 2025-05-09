@@ -19,6 +19,9 @@ import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation.MatchType;
@@ -33,6 +36,9 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.NetworkCommunicator;
 import frc.robot.subsystems.intake.CoralIntake;
 import frc.robot.subsystems.wrist.Climb;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -57,6 +63,14 @@ public class Robot extends LoggedRobot {
   private static final int CURRENT_VERSION = 0; // Increment this when uploading new code
 
   private static final int MATCH_THRESHOLD = Integer.MAX_VALUE;
+
+  public void setSimulatedField() {
+    SimulatedArena.overrideInstance(new Arena2025Reefscape());
+    SimulatedArena.getInstance(); // Required to initialize MapleSim
+
+    SimulatedArena.getInstance()
+        .addGamePiece(new ReefscapeCoralOnField(new Pose2d(4, 4, Rotation2d.fromDegrees(90))));
+  }
 
   public Robot() {
     // Record metadata
@@ -267,9 +281,29 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    // Clear all game pieces from the field
+    SimulatedArena.getInstance().clearGamePieces();
+
+    RobotContainer.getSwerveDriveSimulation()
+        .setSimulationWorldPose(
+            new Pose2d(3.0, 3.0, Rotation2d.fromDegrees(90))); // x, y in meters, heading in degrees
+
+    setSimulatedField();
+
+    Logger.recordOutput(
+        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+    Logger.recordOutput(
+        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    SimulatedArena.getInstance().simulationPeriodic();
+    // Get the positions of the notes (both on the field and in the air)
+    Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");
+    // Publish to telemetry using AdvantageKit
+    Logger.recordOutput("FieldSimulation/NotesPositions", notesPoses);
+  }
 }

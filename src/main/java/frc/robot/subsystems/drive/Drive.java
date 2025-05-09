@@ -223,13 +223,12 @@ public class Drive extends SubsystemBase {
               new SwerveModuleSimulationConfig(
                   DCMotor.getKrakenX60(1), // Drive motor is a Kraken X60
                   DCMotor.getFalcon500(1), // Steer motor is a Falcon 500
-                  TunerConstants.FrontLeft.DriveMotorGearRatio, // Drive motor gear ratio.
-                  TunerConstants.FrontLeft.SteerMotorGearRatio, // Steer motor gear ratio.
-                  Volts.of(
-                      TunerConstants.FrontLeft.DriveFrictionVoltage), // Drive friction voltage.
-                  Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage), // Steer friction voltage
-                  Inches.of(TunerConstants.FrontLeft.WheelRadius), // Wheel radius
-                  KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia), // Steer MOI
+                  TunerConstants.kDriveGearRatio, // Drive motor gear ratio.
+                  TunerConstants.kSteerGearRatio, // Steer motor gear ratio.
+                  TunerConstants.kDriveFrictionVoltage, // Drive friction voltage.
+                  TunerConstants.kSteerFrictionVoltage, // Steer friction voltage
+                  TunerConstants.kWheelRadius, // Wheel radius
+                  TunerConstants.kSteerInertia, // Steer MOI
                   1.2)) // Wheel COF
           // Configures the track length and track width (spacing between swerve modules)
           .withTrackLengthTrackWidth(Inches.of(21), Inches.of(21))
