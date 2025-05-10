@@ -131,6 +131,12 @@ public class RobotContainer {
         swerveDriveSimulation =
             new SwerveDriveSimulation(
                 Drive.driveTrainSimulationConfig, new Pose2d(4, 6, new Rotation2d()));
+
+        // Register the drive simulation from your Drive subsystem
+        SimulatedArena.getInstance()
+            .addDriveTrainSimulation(
+                swerveDriveSimulation); // Or just swerveDriveSimulation if public
+
         // Sim robot, instantiate physics sim IO implementations
         drive =
             new Drive(
@@ -139,11 +145,6 @@ public class RobotContainer {
                 new ModuleIOSim(swerveDriveSimulation.getModules()[1]),
                 new ModuleIOSim(swerveDriveSimulation.getModules()[2]),
                 new ModuleIOSim(swerveDriveSimulation.getModules()[3]));
-
-        // Register the drive simulation from your Drive subsystem
-        SimulatedArena.getInstance()
-            .addDriveTrainSimulation(
-                swerveDriveSimulation); // Or just swerveDriveSimulation if public
 
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();

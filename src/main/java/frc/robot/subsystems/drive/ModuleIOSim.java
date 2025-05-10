@@ -16,12 +16,16 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.generated.TunerConstants;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
@@ -109,6 +113,9 @@ public class ModuleIOSim implements ModuleIO {
     inputs.odometryTimestamps = new double[] {Timer.getFPGATimestamp()};
     inputs.odometryDrivePositionsRad = new double[] {inputs.drivePositionRad};
     inputs.odometryTurnPositions = new Rotation2d[] {inputs.turnPosition};
+
+    setDriveOutputVoltage(Voltage.ofBaseUnits(driveAppliedVolts, Volts));
+    setSteerOutputVoltage(Voltage.ofBaseUnits(turnAppliedVolts, Volts));
   }
 
   @Override
@@ -123,16 +130,30 @@ public class ModuleIOSim implements ModuleIO {
     turnAppliedVolts = output;
   }
 
-  @Override
-  public void setDriveVelocity(double velocityRadPerSec) {
-    driveClosedLoop = true;
-    driveFFVolts = DRIVE_KS * Math.signum(velocityRadPerSec) + DRIVE_KV * velocityRadPerSec;
-    driveController.setSetpoint(velocityRadPerSec);
+  // specified by ModuleIO interface
+  public void setDriveOutputVoltage(Voltage voltage) {
+    this.driveMotor.requestVoltage(voltage);
   }
 
-  @Override
-  public void setTurnPosition(Rotation2d rotation) {
-    turnClosedLoop = true;
-    turnController.setSetpoint(rotation.getRadians());
+  // specified by ModuleIO interface
+  public void setSteerOutputVoltage(Voltage voltage) {
+    this.turnMotor.requestVoltage(voltage);
+  }
+
+  // specified by ModuleIO interface
+  public Rotation2d getSteerFacing() {
+    return this.moduleSimulation.getSteerAbsoluteFacing();
+  }
+
+  // specified by ModuleIO interface
+  public Angle getSteerRelativePosition() {
+    return moduleSimulation
+        .getSteerRelativeEncoderPosition()
+        .divide(TunerConstants.kSteerGearRatio);
+  }
+
+  // specified by ModuleIO interface
+  public Angle getDriveWheelrPositiond() {
+    return moduleSimulation.getDriveWheelFinalPosition();
   }
 }
