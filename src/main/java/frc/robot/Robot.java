@@ -20,7 +20,6 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -285,10 +284,17 @@ public class Robot extends LoggedRobot {
     // Clear all game pieces from the field
     SimulatedArena.getInstance().clearGamePieces();
 
-    RobotContainer.getSwerveDriveSimulation()
-        .setSimulationWorldPose(
-            new Pose2d(4.0, 6.0, Rotation2d.fromDegrees(90))); // x, y in meters, heading in degrees
+    // Starting pose
+    Pose2d startPose = new Pose2d(4.0, 6.0, Rotation2d.fromDegrees(90));
 
+    // Reset simulation pose
+    RobotContainer.getSwerveDriveSimulation().setSimulationWorldPose(startPose);
+
+    // Reset odometry to match simulation
+    robotContainer.drive.setPose(startPose);
+
+    // Re-add any necessary field elements (if using SimulatedArena)
+    SimulatedArena.getInstance().clearGamePieces();
     setSimulatedField();
   }
 

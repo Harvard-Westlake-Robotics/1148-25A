@@ -205,7 +205,7 @@ public class Drive extends SubsystemBase {
   private static final double AMBIGUITY_THRESHOLD = 0.75;
   private static final double AMBIGUITY_SECONDARY_THRESHOLD = 0.2;
 
-  // Reef positioning constants
+  // Reef positioning constantsg
   private static final double ROBOT_REEF_OFFSET_METERS = -0.3556;
   private static final double BLUE_REEF_CENTER_X = 4.5;
   private static final double RED_REEF_CENTER_X = 13.05;

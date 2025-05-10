@@ -91,9 +91,7 @@ public class RobotContainer {
   public static CoralIntakeCommand coralIntakeCommand;
   public static ClimbCommand hangCommand;
 
-  public static SwerveDriveSimulation swerveDriveSimulation =
-      new SwerveDriveSimulation(
-          Drive.driveTrainSimulationConfig, new Pose2d(3, 3, new Rotation2d()));
+  public static SwerveDriveSimulation swerveDriveSimulation;
 
   public static SwerveDriveSimulation getSwerveDriveSimulation() {
     return swerveDriveSimulation;
@@ -130,6 +128,9 @@ public class RobotContainer {
         break;
 
       case SIM:
+        swerveDriveSimulation =
+            new SwerveDriveSimulation(
+                Drive.driveTrainSimulationConfig, new Pose2d(4, 6, new Rotation2d()));
         // Sim robot, instantiate physics sim IO implementations
         drive =
             new Drive(
