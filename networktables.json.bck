@@ -10,7 +10,7 @@
   {
     "name": "/Preferences/MatchCount",
     "type": "double",
-    "value": 4.0,
+    "value": 6.0,
     "properties": {
       "persistent": true
     }
