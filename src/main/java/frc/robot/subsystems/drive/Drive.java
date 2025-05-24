@@ -227,7 +227,7 @@ public class Drive extends SubsystemBase {
                   TunerConstants.kSteerGearRatio, // Steer motor gear ratio.
                   TunerConstants.kDriveFrictionVoltage, // Drive friction voltage.
                   TunerConstants.kSteerFrictionVoltage, // Steer friction voltage
-                  TunerConstants.kWheelRadius, // Wheel radius
+                  Inches.of(2.15), // Wheel radius
                   TunerConstants.kSteerInertia, // Steer MOI
                   1.2)) // Wheel COF
           // Configures the track length and track width (spacing between swerve modules)
