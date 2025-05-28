@@ -32,7 +32,7 @@ public class AutoScoreCommand extends Command {
   private static final double ELEVATOR_TOLERANCE = 0.8; // meters
   private static final double SCORING_DELAY_TICKS = 3;
   private static final double SCORING_VELOCITY = 22.0; // meters per second
-  private static final double DEFAULT_VELOCITY = 6.0; // meters per second
+  // private static final double DEFAULT_VELOCITY = 6.0; // meters per second
   private static final double COMMAND_TIMEOUT = 10.0; // seconds
 
   // PID controller constants

@@ -281,31 +281,12 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
-    // Clear all game pieces from the field
-    SimulatedArena.getInstance().clearGamePieces();
-
-    // Starting pose
-    Pose2d startPose = new Pose2d(4.0, 6.0, Rotation2d.fromDegrees(90));
-
-    // Reset simulation pose
-    RobotContainer.getSwerveDriveSimulation().setSimulationWorldPose(startPose);
-
-    // Reset odometry to match simulation
-    robotContainer.drive.setPose(startPose);
-
-    // Re-add any necessary field elements (if using SimulatedArena)
-    SimulatedArena.getInstance().clearGamePieces();
-    setSimulatedField();
+    robotContainer.resetSimulationField();
   }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    SimulatedArena.getInstance().simulationPeriodic();
-    // Publish to telemetry using AdvantageKit
-    Logger.recordOutput(
-        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
-    Logger.recordOutput(
-        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+    robotContainer.updateSimulation();
   }
 }

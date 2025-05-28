@@ -10,7 +10,6 @@ import frc.robot.subsystems.wrist.AlgaeWrist;
 
 public class GroundIntakeCommand extends Command {
   private LinearVelocity velocity;
-  private LinearVelocity velocity2 = LinearVelocity.ofBaseUnits(0, MetersPerSecond);
   private final double wristAngle = 4.88;
   private Integer index;
   public boolean buttonPressed = false;

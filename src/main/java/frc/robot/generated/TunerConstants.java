@@ -17,25 +17,44 @@ public class TunerConstants {
   // The steer motor uses any SwerveModule.SteerRequestType control request with
   // the
   // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
+
+  // Swerve Steer PID Values, moved so they can be reached by simulator
+  public static final double kSteerP = 65;
+  public static final double kSteerI = 0;
+  public static final double kSteerD = 0.5;
+  public static final double kSteerS = 0;
+  public static final double kSteerV = 0;
+  public static final double kSteerA = 0;
+  public static final StaticFeedforwardSignValue kStaticFeedforwardSign =
+      StaticFeedforwardSignValue.UseClosedLoopSign;
+
+  // Swerve Drive PID Values
+  public static final double kDriveP = 0.03152 * (180 / Math.PI) * 2 * 0.0254;
+  public static final double kDriveI = 0;
+  public static final double kDriveD = 0;
+  public static final double kDriveS = 0.28949;
+  public static final double kDriveV = 0.11353 * (180 / Math.PI) * 2 * 0.0254;
+  public static final double kDriveA = 0.083369 * (180 / Math.PI) * 2 * 0.0254;
+
   private static final Slot0Configs steerGains =
       new Slot0Configs()
-          .withKP(65)
-          .withKI(0)
-          .withKD(0.5)
-          .withKS(0.00)
-          .withKV(0.00)
-          .withKA(0.00)
-          .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
+          .withKP(kSteerP)
+          .withKI(kSteerI)
+          .withKD(kSteerD)
+          .withKS(kSteerS)
+          .withKV(kSteerV)
+          .withKA(kSteerA)
+          .withStaticFeedforwardSign(kStaticFeedforwardSign);
   // When using closed-loop control, the drive motor uses the control
   // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
   private static final Slot0Configs driveGains =
       new Slot0Configs()
-          .withKP(0.03152 * (180 / Math.PI) * 2 * 0.0254)
-          .withKI(0)
-          .withKD(0)
-          .withKS(0.28949)
-          .withKV(0.11353 * (180 / Math.PI) * 2 * 0.0254)
-          .withKA(0.083369 * (180 / Math.PI) * 2 * 0.0254);
+          .withKP(kDriveP)
+          .withKI(kDriveI)
+          .withKD(kDriveD)
+          .withKS(kDriveS)
+          .withKV(kDriveV)
+          .withKA(kDriveA);
 
   // The closed-loop output type to use for the steer motors;
   // This affects the PID/FF gains for the steer motors
