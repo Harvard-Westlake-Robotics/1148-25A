@@ -64,9 +64,6 @@ public class CoralIntake extends SubsystemBase {
       RobotContainer.coralIntakeCommand.setVelocity(
           LinearVelocity.ofBaseUnits(17, MetersPerSecond));
     }
-    if (!hasCoral && !RobotContainer.coralIntakeCommand.isEject()) {
-      RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(6, MetersPerSecond));
-    }
   }
 
   public void setVelocity(LinearVelocity velocity) {

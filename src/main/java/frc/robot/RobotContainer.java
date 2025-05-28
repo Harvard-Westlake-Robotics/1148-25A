@@ -246,7 +246,7 @@ public class RobotContainer {
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
     elevatorCommand = new ScoreCommand(ScoringLevel.L0);
     elevator.setDefaultCommand(elevatorCommand);
-    coralIntakeCommand = new CoralIntakeCommand(10);
+    coralIntakeCommand = new CoralIntakeCommand(6);
     coralIntake.setDefaultCommand(coralIntakeCommand);
     algaeIntakeCommand = new GroundIntakeCommand(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
     algaeIntake.setDefaultCommand(algaeIntakeCommand);
