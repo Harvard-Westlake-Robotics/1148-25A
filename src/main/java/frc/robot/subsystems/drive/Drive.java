@@ -64,11 +64,14 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-
   private static Drive instance;
 
   public static Drive getInstance() {
@@ -198,11 +201,11 @@ public class Drive extends SubsystemBase {
   private static final double MAX_TAG_DISTANCE_METERS = 2.5;
   private static final double MIN_TAG_DISTANCE_METERS = 0.08;
   private static final double MAX_YAW_RATE_DEGREES_PER_SEC = 520.0;
-  private static final double MAX_SPEED_FOR_VISION_METERS_PER_SEC = 3.0;
+  // private static final double MAX_SPEED_FOR_VISION_METERS_PER_SEC = 3.0;
   private static final double AMBIGUITY_THRESHOLD = 0.75;
   private static final double AMBIGUITY_SECONDARY_THRESHOLD = 0.2;
 
-  // Reef positioning constants
+  // Reef positioning constantsg
   private static final double ROBOT_REEF_OFFSET_METERS = -0.3556;
   private static final double BLUE_REEF_CENTER_X = 4.5;
   private static final double RED_REEF_CENTER_X = 13.05;
@@ -210,13 +213,43 @@ public class Drive extends SubsystemBase {
   private static final double REEF_CENTER_RADIUS = 1.1721;
   private static final double ELEVATOR_ANGLE_DEGREES = 40.0;
 
+  // Create and configure a drivetrain simulation configuration
+  public static final DriveTrainSimulationConfig mapleSimConfig =
+      DriveTrainSimulationConfig.Default()
+          // Specify robot mass
+          .withRobotMass(Kilograms.of(ROBOT_MASS_KG)) // Set robot mass in kg
+          // Specify gyro type (for realistic gyro drifting and error simulation)
+          .withGyro(COTS.ofPigeon2())
+          // Specify module positions
+          .withCustomModuleTranslations(getModuleTranslations())
+          // Specify swerve module (for realistic swerve dynamics)
+          .withSwerveModule(
+              new SwerveModuleSimulationConfig(
+                  DCMotor.getKrakenX60(1), // Drive motor is a Kraken X60
+                  DCMotor.getFalcon500(1), // Steer motor is a Falcon 500
+                  TunerConstants.kDriveGearRatio, // Drive motor gear ratio.
+                  TunerConstants.kSteerGearRatio, // Steer motor gear ratio.
+                  TunerConstants.kDriveFrictionVoltage, // Drive friction voltage.
+                  TunerConstants.kSteerFrictionVoltage, // Steer friction voltage
+                  Inches.of(2.15), // Wheel radius
+                  TunerConstants.kSteerInertia, // Steer MOI
+                  1.2)) // Wheel COF
+          // Configures the track length and track width (spacing between swerve modules)
+          .withTrackLengthTrackWidth(Inches.of(21), Inches.of(21))
+          // Configures the bumper size (dimensions of the robot bumper)
+          .withBumperSize(Inches.of(33.6), Inches.of(33.6));
+
+  private final Consumer<Pose2d> resetSimulationPoseCallBack;
+
   public Drive(
       GyroIO gyroIO,
-      ModuleIO flModuleIO,
-      ModuleIO frModuleIO,
-      ModuleIO blModuleIO,
-      ModuleIO brModuleIO) {
+      ModuleIOTalonFX flModuleIO,
+      ModuleIOTalonFX frModuleIO,
+      ModuleIOTalonFX blModuleIO,
+      ModuleIOTalonFX brModuleIO,
+      Consumer<Pose2d> resetSimulationPoseCallBack) {
     this.gyroIO = gyroIO;
+    this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
     modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
@@ -811,6 +844,7 @@ public class Drive extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    resetSimulationPoseCallBack.accept(pose);
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 

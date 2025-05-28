@@ -17,25 +17,44 @@ public class TunerConstants {
   // The steer motor uses any SwerveModule.SteerRequestType control request with
   // the
   // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
+
+  // Swerve Steer PID Values, moved so they can be reached by simulator
+  public static final double kSteerP = 65;
+  public static final double kSteerI = 0;
+  public static final double kSteerD = 0.5;
+  public static final double kSteerS = 0;
+  public static final double kSteerV = 0;
+  public static final double kSteerA = 0;
+  public static final StaticFeedforwardSignValue kStaticFeedforwardSign =
+      StaticFeedforwardSignValue.UseClosedLoopSign;
+
+  // Swerve Drive PID Values
+  public static final double kDriveP = 0.03152 * (180 / Math.PI) * 2 * 0.0254;
+  public static final double kDriveI = 0;
+  public static final double kDriveD = 0;
+  public static final double kDriveS = 0.28949;
+  public static final double kDriveV = 0.11353 * (180 / Math.PI) * 2 * 0.0254;
+  public static final double kDriveA = 0.083369 * (180 / Math.PI) * 2 * 0.0254;
+
   private static final Slot0Configs steerGains =
       new Slot0Configs()
-          .withKP(65)
-          .withKI(0)
-          .withKD(0.5)
-          .withKS(0.00)
-          .withKV(0.00)
-          .withKA(0.00)
-          .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
+          .withKP(kSteerP)
+          .withKI(kSteerI)
+          .withKD(kSteerD)
+          .withKS(kSteerS)
+          .withKV(kSteerV)
+          .withKA(kSteerA)
+          .withStaticFeedforwardSign(kStaticFeedforwardSign);
   // When using closed-loop control, the drive motor uses the control
   // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
   private static final Slot0Configs driveGains =
       new Slot0Configs()
-          .withKP(0.03152 * (180 / Math.PI) * 2 * 0.0254)
-          .withKI(0)
-          .withKD(0)
-          .withKS(0.28949)
-          .withKV(0.11353 * (180 / Math.PI) * 2 * 0.0254)
-          .withKA(0.083369 * (180 / Math.PI) * 2 * 0.0254);
+          .withKP(kDriveP)
+          .withKI(kDriveI)
+          .withKD(kDriveD)
+          .withKS(kDriveS)
+          .withKV(kDriveV)
+          .withKA(kDriveA);
 
   // The closed-loop output type to use for the steer motors;
   // This affects the PID/FF gains for the steer motors
@@ -99,23 +118,23 @@ public class TunerConstants {
 
   // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
   // This may need to be tuned to your individual robot
-  private static final double kCoupleRatio = 5.4;
+  public static final double kCoupleRatio = 5.4;
 
-  private static final double kDriveGearRatio = 5.89;
-  private static final double kSteerGearRatio = 12.1 / 1;
-  private static final Distance kWheelRadius = Inches.of(2.15);
+  public static final double kDriveGearRatio = 5.89;
+  public static final double kSteerGearRatio = 12.1 / 1;
+  public static final Distance kWheelRadius = Inches.of(2.15);
 
-  private static final boolean kInvertLeftSide = false;
-  private static final boolean kInvertRightSide = true;
+  public static final boolean kInvertLeftSide = false;
+  public static final boolean kInvertRightSide = true;
 
-  private static final int kPigeonId = 18;
+  public static final int kPigeonId = 21;
 
   // These are only used for simulation
-  private static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.01);
-  private static final MomentOfInertia kDriveInertia = KilogramSquareMeters.of(0.01);
+  public static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.01);
+  public static final MomentOfInertia kDriveInertia = KilogramSquareMeters.of(0.01);
   // Simulated voltage necessary to overcome friction
-  private static final Voltage kSteerFrictionVoltage = Volts.of(0.2);
-  private static final Voltage kDriveFrictionVoltage = Volts.of(0.2);
+  public static final Voltage kSteerFrictionVoltage = Volts.of(0.2);
+  public static final Voltage kDriveFrictionVoltage = Volts.of(0.2);
 
   public static final SwerveDrivetrainConstants DrivetrainConstants =
       new SwerveDrivetrainConstants()

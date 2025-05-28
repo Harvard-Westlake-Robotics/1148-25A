@@ -18,6 +18,8 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -41,15 +43,19 @@ import frc.robot.subsystems.LEDs.LED;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.drive.ModuleIOTalonFXReal;
+import frc.robot.subsystems.drive.ModuleIOTalonFXSim;
 import frc.robot.subsystems.drive.NetworkCommunicator;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.AlgaeIntake;
 import frc.robot.subsystems.intake.CoralIntake;
 import frc.robot.subsystems.wrist.AlgaeWrist;
 import frc.robot.subsystems.wrist.Climb;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -86,6 +92,8 @@ public class RobotContainer {
   public static CoralIntakeCommand coralIntakeCommand;
   public static ClimbCommand hangCommand;
 
+  private SwerveDriveSimulation driveSimulation = null;
+
   public boolean elevatorDeployed = false;
 
   public static void serialize() {
@@ -102,10 +110,11 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
+                new ModuleIOTalonFXReal(TunerConstants.FrontRight),
+                new ModuleIOTalonFXReal(TunerConstants.BackLeft),
+                new ModuleIOTalonFXReal(TunerConstants.BackRight),
+                pose -> {});
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -118,13 +127,18 @@ public class RobotContainer {
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+
+        driveSimulation =
+            new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+        SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+                new GyroIOSim(driveSimulation.getGyroSimulation()),
+                new ModuleIOTalonFXSim(TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
+                new ModuleIOTalonFXSim(TunerConstants.FrontRight, driveSimulation.getModules()[1]),
+                new ModuleIOTalonFXSim(TunerConstants.BackLeft, driveSimulation.getModules()[2]),
+                new ModuleIOTalonFXSim(TunerConstants.BackRight, driveSimulation.getModules()[3]),
+                driveSimulation::setSimulationWorldPose);
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -140,10 +154,11 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIOTalonFX(TunerConstants.FrontLeft) {},
+                new ModuleIOTalonFX(TunerConstants.FrontRight) {},
+                new ModuleIOTalonFX(TunerConstants.BackLeft) {},
+                new ModuleIOTalonFX(TunerConstants.BackRight) {},
+                pose -> {});
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -238,6 +253,19 @@ public class RobotContainer {
     hangCommand = new ClimbCommand();
     hangWrist.setDefaultCommand(hangCommand);
 
+    // Reset gyro / odometry
+    final Runnable resetGyro =
+        Constants.currentMode == Constants.Mode.SIM
+            ? () ->
+                drive.setPose(
+                    driveSimulation
+                        .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during
+            // simulation
+            : () ->
+                drive.setPose(
+                    new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
+    driver.povCenter().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+
     // Add drift mode toggle to the driver's right bumper button
     operator.povLeft().onTrue(DriveCommands.toggleDriftMode(drive));
 
@@ -256,5 +284,24 @@ public class RobotContainer {
         .andThen(
             new Command() {}.withTimeout(0.3)
                 .andThen(NetworkCommunicator.getInstance().getCustomAuto()));
+  }
+
+  public void resetSimulationField() {
+    if (Constants.currentMode != Constants.Mode.SIM) return;
+
+    driveSimulation.setSimulationWorldPose(new Pose2d(3, 3, new Rotation2d()));
+    SimulatedArena.getInstance().resetFieldForAuto();
+  }
+
+  public void updateSimulation() {
+    if (Constants.currentMode != Constants.Mode.SIM) return;
+
+    SimulatedArena.getInstance().simulationPeriodic();
+    Logger.recordOutput(
+        "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+    Logger.recordOutput(
+        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+    Logger.recordOutput(
+        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
   }
 }

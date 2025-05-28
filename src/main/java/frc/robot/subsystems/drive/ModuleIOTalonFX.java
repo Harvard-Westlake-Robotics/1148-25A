@@ -8,7 +8,7 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See thecon
 // GNU General Public License for more details.
 
 package frc.robot.subsystems.drive;
@@ -54,58 +54,58 @@ import java.util.Queue;
  */
 public class ModuleIOTalonFX implements ModuleIO {
   // Constants for drift mode
-  private static final double DRIFT_CURRENT_LIMIT_STATOR =
+  protected static final double DRIFT_CURRENT_LIMIT_STATOR =
       240; // Higher current limit for more torque during drift
-  private static final double DRIFT_CURRENT_LIMIT_SUPPLY = 100; // Supply current limit
+  protected static final double DRIFT_CURRENT_LIMIT_SUPPLY = 100; // Supply current limit
 
-  private final SwerveModuleConstants<
+  protected final SwerveModuleConstants<
           TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
       constants;
 
   // Hardware objects
-  private final TalonFX driveTalon;
-  private final TalonFX turnTalon;
-  private final CANcoder cancoder;
+  protected final TalonFX driveTalon;
+  protected final TalonFX turnTalon;
+  protected final CANcoder cancoder;
 
   // Is this a front module?
-  private final boolean isFrontModule;
+  protected final boolean isFrontModule;
 
   // Voltage control requests
-  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
-  private final PositionVoltage positionVoltageRequest =
+  protected final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
+  protected final PositionVoltage positionVoltageRequest =
       new PositionVoltage(0.0).withEnableFOC(true);
-  private final VelocityVoltage velocityVoltageRequest =
+  protected final VelocityVoltage velocityVoltageRequest =
       new VelocityVoltage(0.0).withEnableFOC(true);
 
   // Torque-current control requests
-  private final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);
-  private final MotionMagicTorqueCurrentFOC positionTorqueCurrentRequest =
+  protected final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);
+  protected final MotionMagicTorqueCurrentFOC positionTorqueCurrentRequest =
       new MotionMagicTorqueCurrentFOC(0.0);
-  private final VelocityTorqueCurrentFOC velocityTorqueCurrentRequest =
+  protected final VelocityTorqueCurrentFOC velocityTorqueCurrentRequest =
       new VelocityTorqueCurrentFOC(0.0);
 
   // Timestamp inputs from Phoenix thread
-  private final Queue<Double> timestampQueue;
+  protected final Queue<Double> timestampQueue;
 
   // Inputs from drive motor
-  private final StatusSignal<Angle> drivePosition;
-  private final Queue<Double> drivePositionQueue;
-  private final StatusSignal<AngularVelocity> driveVelocity;
-  private final StatusSignal<Voltage> driveAppliedVolts;
-  private final StatusSignal<Current> driveCurrent;
+  protected final StatusSignal<Angle> drivePosition;
+  protected final Queue<Double> drivePositionQueue;
+  protected final StatusSignal<AngularVelocity> driveVelocity;
+  protected final StatusSignal<Voltage> driveAppliedVolts;
+  protected final StatusSignal<Current> driveCurrent;
 
   // Inputs from turn motor
-  private final StatusSignal<Angle> turnAbsolutePosition;
-  private final StatusSignal<Angle> turnPosition;
-  private final Queue<Double> turnPositionQueue;
-  private final StatusSignal<AngularVelocity> turnVelocity;
-  private final StatusSignal<Voltage> turnAppliedVolts;
-  private final StatusSignal<Current> turnCurrent;
+  protected final StatusSignal<Angle> turnAbsolutePosition;
+  protected final StatusSignal<Angle> turnPosition;
+  protected final Queue<Double> turnPositionQueue;
+  protected final StatusSignal<AngularVelocity> turnVelocity;
+  protected final StatusSignal<Voltage> turnAppliedVolts;
+  protected final StatusSignal<Current> turnCurrent;
 
   // Connection debouncers
-  private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
-  private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
-  private final Debouncer turnEncoderConnectedDebounce = new Debouncer(0.5);
+  protected final Debouncer driveConnectedDebounce = new Debouncer(0.5);
+  protected final Debouncer turnConnectedDebounce = new Debouncer(0.5);
+  protected final Debouncer turnEncoderConnectedDebounce = new Debouncer(0.5);
 
   public ModuleIOTalonFX(
       SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>

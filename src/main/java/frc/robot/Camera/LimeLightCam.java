@@ -5,7 +5,6 @@ import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.Camera.BaseCam.NeuralDetectorResult;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 

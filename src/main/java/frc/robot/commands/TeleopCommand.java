@@ -13,7 +13,6 @@ import frc.robot.subsystems.drive.NetworkCommunicator;
 import frc.robot.subsystems.intake.CoralIntake;
 
 public class TeleopCommand extends Command {
-  private boolean cancel = false;
 
   public TeleopCommand() {
     // this.addRequirements(Elevator.getInstance(), Drive.getInstance(),
