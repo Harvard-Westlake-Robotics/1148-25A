@@ -8,9 +8,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
-/* Maybe in future remove limelightHelpers Dependency,
-really just copy pasting but I'm lazy */
-
 public class LimeLightCam extends BaseCam {
   public String name = "";
   public static int LimeLightCount = 0;
@@ -117,24 +114,31 @@ public class LimeLightCam extends BaseCam {
     return targetCount() > 0;
   }
 
+  /* Returns the horizontal angle to the target in degrees */
   public double tX() {
     return -1 * _ntTable.getEntry("tx").getDouble(0);
   }
 
-  /* Used with MegaTag2, don't know how that thing works tho */
+  /* Sets the robot's current yaw position when stationary */
   public void SetRobotOrientation(Rotation2d curYaw) {
     LimelightHelpers.SetRobotOrientation(name, curYaw.getDegrees(), 0, 0, 0, 0, 0);
   }
 
+  /* Sets the robot's current yaw position and its rotational speed */
   public void SetRobotOrientation(Rotation2d curYaw, double curYawRate) {
     LimelightHelpers.SetRobotOrientation(name, curYaw.getDegrees(), curYawRate, 0, 0, 0, 0);
   }
 
+  /* Obtains an estimated position based off tag readings.
+  When disabled, we run MegaTag1 because there shouldn't be any ambiguity variables besides distance.
+  When enabled, MegaTag2 automatically filters out invalid or ambiguous readings */
   public Optional<AprilTagResult> getEstimate() {
     if (runNeuralNetwork) {
       return Optional.empty();
     }
     LimelightHelpers.PoseEstimate latestEstimate;
+
+    // Selects which MegaTag to use
     if (DriverStation.isDisabled()) {
       latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
     } else {
@@ -145,8 +149,9 @@ public class LimeLightCam extends BaseCam {
 
     if (latestEstimate.tagCount == 0) return Optional.empty();
 
+    // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight; MT 1 and 2 have
+    // seperated values
     if (DriverStation.isDisabled()) {
-      // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight
       if (latestEstimate.pose.getX() > X_MT1_VARIENCE_MAX) {
         X_MT1_VARIENCE_MAX = latestEstimate.pose.getX();
       }
@@ -184,7 +189,6 @@ public class LimeLightCam extends BaseCam {
           "RealOutputs/" + name + "/MT1/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
       Logger.recordOutput("RealOutputs/" + name + "/MT1/tagDistance", latestEstimate.avgTagDist);
     } else {
-      // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight
       if (latestEstimate.pose.getX() > X_MT2_VARIENCE_MAX) {
         X_MT2_VARIENCE_MAX = latestEstimate.pose.getX();
       }
@@ -229,33 +233,10 @@ public class LimeLightCam extends BaseCam {
             latestEstimate.timestampSeconds,
             latestEstimate.avgTagDist,
             latestEstimate.tagCount,
-            latestEstimate
-                .rawFiducials[0]
-                .ambiguity)); // Probably not the best but good enough for now
+            latestEstimate.rawFiducials[0].ambiguity));
   }
 
-  public Optional<AprilTagResult> getEstimateMT2() {
-    if (runNeuralNetwork) {
-      return Optional.empty();
-    }
-    LimelightHelpers.PoseEstimate latestEstimate;
-    latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
-
-    if (latestEstimate == null) return Optional.empty();
-
-    if (latestEstimate.tagCount == 0) return Optional.empty();
-
-    return Optional.of(
-        new AprilTagResult(
-            latestEstimate.pose,
-            latestEstimate.timestampSeconds,
-            latestEstimate.avgTagDist,
-            latestEstimate.tagCount,
-            latestEstimate
-                .rawFiducials[0]
-                .ambiguity)); // Probably not the best but good enough for now
-  }
-
+  /* Returns the latest tag detections from the limelight */
   public Optional<NeuralDetectorResult[]> getDetections() {
     if (!runNeuralNetwork) {
       return Optional.empty();

@@ -65,7 +65,6 @@ public abstract class BaseCam {
     boolean test(AprilTagResult latestResult);
   }
 
-  // eventually switch this to taking in a addVisionEstimate
   public boolean addVisionEstimate(
       addVisionEstimate addVisionMeasurement, acceptEstimate checkEstimation) {
     Optional<AprilTagResult> oEstimation = this.getEstimate();

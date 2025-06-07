@@ -151,7 +151,6 @@ public final class Constants {
           99999.0,
           1.0); // / 16.709
 
-  // TODO: Define
   public final class Elevator {
     public static final int elevator1ID = 13;
     public static final int elevator2ID = 14;
