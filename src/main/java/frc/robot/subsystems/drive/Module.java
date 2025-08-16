@@ -89,6 +89,31 @@ public class Module {
     io.setTurnPosition(state.angle);
   }
 
+  /**
+   * Runs the module with the specified setpoint state using Motion Magic for drive position
+   * control. This provides smoother acceleration profiles compared to velocity control. Mutates the
+   * state to optimize it.
+   */
+  public void runSetpointWithMotionMagic(SwerveModuleState state) {
+    // Optimize velocity setpoint
+    state.optimize(getAngle());
+    state.cosineScale(inputs.turnPosition);
+
+    // Calculate target position based on current position and desired velocity
+    // This uses a time-based integration approach for smoother motion
+    double currentPositionRad = inputs.drivePositionRad;
+    double targetVelocityRadPerSec = state.speedMetersPerSecond / constants.WheelRadius;
+
+    // Calculate the target position increment (20ms is the typical loop time)
+    double deltaTime = 0.02; // 20ms robot loop
+    double targetPositionIncrement = targetVelocityRadPerSec * deltaTime;
+    double targetPositionRad = currentPositionRad + targetPositionIncrement;
+
+    // Apply setpoints - use Motion Magic for drive, position control for turn
+    io.setDrivePosition(targetPositionRad);
+    io.setTurnPosition(state.angle);
+  }
+
   /** Runs the module with the specified output while controlling to zero degrees. */
   public void runCharacterization(double output) {
     io.setDriveOpenLoop(output);

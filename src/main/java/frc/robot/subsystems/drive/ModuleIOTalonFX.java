@@ -13,7 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
-import static frc.robot.util.PhoenixUtil.*;
+import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -22,6 +22,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
@@ -74,11 +75,15 @@ public class ModuleIOTalonFX implements ModuleIO {
   protected final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
   protected final PositionVoltage positionVoltageRequest =
       new PositionVoltage(0.0).withEnableFOC(true);
+  protected final MotionMagicVoltage driveMotionMagicVoltageRequest =
+      new MotionMagicVoltage(0.0).withEnableFOC(true);
   protected final VelocityVoltage velocityVoltageRequest =
       new VelocityVoltage(0.0).withEnableFOC(true);
 
   // Torque-current control requests
   protected final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);
+  protected final MotionMagicTorqueCurrentFOC driveMotionMagicTorqueCurrentRequest =
+      new MotionMagicTorqueCurrentFOC(0.0);
   protected final MotionMagicTorqueCurrentFOC positionTorqueCurrentRequest =
       new MotionMagicTorqueCurrentFOC(0.0);
   protected final VelocityTorqueCurrentFOC velocityTorqueCurrentRequest =
@@ -121,9 +126,6 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // Configure drive motor
     var driveConfig = constants.DriveMotorInitialConfigs;
-    driveConfig.MotionMagic.MotionMagicAcceleration = 9999;
-    driveConfig.MotionMagic.MotionMagicCruiseVelocity = 9999;
-    driveConfig.MotionMagic.MotionMagicJerk = 9999;
     configureDriveMotor(driveConfig);
     tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig, 0.25));
     tryUntilOk(5, () -> driveTalon.setPosition(0.0, 0.25));
@@ -177,7 +179,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   /**
-   * Configures the drive motor with appropriate settings for normal operation or drift mode.
+   * Configures the drive motor with appropriate settings for normal operation or car-like drift
+   * mode.
    *
    * @param driveConfig The drive motor configuration to modify
    */
@@ -185,8 +188,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     // Choose neutral mode based on drift mode and module position
     NeutralModeValue neutralMode;
     if (RobotContainer.isDriftModeActive) {
-      // In drift mode: front = brake, rear = coast
-      neutralMode = isFrontModule ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+      // Car-like drift mode: front wheels coast (for steering), rear wheels brake
+      // (for power)
+      neutralMode = isFrontModule ? NeutralModeValue.Coast : NeutralModeValue.Brake;
     } else {
       // Normal operation: all modules brake
       neutralMode = NeutralModeValue.Brake;
@@ -196,14 +200,24 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Slot0 = constants.DriveMotorGains;
     driveConfig.Feedback.SensorToMechanismRatio = constants.DriveMotorGearRatio;
 
-    // Configure current limits, higher in drift mode for more torque
+    // Configure current limits for car-like drift mode
     if (RobotContainer.isDriftModeActive) {
-      driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = DRIFT_CURRENT_LIMIT_STATOR;
-      driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -DRIFT_CURRENT_LIMIT_STATOR;
-      driveConfig.CurrentLimits.StatorCurrentLimit = DRIFT_CURRENT_LIMIT_STATOR;
-      driveConfig.CurrentLimits.SupplyCurrentLimit = DRIFT_CURRENT_LIMIT_SUPPLY;
-      driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+      if (!isFrontModule) {
+        // Rear wheels: Higher current limits for oversteer power
+        driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = DRIFT_CURRENT_LIMIT_STATOR;
+        driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -DRIFT_CURRENT_LIMIT_STATOR;
+        driveConfig.CurrentLimits.StatorCurrentLimit = DRIFT_CURRENT_LIMIT_STATOR;
+        driveConfig.CurrentLimits.SupplyCurrentLimit = DRIFT_CURRENT_LIMIT_SUPPLY;
+        driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+      } else {
+        // Front wheels: Lower current limits since they're mainly for steering
+        driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = constants.SlipCurrent * 0.5;
+        driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -constants.SlipCurrent * 0.5;
+        driveConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent * 0.5;
+        driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      }
     } else {
+      // Normal operation
       driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = constants.SlipCurrent;
       driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -constants.SlipCurrent;
       driveConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
@@ -230,14 +244,20 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     turnConfig.Slot0 = constants.SteerMotorGains;
     turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
-    turnConfig.Feedback.FeedbackSensorSource =
-        switch (constants.FeedbackSource) {
-          case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
-          case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
-          case SyncCANcoder -> FeedbackSensorSourceValue.SyncCANcoder;
-          default -> throw new RuntimeException(
-              "You are using an unsupported swerve configuration, which this template does not support without manual customization. The 2025 release of Phoenix supports some swerve configurations which were not available during 2025 beta testing, preventing any development and support from the AdvantageKit developers.");
-        };
+    switch (constants.FeedbackSource) {
+      case RemoteCANcoder:
+        turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        break;
+      case FusedCANcoder:
+        turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        break;
+      case SyncCANcoder:
+        turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
+        break;
+      default:
+        throw new RuntimeException(
+            "You are using an unsupported swerve configuration, which this template does not support without manual customization. The 2025 release of Phoenix supports some swerve configurations which were not available during 2025 beta testing, preventing any development and support from the AdvantageKit developers.");
+    }
     turnConfig.Feedback.RotorToSensorRatio = constants.SteerMotorGearRatio;
 
     // Adjust motion magic parameters for drift mode
@@ -304,40 +324,64 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   @Override
   public void setDriveOpenLoop(double output) {
-    driveTalon.setControl(
-        switch (constants.DriveMotorClosedLoopOutput) {
-          case Voltage -> voltageRequest.withOutput(output);
-          case TorqueCurrentFOC -> torqueCurrentRequest.withOutput(output);
-        });
+    switch (constants.DriveMotorClosedLoopOutput) {
+      case Voltage:
+        driveTalon.setControl(voltageRequest.withOutput(output));
+        break;
+      case TorqueCurrentFOC:
+        driveTalon.setControl(torqueCurrentRequest.withOutput(output));
+        break;
+    }
   }
 
   @Override
   public void setTurnOpenLoop(double output) {
-    turnTalon.setControl(
-        switch (constants.SteerMotorClosedLoopOutput) {
-          case Voltage -> voltageRequest.withOutput(output);
-          case TorqueCurrentFOC -> torqueCurrentRequest.withOutput(output);
-        });
+    switch (constants.SteerMotorClosedLoopOutput) {
+      case Voltage:
+        turnTalon.setControl(voltageRequest.withOutput(output));
+        break;
+      case TorqueCurrentFOC:
+        turnTalon.setControl(torqueCurrentRequest.withOutput(output));
+        break;
+    }
   }
 
   @Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
-    driveTalon.setControl(
-        switch (constants.DriveMotorClosedLoopOutput) {
-          case Voltage -> velocityVoltageRequest.withVelocity(velocityRotPerSec);
-          case TorqueCurrentFOC -> velocityTorqueCurrentRequest.withVelocity(velocityRotPerSec);
-        });
+    switch (constants.DriveMotorClosedLoopOutput) {
+      case Voltage:
+        driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
+        break;
+      case TorqueCurrentFOC:
+        driveTalon.setControl(velocityTorqueCurrentRequest.withVelocity(velocityRotPerSec));
+        break;
+    }
+  }
+
+  @Override
+  public void setDrivePosition(double positionRad) {
+    double positionRotations = Units.radiansToRotations(positionRad);
+    switch (constants.DriveMotorClosedLoopOutput) {
+      case Voltage:
+        driveTalon.setControl(driveMotionMagicVoltageRequest.withPosition(positionRotations));
+        break;
+      case TorqueCurrentFOC:
+        driveTalon.setControl(driveMotionMagicTorqueCurrentRequest.withPosition(positionRotations));
+        break;
+    }
   }
 
   @Override
   public void setTurnPosition(Rotation2d rotation) {
-    turnTalon.setControl(
-        switch (constants.SteerMotorClosedLoopOutput) {
-          case Voltage -> positionVoltageRequest.withPosition(rotation.getRotations());
-          case TorqueCurrentFOC -> positionTorqueCurrentRequest.withPosition(
-              rotation.getRotations());
-        });
+    switch (constants.SteerMotorClosedLoopOutput) {
+      case Voltage:
+        turnTalon.setControl(positionVoltageRequest.withPosition(rotation.getRotations()));
+        break;
+      case TorqueCurrentFOC:
+        turnTalon.setControl(positionTorqueCurrentRequest.withPosition(rotation.getRotations()));
+        break;
+    }
   }
 
   /**
@@ -349,9 +393,11 @@ public class ModuleIOTalonFX implements ModuleIO {
     var driveConfig = new MotorOutputConfigs();
     driveTalon.getConfigurator().refresh(driveConfig);
 
-    // Set neutral mode based on drift mode and module position
+    // Set neutral mode based on car-like drift mode and module position
     if (RobotContainer.isDriftModeActive) {
-      driveConfig.NeutralMode = isFrontModule ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+      // Car-like drift: front wheels coast (for steering), rear wheels brake (for
+      // power)
+      driveConfig.NeutralMode = isFrontModule ? NeutralModeValue.Coast : NeutralModeValue.Brake;
     } else {
       driveConfig.NeutralMode = NeutralModeValue.Brake;
     }
@@ -362,21 +408,34 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveTalon.getConfigurator().refresh(currentLimits);
 
     if (RobotContainer.isDriftModeActive) {
-      currentLimits.StatorCurrentLimit = DRIFT_CURRENT_LIMIT_STATOR;
-      currentLimits.SupplyCurrentLimit = DRIFT_CURRENT_LIMIT_SUPPLY;
-      currentLimits.SupplyCurrentLimitEnable = true;
+      if (!isFrontModule) {
+        // Rear wheels: Higher current limits for oversteer power
+        currentLimits.StatorCurrentLimit = DRIFT_CURRENT_LIMIT_STATOR;
+        currentLimits.SupplyCurrentLimit = DRIFT_CURRENT_LIMIT_SUPPLY;
+        currentLimits.SupplyCurrentLimitEnable = true;
+      } else {
+        // Front wheels: Lower current limits since they're mainly for steering
+        currentLimits.StatorCurrentLimit = constants.SlipCurrent * 0.5;
+        currentLimits.StatorCurrentLimitEnable = true;
+      }
     } else {
       currentLimits.StatorCurrentLimit = constants.SlipCurrent;
       currentLimits.StatorCurrentLimitEnable = true;
     }
     driveTalon.getConfigurator().apply(currentLimits);
 
-    // Update turn motor configuration
+    // Update turn motor configuration for car-like behavior
     var turnOutputConfig = new MotorOutputConfigs();
     turnTalon.getConfigurator().refresh(turnOutputConfig);
 
-    turnOutputConfig.NeutralMode =
-        RobotContainer.isDriftModeActive ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+    if (RobotContainer.isDriftModeActive) {
+      // Car-like drift: front wheels can turn freely (coast), rear wheels locked in
+      // position (brake)
+      turnOutputConfig.NeutralMode =
+          isFrontModule ? NeutralModeValue.Coast : NeutralModeValue.Brake;
+    } else {
+      turnOutputConfig.NeutralMode = NeutralModeValue.Coast;
+    }
     turnTalon.getConfigurator().apply(turnOutputConfig);
   }
 }

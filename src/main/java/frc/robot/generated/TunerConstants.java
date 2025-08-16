@@ -79,6 +79,11 @@ public class TunerConstants {
   // This needs to be tuned to your individual robot
   private static final Current kSlipCurrent = Amps.of(130.0);
 
+  // Motion Magic constants for drive motors
+  public static final double kDriveMotionMagicCruiseVelocity = 100.0; // rotations per second
+  public static final double kDriveMotionMagicAcceleration = 200.0; // rotations per second squared
+  public static final double kDriveMotionMagicJerk = 1600.0; // rotations per second cubed
+
   // Initial configs for the drive and steer motors and the azimuth encoder; these
   // cannot be null.
   // Some configs will be overwritten; check the `with*InitialConfigs()` API
@@ -92,7 +97,12 @@ public class TunerConstants {
                   .withStatorCurrentLimitEnable(true)
                   .withStatorCurrentLimit(kSlipCurrent))
           .withMotorOutput(
-              new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast)); // REMOVE LATER
+              new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast)) // REMOVE LATER
+          .withMotionMagic(
+              new MotionMagicConfigs()
+                  .withMotionMagicCruiseVelocity(kDriveMotionMagicCruiseVelocity)
+                  .withMotionMagicAcceleration(kDriveMotionMagicAcceleration)
+                  .withMotionMagicJerk(kDriveMotionMagicJerk));
   private static final TalonFXConfiguration steerInitialConfigs =
       new TalonFXConfiguration()
           .withCurrentLimits(

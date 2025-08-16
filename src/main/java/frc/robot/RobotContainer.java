@@ -210,6 +210,13 @@ public class RobotContainer {
     autoChooser.addOption(
         "Elevator SysID (Dynamic Reverse)", elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    // Add drift compensation calibration
+    autoChooser.addOption(
+        "Drive Drift Compensation Calibration", DriveCommands.driftCompensationCalibration(drive));
+
+    // Add traction control test
+    autoChooser.addOption("Traction Control Test", DriveCommands.tractionControlTest(drive));
+
     // Configure the button bindings
     configureButtonBindings();
     LED.getInstance().Color(0, 255, 0);
@@ -239,10 +246,24 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    // Default command, normal field-relative drive
+    // Dynamic default command based on drift mode state
     drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+        Commands.either(
+            // Drift mode: Use R2 as throttle and left stick X as steering
+            DriveCommands.carDriftDrive(
+                drive,
+                () -> driver.getR2Axis(), // R2 trigger for throttle
+                () -> -driver.getLeftX() // Left stick X for steering (inverted)
+                ),
+            // Normal mode: Standard swerve controls
+            DriveCommands.joystickDrive(
+                drive,
+                () -> -driver.getLeftY(), // Forward/backward
+                () -> -driver.getLeftX(), // Left/right strafe
+                () -> -driver.getRightX() // Rotation
+                ),
+            () -> RobotContainer.isDriftModeActive // Condition to check
+            ));
     elevatorCommand = new ScoreCommand(ScoringLevel.L0);
     elevator.setDefaultCommand(elevatorCommand);
     coralIntakeCommand = new CoralIntakeCommand(6);
@@ -267,6 +288,12 @@ public class RobotContainer {
 
     // Add drift mode toggle to the driver's right bumper button
     operator.povLeft().onTrue(DriveCommands.toggleDriftMode(drive));
+
+    // Add traction control toggle (disabled by default for testing)
+    operator.povRight().onTrue(DriveCommands.toggleTractionControl(drive));
+
+    // Add traction control test command (hold for monitoring)
+    operator.leftBumper().whileTrue(DriveCommands.tractionControlTest(drive));
 
     ControlMap.getInstance().configurePreset1(operator, driver);
   }

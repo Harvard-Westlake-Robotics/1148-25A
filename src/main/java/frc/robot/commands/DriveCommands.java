@@ -105,6 +105,46 @@ public class DriveCommands {
   }
 
   /**
+   * Field relative drive command using two joysticks with Motion Magic motion profiles. This
+   * provides smoother acceleration and deceleration compared to direct velocity control.
+   */
+  public static Command joystickDriveWithMotionMagic(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier) {
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity =
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          // Apply rotation deadband
+          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+
+          // Square rotation value for more precise control
+          omega = Math.copySign(omega * omega, omega);
+
+          // Convert to field relative speeds & send command using Motion Magic
+          ChassisSpeeds speeds =
+              new ChassisSpeeds(
+                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  omega * drive.getMaxAngularSpeedRadPerSec());
+          boolean isFlipped =
+              DriverStation.getAlliance().isPresent()
+                  && DriverStation.getAlliance().get() == Alliance.Red;
+          drive.runVelocityWithMotionMagic(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  speeds,
+                  isFlipped
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation()));
+        },
+        drive);
+  }
+
+  /**
    * Field relative drive command using joystick for linear control and PID for angular control.
    * Possible use cases include snapping to an angle, aiming at a vision target, or controlling
    * absolute rotation with a joystick.
@@ -146,6 +186,61 @@ public class DriveCommands {
                   DriverStation.getAlliance().isPresent()
                       && DriverStation.getAlliance().get() == Alliance.Red;
               drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
+            },
+            drive)
+
+        // Reset PID controller when command starts
+        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+  }
+
+  /**
+   * Field relative drive command using joystick for linear control and PID for angular control,
+   * with Motion Magic motion profiles for smoother drive control. Possible use cases include
+   * snapping to an angle, aiming at a vision target, or controlling absolute rotation with a
+   * joystick.
+   */
+  public static Command joystickDriveAtAngleWithMotionMagic(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      Supplier<Rotation2d> rotationSupplier) {
+
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    // Construct command
+    return Commands.run(
+            () -> {
+              // Get linear velocity
+              Translation2d linearVelocity =
+                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+              // Calculate angular speed
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+
+              // Convert to field relative speeds & send command using Motion Magic
+              ChassisSpeeds speeds =
+                  new ChassisSpeeds(
+                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      omega);
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              drive.runVelocityWithMotionMagic(
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       speeds,
                       isFlipped
@@ -221,6 +316,131 @@ public class DriveCommands {
                 }));
   }
 
+  /**
+   * Calibrates drift compensation by driving the robot in straight lines and measuring drift. This
+   * should be run on a flat, consistent surface.
+   */
+  public static Command driftCompensationCalibration(Drive drive) {
+    Timer timer = new Timer();
+    DriftCalibrationState state = new DriftCalibrationState();
+
+    return Commands.sequence(
+        // Reset drift compensation and prepare for calibration
+        Commands.runOnce(
+            () -> {
+              drive.resetDriftCompensation();
+              drive.startDriftCalibration();
+              state.reset();
+            }),
+
+        // Test forward movement
+        Commands.sequence(
+            Commands.runOnce(
+                () -> {
+                  state.startDirection = "Forward";
+                  state.startPose = drive.getPose();
+                  timer.restart();
+                }),
+            Commands.run(
+                    () -> {
+                      double distance = timer.get() * 1.0; // 1 m/s for 3 seconds
+                      drive.setDriftCalibrationExpectedPosition(new Translation2d(distance, 0));
+                      drive.runVelocity(new ChassisSpeeds(1.0, 0.0, 0.0));
+                    },
+                    drive)
+                .withTimeout(3.0),
+            Commands.runOnce(
+                () -> {
+                  drive.stopDriftCalibration();
+                  state.recordResult(drive.getPose(), new Translation2d(3.0, 0.0));
+                })),
+
+        // Wait between tests
+        Commands.waitSeconds(1.0),
+
+        // Test backward movement
+        Commands.sequence(
+            Commands.runOnce(
+                () -> {
+                  state.startDirection = "Backward";
+                  state.startPose = drive.getPose();
+                  drive.startDriftCalibration();
+                  timer.restart();
+                }),
+            Commands.run(
+                    () -> {
+                      double distance = timer.get() * -1.0; // -1 m/s for 3 seconds
+                      drive.setDriftCalibrationExpectedPosition(new Translation2d(distance, 0));
+                      drive.runVelocity(new ChassisSpeeds(-1.0, 0.0, 0.0));
+                    },
+                    drive)
+                .withTimeout(3.0),
+            Commands.runOnce(
+                () -> {
+                  drive.stopDriftCalibration();
+                  state.recordResult(drive.getPose(), new Translation2d(-3.0, 0.0));
+                })),
+
+        // Wait between tests
+        Commands.waitSeconds(1.0),
+
+        // Test left strafe
+        Commands.sequence(
+            Commands.runOnce(
+                () -> {
+                  state.startDirection = "Left";
+                  state.startPose = drive.getPose();
+                  drive.startDriftCalibration();
+                  timer.restart();
+                }),
+            Commands.run(
+                    () -> {
+                      double distance = timer.get() * 1.0; // 1 m/s for 3 seconds
+                      drive.setDriftCalibrationExpectedPosition(new Translation2d(0, distance));
+                      drive.runVelocity(new ChassisSpeeds(0.0, 1.0, 0.0));
+                    },
+                    drive)
+                .withTimeout(3.0),
+            Commands.runOnce(
+                () -> {
+                  drive.stopDriftCalibration();
+                  state.recordResult(drive.getPose(), new Translation2d(0.0, 3.0));
+                })),
+
+        // Wait between tests
+        Commands.waitSeconds(1.0),
+
+        // Test right strafe
+        Commands.sequence(
+            Commands.runOnce(
+                () -> {
+                  state.startDirection = "Right";
+                  state.startPose = drive.getPose();
+                  drive.startDriftCalibration();
+                  timer.restart();
+                }),
+            Commands.run(
+                    () -> {
+                      double distance = timer.get() * -1.0; // -1 m/s for 3 seconds
+                      drive.setDriftCalibrationExpectedPosition(new Translation2d(0, distance));
+                      drive.runVelocity(new ChassisSpeeds(0.0, -1.0, 0.0));
+                    },
+                    drive)
+                .withTimeout(3.0),
+            Commands.runOnce(
+                () -> {
+                  drive.stopDriftCalibration();
+                  state.recordResult(drive.getPose(), new Translation2d(0.0, -3.0));
+                })),
+
+        // Stop and print results
+        Commands.runOnce(
+            () -> {
+              drive.stop();
+              state.printResults();
+            }));
+  }
+
   /** Measures the robot's wheel radius by spinning in a circle. */
   public static Command wheelRadiusCharacterization(Drive drive) {
     SlewRateLimiter limiter = new SlewRateLimiter(WHEEL_RADIUS_RAMP_RATE);
@@ -291,6 +511,76 @@ public class DriveCommands {
   }
 
   /**
+   * Resets drift compensation factors to zero.
+   *
+   * @param drive The drive subsystem
+   * @return A command that resets drift compensation
+   */
+  public static Command resetDriftCompensation(Drive drive) {
+    return Commands.runOnce(
+        () -> {
+          drive.resetDriftCompensation();
+          System.out.println("Drift compensation reset to zero.");
+        });
+  }
+
+  /**
+   * Toggles drift compensation on/off.
+   *
+   * @param drive The drive subsystem
+   * @return A command that toggles drift compensation
+   */
+  public static Command toggleDriftCompensation(Drive drive) {
+    return Commands.runOnce(
+        () -> {
+          boolean wasEnabled = drive.getDriftCompensation().getNorm() > 0.001;
+          drive.setDriftCompensationEnabled(!wasEnabled);
+          System.out.println("Drift compensation " + (!wasEnabled ? "enabled" : "disabled"));
+        });
+  }
+
+  /**
+   * Toggles traction control system on/off.
+   *
+   * @param drive The drive subsystem
+   * @return A command that toggles traction control
+   */
+  public static Command toggleTractionControl(Drive drive) {
+    return Commands.runOnce(
+        () -> {
+          boolean currentState = Drive.TRACTION_CONTROL_ENABLED;
+          drive.setTractionControlEnabled(!currentState);
+          System.out.println("Traction Control " + (!currentState ? "ENABLED" : "DISABLED"));
+        });
+  }
+
+  /**
+   * Creates a command to test traction control by monitoring skid detection.
+   *
+   * @param drive The drive subsystem
+   * @return A command that logs traction control telemetry
+   */
+  public static Command tractionControlTest(Drive drive) {
+    return Commands.run(
+            () -> {
+              double skiddingRatio = drive.getSkiddingRatio();
+              boolean anySlipping = drive.isAnyModuleSlipping();
+              double[] multipliers = drive.getTractionControlMultipliers();
+
+              System.out.printf(
+                  "Skidding Ratio: %.3f | Any Slip: %s | Multipliers: [%.2f, %.2f, %.2f, %.2f]%n",
+                  skiddingRatio,
+                  anySlipping,
+                  multipliers[0],
+                  multipliers[1],
+                  multipliers[2],
+                  multipliers[3]);
+            },
+            drive)
+        .withTimeout(30.0); // Run for 30 seconds
+  }
+
+  /**
    * Toggles drift mode and applies appropriate motor configurations.
    *
    * @param drive The drive subsystem
@@ -316,9 +606,71 @@ public class DriveCommands {
         });
   }
 
+  /**
+   * Car-like drift mode drive command with throttle and steering controls. Uses R2 trigger for
+   * throttle and left stick X-axis for steering.
+   *
+   * @param drive The drive subsystem
+   * @param throttleSupplier Supplier for throttle input (0.0 to 1.0)
+   * @param steeringSupplier Supplier for steering input (-1.0 to 1.0)
+   * @return A command for car-like drift driving
+   */
+  public static Command carDriftDrive(
+      Drive drive, DoubleSupplier throttleSupplier, DoubleSupplier steeringSupplier) {
+    return Commands.run(
+        () -> {
+          // Get inputs and apply deadband
+          double throttle = MathUtil.applyDeadband(throttleSupplier.getAsDouble(), DEADBAND);
+          double steering = MathUtil.applyDeadband(steeringSupplier.getAsDouble(), DEADBAND);
+
+          // Ensure throttle is positive (0.0 to 1.0)
+          throttle = Math.max(0.0, throttle);
+
+          // Apply car-like drift mode
+          drive.runCarDriftMode(throttle, steering);
+        },
+        drive);
+  }
+
   private static class WheelRadiusCharacterizationState {
     double[] positions = new double[4];
     Rotation2d lastAngle = new Rotation2d();
     double gyroDelta = 0.0;
+  }
+
+  private static class DriftCalibrationState {
+    String startDirection = "";
+    Pose2d startPose = new Pose2d();
+    List<String> results = new LinkedList<>();
+
+    void reset() {
+      results.clear();
+    }
+
+    void recordResult(Pose2d endPose, Translation2d expectedMovement) {
+      Translation2d actualMovement = endPose.getTranslation().minus(startPose.getTranslation());
+      Translation2d error = actualMovement.minus(expectedMovement);
+
+      String result =
+          String.format(
+              "%s: Expected(%.2f, %.2f) Actual(%.2f, %.2f) Error(%.2f, %.2f)",
+              startDirection,
+              expectedMovement.getX(),
+              expectedMovement.getY(),
+              actualMovement.getX(),
+              actualMovement.getY(),
+              error.getX(),
+              error.getY());
+
+      results.add(result);
+    }
+
+    void printResults() {
+      System.out.println("********** Drift Compensation Calibration Results **********");
+      for (String result : results) {
+        System.out.println("\t" + result);
+      }
+      System.out.println("Check AdvantageScope for detailed drift compensation factors.");
+    }
   }
 }
