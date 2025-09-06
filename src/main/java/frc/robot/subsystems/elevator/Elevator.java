@@ -33,13 +33,14 @@ public class Elevator extends SubsystemBase {
 
   private Elevator() {
     io = new ElevatorIOTalonFX();
-    sysId = new SysIdRoutine(
-        new Config(
-            null,
-            null,
-            null,
-            (state) -> Logger.recordOutput("Elevator/SysIdState", state.toString())),
-        new Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    sysId =
+        new SysIdRoutine(
+            new Config(
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Elevator/SysIdState", state.toString())),
+            new Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
   }
 
   public void periodic() {
@@ -153,8 +154,7 @@ public class Elevator extends SubsystemBase {
   }
 
   /**
-   * Logs only critical elevator state when performance is limited. Reduces
-   * logging overhead while
+   * Logs only critical elevator state when performance is limited. Reduces logging overhead while
    * maintaining essential telemetry.
    */
   private void logCriticalElevatorState() {

@@ -219,7 +219,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-    LED.getInstance().Color(0, 255, 0);
+    LED.getInstance().Color(255, 0, 0);
     try {
       pathfindL = PathPlannerPath.fromPathFile("Push");
     } catch (Exception e) {

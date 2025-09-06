@@ -116,8 +116,10 @@ public class AlgaeIntake extends SubsystemBase {
         inputs.intakeVelocityMPS);
 
     // Sensor data
-    LoggingUtil.logBooleanSensor("AlgaeIntake", "Sensor1", getSensor1());
-    LoggingUtil.logBooleanSensor("AlgaeIntake", "Sensor2", getSensor2());
+    LoggingUtil.logBooleanSensor(
+        "AlgaeIntake", "Sensor1", getSensor1() != null ? getSensor1() : false);
+    LoggingUtil.logBooleanSensor(
+        "AlgaeIntake", "Sensor2", getSensor2() != null ? getSensor2() : false);
 
     // Game piece detection
     LoggingUtil.logBoolean("AlgaeIntake/HasAlgae", hasAlgae);
