@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.intake.CoralIntake;
 
 public class RaiseElevatorCommand extends Command {
   private double targetHeight;
@@ -28,7 +29,8 @@ public class RaiseElevatorCommand extends Command {
   }
 
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   @Override
   public void execute() {
@@ -36,7 +38,8 @@ public class RaiseElevatorCommand extends Command {
   }
 
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+  }
 
   @Override
   public boolean isFinished() {
@@ -44,20 +47,23 @@ public class RaiseElevatorCommand extends Command {
   }
 
   public void setHeight(ScoringLevel level) {
-    if (level == ScoringLevel.L1) {
-      targetHeight = 15.5;
-    } else if (level == ScoringLevel.L2) {
-      targetHeight = 20.40;
-    } else if (level == ScoringLevel.L3) {
-      targetHeight = 30.08;
-    } else if (level == ScoringLevel.L4) {
-      targetHeight = 53.40;
-    } else if (level == ScoringLevel.TOP_REMOVE) {
-      targetHeight = 19.32;
-    } else if (level == ScoringLevel.BOTTOM_REMOVE) {
-      targetHeight = 7.80;
-    } else {
-      targetHeight = 0.0;
+    // If coral not fully in robot, prevent robot from sending elevator anywhere
+    if (CoralIntake.getInstance().getSensor3()) {
+      if (level == ScoringLevel.L1) {
+        targetHeight = 15.5;
+      } else if (level == ScoringLevel.L2) {
+        targetHeight = 20.40;
+      } else if (level == ScoringLevel.L3) {
+        targetHeight = 30.08;
+      } else if (level == ScoringLevel.L4) {
+        targetHeight = 53.40;
+      } else if (level == ScoringLevel.TOP_REMOVE) {
+        targetHeight = 19.32;
+      } else if (level == ScoringLevel.BOTTOM_REMOVE) {
+        targetHeight = 7.80;
+      } else {
+        targetHeight = 0.0;
+      }
     }
   }
 }
