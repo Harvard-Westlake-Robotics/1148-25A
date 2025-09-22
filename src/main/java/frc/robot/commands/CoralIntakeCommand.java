@@ -67,7 +67,7 @@ public class CoralIntakeCommand extends Command {
     } else {
       CoralIntake.getInstance().setVelocity(velocity);
     }
-  }
+  } 
 
   @Override
   public void end(boolean interrupted) {
@@ -80,9 +80,8 @@ public class CoralIntakeCommand extends Command {
   public boolean isFinished() {
     if (!eject) {
       return CoralIntake.getInstance().hasCoral();
-    } else {
-      return CoralIntake.getInstance().getSensor2();
     }
+    return false;
   }
 
   public void setVelocity(LinearVelocity velocity) {
