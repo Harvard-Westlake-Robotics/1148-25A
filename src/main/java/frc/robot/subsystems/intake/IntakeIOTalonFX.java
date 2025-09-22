@@ -178,7 +178,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   public Boolean getSensor3() {
     if (input3 != null) {
-      return input2.get();
+      return input3.get();
     } else {
       return null;
     }

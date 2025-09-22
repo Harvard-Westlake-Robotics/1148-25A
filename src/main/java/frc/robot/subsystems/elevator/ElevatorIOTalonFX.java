@@ -78,17 +78,13 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator2Config.CurrentLimits.SupplyCurrentLimitEnable = true;
     elevator2Config.CurrentLimits.SupplyCurrentLimit = 50;
     elevator1Config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    elevator1Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        Constants.Elevator.elevatorForwardSoftLimitRotations;
+    elevator1Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Elevator.elevatorForwardSoftLimitRotations;
     elevator1Config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    elevator1Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        Constants.Elevator.elevatorReverseSoftLimitRotations;
+    elevator1Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Constants.Elevator.elevatorReverseSoftLimitRotations;
     elevator2Config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    elevator2Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        Constants.Elevator.elevatorForwardSoftLimitRotations;
+    elevator2Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Elevator.elevatorForwardSoftLimitRotations;
     elevator2Config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    elevator2Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        Constants.Elevator.elevatorReverseSoftLimitRotations;
+    elevator2Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Constants.Elevator.elevatorReverseSoftLimitRotations;
     elevator1.getConfigurator().apply(elevator1Config);
     elevator2.getConfigurator().apply(elevator2Config);
     elevator1.setControl(elevatorController);
@@ -104,31 +100,36 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     motor2AppliedVolts = elevator2.getMotorVoltage();
     motor2Current = elevator2.getStatorCurrent();
 
-    elevatorFeedforward =
-        new ElevatorFeedforward(
-            Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
+    elevatorFeedforward = new ElevatorFeedforward(
+        Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
   }
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    var elevator1Status =
-        StatusSignal.refreshAll(motor1Position, motor1Velocity, motor1AppliedVolts, motor1Current);
-    var elevator2Status =
-        StatusSignal.refreshAll(motor2Position, motor2Velocity, motor2AppliedVolts, motor2Current);
+    var elevator1Status = StatusSignal.refreshAll(motor1Position, motor1Velocity, motor1AppliedVolts, motor1Current);
+    var elevator2Status = StatusSignal.refreshAll(motor2Position, motor2Velocity, motor2AppliedVolts, motor2Current);
 
     inputs.elevator1Connected = motor1ConnectedDebounce.calculate(elevator1.isConnected());
     inputs.elevator1PositionMeters =
-        motor1Position.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
+        // motor1Position.getValueAsDouble() /
+        // Constants.Elevator.rotationsToMetersRatio;
+        motor1Position.getValueAsDouble();
     inputs.elevator1VelocityMPS =
-        motor1Velocity.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
+        // motor1Velocity.getValueAsDouble() /
+        // Constants.Elevator.rotationsToMetersRatio;
+        motor1Velocity.getValueAsDouble();
     inputs.elevator1AppliedVolts = motor1AppliedVolts.getValueAsDouble();
     inputs.elevator1CurrentAmps = motor1Current.getValueAsDouble();
 
     inputs.elevator2Connected = motor2ConnectedDebounce.calculate(elevator2.isConnected());
     inputs.elevator2PositionMeters =
-        motor2Position.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
+        // motor2Position.getValueAsDouble() /
+        // Constants.Elevator.rotationsToMetersRatio;\
+        motor2Position.getValueAsDouble();
     inputs.elevator2VelocityMPS =
-        motor2Velocity.getValueAsDouble() * Constants.Elevator.rotationsToMetersRatio;
+        // motor2Velocity.getValueAsDouble() /
+        // Constants.Elevator.rotationsToMetersRatio;
+        motor2Velocity.getValueAsDouble();
     inputs.elevator2AppliedVolts = motor2AppliedVolts.getValueAsDouble();
     inputs.elevator2CurrentAmps = motor2Current.getValueAsDouble();
   }

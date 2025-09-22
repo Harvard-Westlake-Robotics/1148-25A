@@ -20,8 +20,10 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
- * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
- * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
+ * This class defines the runtime mode used by AdvantageKit. The mode is always
+ * "real" when running
+ * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics
+ * sim) and "replay"
  * (log replay from a file).
  */
 public final class Constants {
@@ -107,49 +109,47 @@ public final class Constants {
    * in the parameters below, we did the reciprocal of rotationsToMetersRatio bc
    * your dumbass did metersToRotations :)
    */
-  public static final IntakeConstants AlgaeIntake =
-      new IntakeConstants(
-          16,
-          InvertedValue.CounterClockwise_Positive,
-          100,
-          -100,
-          1.669162,
-          0.0,
-          0.0,
-          0.1761,
-          0.12875,
-          0.0,
-          -1,
-          -1,
-          -1,
-          0.0,
-          0.0,
-          100.0,
-          100.0,
-          1000000.0,
-          1.0 / 16.709);
+  public static final IntakeConstants AlgaeIntake = new IntakeConstants(
+      16,
+      InvertedValue.CounterClockwise_Positive,
+      100,
+      -100,
+      1.669162,
+      0.0,
+      0.0,
+      0.1761,
+      0.12875,
+      0.0,
+      -1,
+      -1,
+      -1,
+      0.0,
+      0.0,
+      100.0,
+      100.0,
+      1000000.0,
+      1.0 / 16.709);
 
-  public static final IntakeConstants CoralIntake =
-      new IntakeConstants(
-          17,
-          InvertedValue.Clockwise_Positive,
-          100,
-          -100,
-          8.569162,
-          0.0,
-          0.0,
-          0.3,
-          0.0,
-          0.0,
-          4,
-          1,
-          9,
-          0.55,
-          0.005,
-          99999.0,
-          99999.0,
-          99999.0,
-          1.0); // / 16.709
+  public static final IntakeConstants CoralIntake = new IntakeConstants(
+      17,
+      InvertedValue.Clockwise_Positive,
+      100,
+      -100,
+      8.569162,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0,
+      4,
+      1,
+      6,
+      0.55,
+      0.005,
+      99999.0,
+      99999.0,
+      99999.0,
+      1.0); // / 16.709
 
   public final class Elevator {
     public static final int elevator1ID = 13;
@@ -165,8 +165,8 @@ public final class Constants {
     public static double kA = 0.0;
     public static final double elevatorForwardSoftLimitRotations = 55;
     public static final double elevatorReverseSoftLimitRotations = 0.0;
-    public static final double rotationsToMetersRatio = (1);
-    public static final double[] elevatorHeights = {0, 1, 2, 3};
+    public static final double rotationsToMetersRatio = (24.02);
+    public static final double[] elevatorHeights = { 0, 1, 2, 3 };
     public static final double elevatorGroundOffsetMeters = 0.2125;
   }
 
@@ -229,43 +229,41 @@ public final class Constants {
   }
 
   // TODO: Fix later with real values
-  public static final WristConstants IntakeWrist =
-      new WristConstants(
-          18,
-          InvertedValue.CounterClockwise_Positive,
-          100000,
-          3.669162,
-          0.0,
-          0.2,
-          0.000,
-          0.0,
-          0.0,
-          0.0,
-          1000.0,
-          1000.0,
-          1000.0,
-          1.0, // 4.846
-          Angle.ofBaseUnits(0.0, Degrees),
-          40,
-          80);
+  public static final WristConstants IntakeWrist = new WristConstants(
+      18,
+      InvertedValue.CounterClockwise_Positive,
+      100000,
+      3.669162,
+      0.0,
+      0.2,
+      0.000,
+      0.0,
+      0.0,
+      0.0,
+      1000.0,
+      1000.0,
+      1000.0,
+      1.0, // 4.846
+      Angle.ofBaseUnits(0.0, Degrees),
+      40,
+      80);
 
-  public static final WristConstants HangWrist =
-      new WristConstants(
-          15,
-          InvertedValue.CounterClockwise_Positive,
-          90,
-          1.369162,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          10000.0,
-          30.0 * 3,
-          10000000.0,
-          1.0,
-          Angle.ofBaseUnits(0.0, Degrees),
-          340,
-          340); // 28.64 rot
+  public static final WristConstants HangWrist = new WristConstants(
+      15,
+      InvertedValue.CounterClockwise_Positive,
+      90,
+      1.369162,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      10000.0,
+      30.0 * 3,
+      10000000.0,
+      1.0,
+      Angle.ofBaseUnits(0.0, Degrees),
+      340,
+      340); // 28.64 rot
 }
