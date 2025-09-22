@@ -78,13 +78,9 @@ public class ControlMap {
                     RobotContainer.coralIntakeCommand.setVelocity(
                         LinearVelocity.ofBaseUnits(0, MetersPerSecond));
                   } else {
-                    if (RobotContainer.coralIntakeCommand.isEject()) {
-                      RobotContainer.coralIntakeCommand.setEject(false);
-                      RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
-                    } else {
-                      RobotContainer.coralIntakeCommand.setVelocity(
+                    RobotContainer.coralIntakeCommand.setEject(false);
+                    RobotContainer.coralIntakeCommand.setVelocity(
                         LinearVelocity.ofBaseUnits(4, MetersPerSecond));
-                    }
                   }
                 }));
 
@@ -101,7 +97,7 @@ public class ControlMap {
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+                      LinearVelocity.ofBaseUnits(6, MetersPerSecond));
                   RobotContainer.coralIntakeCommand.setEject(false);
                 }));
     operator
@@ -117,7 +113,7 @@ public class ControlMap {
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+                      LinearVelocity.ofBaseUnits(6, MetersPerSecond));
                   RobotContainer.coralIntakeCommand.setEject(false);
                 }));
     // Algae Intake

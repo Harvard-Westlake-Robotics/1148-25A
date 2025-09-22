@@ -64,6 +64,8 @@ public class CoralIntakeCommand extends Command {
       // if the intake is still but we dont have a coral loaded- unsure why it is here
     } else if (CoralIntake.getInstance().getSensor2()) {
       CoralIntake.getInstance().setVelocity(velocity);
+    } else {
+      CoralIntake.getInstance().setVelocity(velocity);
     }
   }
 
