@@ -54,7 +54,7 @@ public class RaiseElevatorCommand extends Command {
       } else if (level == ScoringLevel.L2) {
         targetHeight = 20.40;
       } else if (level == ScoringLevel.L3) {
-        targetHeight = 30.08;
+        targetHeight = 31.30;
       } else if (level == ScoringLevel.L4) {
         targetHeight = 53.40;
       } else if (level == ScoringLevel.TOP_REMOVE) {
