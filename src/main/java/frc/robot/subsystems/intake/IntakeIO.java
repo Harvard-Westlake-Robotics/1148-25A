@@ -29,6 +29,8 @@ public interface IntakeIO {
 
   public default void runCharacterization(double volts) {}
 
+  public double getRotations();
+
   public Boolean getSensor1();
 
   public Boolean getSensor2();

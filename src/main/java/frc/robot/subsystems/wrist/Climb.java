@@ -17,7 +17,7 @@ public class Climb extends SubsystemBase {
   private DigitalInput limitSwitch = new DigitalInput(0);
 
   // Tunable parameters
-  private double targetAngle = 90 * 5; // Default position
+  private double targetAngle = 66; // Default position
   private double angleTolerance = 5.0; // degrees
 
   public static Climb getInstance() {
@@ -31,8 +31,8 @@ public class Climb extends SubsystemBase {
     this.constants = Constants.HangWrist;
     this.key = "Hang Wrist";
     io = new WristIOTalonFX(constants);
-    io.zeroPosition(90 * 5);
-    io.setAngle(90 * 5);
+    io.zeroPosition(66);
+    io.setAngle(66);
   }
 
   public WristConstants getConstants() {

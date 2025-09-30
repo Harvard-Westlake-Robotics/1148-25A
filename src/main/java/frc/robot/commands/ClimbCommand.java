@@ -7,9 +7,9 @@ public class ClimbCommand extends Command {
   private Climb climb;
   private boolean deploy;
   private boolean climbDown;
-  private double climbAngle = 120 * 5;
-  private double zeroAngle = 250;
-  private double stowAngle = 90 * 5;
+  private double climbAngle = 66 + 5;
+  private double zeroAngle = 0;
+  private double stowAngle = 66;
   private boolean hasDeployed = false;
 
   public ClimbCommand() {
@@ -31,9 +31,9 @@ public class ClimbCommand extends Command {
       zeroAngle = Climb.getInstance().getWristPosition();
       stowAngle = Climb.getInstance().getWristPosition();
     } else {
-      climbAngle = 93.5 * 5;
-      stowAngle = 90 * 5;
-      zeroAngle = 250;
+      climbAngle = 66 + 5;
+      stowAngle = 66;
+      zeroAngle = 0;
     }
 
     if (climbDown) {

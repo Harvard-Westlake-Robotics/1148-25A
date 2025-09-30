@@ -16,7 +16,7 @@ public class Elevator extends SubsystemBase {
   private ElevatorIO io;
   private static Elevator instance = null;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-  private DigitalInput dio = new DigitalInput(5);
+  public DigitalInput dio = new DigitalInput(5);
   SysIdRoutine sysId;
 
   // Tunable parameters

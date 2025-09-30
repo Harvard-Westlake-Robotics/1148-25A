@@ -8,22 +8,25 @@ import frc.robot.subsystems.intake.CoralIntake;
 public class RaiseElevatorCommand extends Command {
   private double targetHeight;
 
-  public RaiseElevatorCommand(ScoringLevel l4) {
+  public RaiseElevatorCommand(ScoringLevel level) {
     this.addRequirements(Elevator.getInstance());
-    if (l4 == ScoringLevel.L1) {
-      targetHeight = 15.5;
-    } else if (l4 == ScoringLevel.L2) {
-      targetHeight = 20.40;
-    } else if (l4 == ScoringLevel.L3) {
-      targetHeight = 30.08;
-    } else if (l4 == ScoringLevel.L4) {
-      targetHeight = 53.40;
-    } else if (l4 == ScoringLevel.TOP_REMOVE) {
-      targetHeight = 20.32;
-    } else if (l4 == ScoringLevel.BOTTOM_REMOVE) {
-      targetHeight = 9.80;
-    } else {
-      targetHeight = 0.0;
+    // If coral not fully in robot, prevent robot from sending elevator anywhere
+    if (CoralIntake.getInstance().getSensor3()) {
+      if (level == ScoringLevel.L1) {
+        targetHeight = 15.5;
+      } else if (level == ScoringLevel.L2) {
+        targetHeight = 20.40;
+      } else if (level == ScoringLevel.L3) {
+        targetHeight = 31.30;
+      } else if (level == ScoringLevel.L4) {
+        targetHeight = 52.50;
+      } else if (level == ScoringLevel.TOP_REMOVE) {
+        targetHeight = 19.32;
+      } else if (level == ScoringLevel.BOTTOM_REMOVE) {
+        targetHeight = 7.80;
+      } else {
+        targetHeight = 0.0;
+      }
     }
     Elevator.getInstance().goToHeight(targetHeight);
   }
@@ -33,6 +36,9 @@ public class RaiseElevatorCommand extends Command {
 
   @Override
   public void execute() {
+    if (targetHeight == 0.0 && !Elevator.getInstance().dio.get()) {
+      targetHeight = Elevator.getInstance().getHeight();
+    }
     Elevator.getInstance().goToHeight(targetHeight);
   }
 
@@ -54,7 +60,7 @@ public class RaiseElevatorCommand extends Command {
       } else if (level == ScoringLevel.L3) {
         targetHeight = 31.30;
       } else if (level == ScoringLevel.L4) {
-        targetHeight = 53.40;
+        targetHeight = 52.50;
       } else if (level == ScoringLevel.TOP_REMOVE) {
         targetHeight = 19.32;
       } else if (level == ScoringLevel.BOTTOM_REMOVE) {

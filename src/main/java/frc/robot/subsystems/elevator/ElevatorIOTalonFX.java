@@ -78,13 +78,17 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     elevator2Config.CurrentLimits.SupplyCurrentLimitEnable = true;
     elevator2Config.CurrentLimits.SupplyCurrentLimit = 50;
     elevator1Config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    elevator1Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Elevator.elevatorForwardSoftLimitRotations;
+    elevator1Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        Constants.Elevator.elevatorForwardSoftLimitRotations;
     elevator1Config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    elevator1Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Constants.Elevator.elevatorReverseSoftLimitRotations;
+    elevator1Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        Constants.Elevator.elevatorReverseSoftLimitRotations;
     elevator2Config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    elevator2Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Elevator.elevatorForwardSoftLimitRotations;
+    elevator2Config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        Constants.Elevator.elevatorForwardSoftLimitRotations;
     elevator2Config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    elevator2Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Constants.Elevator.elevatorReverseSoftLimitRotations;
+    elevator2Config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        Constants.Elevator.elevatorReverseSoftLimitRotations;
     elevator1.getConfigurator().apply(elevator1Config);
     elevator2.getConfigurator().apply(elevator2Config);
     elevator1.setControl(elevatorController);
@@ -100,14 +104,17 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     motor2AppliedVolts = elevator2.getMotorVoltage();
     motor2Current = elevator2.getStatorCurrent();
 
-    elevatorFeedforward = new ElevatorFeedforward(
-        Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
+    elevatorFeedforward =
+        new ElevatorFeedforward(
+            Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
   }
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    var elevator1Status = StatusSignal.refreshAll(motor1Position, motor1Velocity, motor1AppliedVolts, motor1Current);
-    var elevator2Status = StatusSignal.refreshAll(motor2Position, motor2Velocity, motor2AppliedVolts, motor2Current);
+    var elevator1Status =
+        StatusSignal.refreshAll(motor1Position, motor1Velocity, motor1AppliedVolts, motor1Current);
+    var elevator2Status =
+        StatusSignal.refreshAll(motor2Position, motor2Velocity, motor2AppliedVolts, motor2Current);
 
     inputs.elevator1Connected = motor1ConnectedDebounce.calculate(elevator1.isConnected());
     inputs.elevator1PositionMeters =

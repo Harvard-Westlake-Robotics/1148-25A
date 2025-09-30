@@ -176,6 +176,10 @@ public class IntakeIOTalonFX implements IntakeIO {
     intakeMotor.setControl(intakePositionController);
   }
 
+  public double getRotations() {
+    return intakeMotor.getPosition().getValueAsDouble();
+  }
+
   public Boolean getSensor3() {
     if (input3 != null) {
       return input3.get();
@@ -197,6 +201,30 @@ public class IntakeIOTalonFX implements IntakeIO {
       return input1.get();
     } else {
       return null;
+    }
+  }
+
+  public int getSensor1Port() {
+    if (input1 != null) {
+      return input1.getChannel();
+    } else {
+      return -1;
+    }
+  }
+
+  public int getSensor2Port() {
+    if (input2 != null) {
+      return input2.getChannel();
+    } else {
+      return -1;
+    }
+  }
+
+  public int getSensor3Port() {
+    if (input3 != null) {
+      return input3.getChannel();
+    } else {
+      return -1;
     }
   }
 }
