@@ -88,7 +88,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         intakeConstants.sensor3ID != -1 ? new DigitalInput(intakeConstants.sensor3ID) : null;
 
     intakeFeedforward =
-        new SimpleMotorFeedforward(intakeConstants.kS, intakeConstants.kA, intakeConstants.kV);
+        new SimpleMotorFeedforward(intakeConstants.kS, intakeConstants.kV, intakeConstants.kA);
   }
 
   @Override
@@ -201,30 +201,6 @@ public class IntakeIOTalonFX implements IntakeIO {
       return input1.get();
     } else {
       return null;
-    }
-  }
-
-  public int getSensor1Port() {
-    if (input1 != null) {
-      return input1.getChannel();
-    } else {
-      return -1;
-    }
-  }
-
-  public int getSensor2Port() {
-    if (input2 != null) {
-      return input2.getChannel();
-    } else {
-      return -1;
-    }
-  }
-
-  public int getSensor3Port() {
-    if (input3 != null) {
-      return input3.getChannel();
-    } else {
-      return -1;
     }
   }
 }

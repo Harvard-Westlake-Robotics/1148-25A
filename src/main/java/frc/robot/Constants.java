@@ -144,7 +144,7 @@ public final class Constants {
           4,
           7,
           6,
-          0.4,
+          0.5,
           0.000,
           99999.0,
           99999.0,

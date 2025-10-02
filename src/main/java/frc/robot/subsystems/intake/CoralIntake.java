@@ -22,7 +22,12 @@ public class CoralIntake extends SubsystemBase {
   private IntakeConstants constants;
   private String key;
   private static CoralIntake instance;
-  private boolean hasCoral;
+  private boolean hasCoral = false;
+
+  public void setHasCoral(boolean hasCoral) {
+    this.hasCoral = hasCoral;
+  }
+
   SysIdRoutine sysId;
 
   // Tunable parameters
@@ -83,11 +88,11 @@ public class CoralIntake extends SubsystemBase {
     Logger.recordOutput("Sensor 3", getSensor3());
     io.updateInputs(inputs);
     Logger.processInputs(key, inputs);
-    if (!getSensor2() && getSensor1()) {
-      hasCoral = true;
-    } else {
-      hasCoral = false;
-    }
+    // if (!getSensor2() && getSensor1()) {
+    // hasCoral = true;
+    // } else {
+    // hasCoral = false;
+    // }
     if (frc.robot.subsystems.elevator.Elevator.getInstance().getTarget() == 19.32
         || frc.robot.subsystems.elevator.Elevator.getInstance().getTarget() == 7.80) {
       RobotContainer.coralIntakeCommand.setVelocity(
@@ -205,8 +210,9 @@ public class CoralIntake extends SubsystemBase {
     return Math.abs(targetVelocity.in(MetersPerSecond) - inputs.intakeVelocityMPS);
   }
 
-  public boolean isAtTargetVelocity() {
-    return Math.abs(targetVelocity.in(MetersPerSecond) - inputs.intakeVelocityMPS)
-        < velocityTolerance;
-  }
+  // public boolean isAtTargetVelocity() {
+  // return Math.abs(targetVelocity.in(MetersPerSecond) -
+  // inputs.intakeVelocityMPS)
+  // < velocityTolerance;
+  // }
 }

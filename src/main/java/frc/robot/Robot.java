@@ -197,6 +197,8 @@ public class Robot extends LoggedRobot {
       autonomousCommand.schedule();
     }
     NetworkCommunicator.getInstance().setIsAuto(true);
+
+    CoralIntake.getInstance().setHasCoral(true);
   }
 
   /** This function is called periodically during autonomous. */
