@@ -63,7 +63,6 @@ public class ControlMap {
                       RobotContainer.coralIntakeCommand.setVelocity(
                           LinearVelocity.ofBaseUnits(30, MetersPerSecond));
                     }
-
                   } else {
                     RobotContainer.coralIntakeCommand.setVelocity(
                         LinearVelocity.ofBaseUnits(20, MetersPerSecond));
@@ -80,7 +79,7 @@ public class ControlMap {
                   } else {
                     RobotContainer.coralIntakeCommand.setEject(false);
                     RobotContainer.coralIntakeCommand.setVelocity(
-                        LinearVelocity.ofBaseUnits(4, MetersPerSecond));
+                        LinearVelocity.ofBaseUnits(13, MetersPerSecond));
                   }
                 }));
 

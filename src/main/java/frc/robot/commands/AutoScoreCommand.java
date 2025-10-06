@@ -22,37 +22,35 @@ import frc.robot.util.LoggingUtil;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Command to automatically score game pieces at specified heights. This command
- * handles both the
- * elevator movement and drive positioning. It includes safety checks, timeouts,
- * and error handling.
+ * Command to automatically score game pieces at specified heights. This command handles both the
+ * elevator movement and drive positioning. It includes safety checks, timeouts, and error handling.
  */
 public class AutoScoreCommand extends Command {
   // Constants for position and timing - relaxed tolerances for smoother control
   public static double POSITION_TOLERANCE = 0.02; // meters (increased from 0.02)
-  public static double ROTATION_TOLERANCE = 0.6; // degrees (increased from 0.6)
+  public static double ROTATION_TOLERANCE = 1.0; // degrees (increased from 0.6)
   private static final double ELEVATOR_TOLERANCE = 0.8; // meters
   private static final double SCORING_DELAY_TICKS = 3;
-  private static final double SCORING_VELOCITY = 22.0; // meters per second
+  private static final double SCORING_VELOCITY = 52.0; // meters per second
   // private static final double DEFAULT_VELOCITY = 6.0; // meters per second
   private static final double COMMAND_TIMEOUT = 10.0; // seconds
 
   // PID controller constants - reduced gains to prevent oscillation
-  public static double X_PID_P = 10.0; // Reduced from 18.7
+  public static double X_PID_P = 13.0; // Reduced from 18.7
   public static double X_PID_I = 0.0; // Added I term
   public static double X_PID_D = 0.2; // Increased from 0.05
-  public static double Y_PID_P = 10.0; // Reduced from 18.7
+  public static double Y_PID_P = 13.0; // Reduced from 18.7
   public static double Y_PID_I = 0.0; // Added I term
   public static double Y_PID_D = 0.2; // Increased from 0.05
-  public static double THETA_PID_P = 6.0; // Reduced from 9.9
+  public static double THETA_PID_P = 7.0; // Reduced from 9.9
   public static double THETA_PID_I = 0.0; // Added I term
   public static double THETA_PID_D = 0.15; // Increased from 0.1
 
   // Motion profile constants - smoother trajectory
-  private static final double MAX_VELOCITY = 1.5; // Reduced from 2.0
+  private static final double MAX_VELOCITY = 2.5; // Reduced from 2.0
   private static final double MAX_ACCELERATION = 2.0; // Reduced from 2.75
-  private static final double MAX_ANGULAR_VELOCITY = 1.5; // Reduced from 2.0
-  private static final double MAX_ANGULAR_ACCELERATION = 2.0; // Reduced from 2.75
+  private static final double MAX_ANGULAR_VELOCITY = 5.5; // Reduced from 2.0
+  private static final double MAX_ANGULAR_ACCELERATION = 5.0; // Reduced from 2.75
 
   // Feedforward constants
   private static final double X_FEEDFORWARD_KS = 0.1; // Static friction
@@ -87,15 +85,18 @@ public class AutoScoreCommand extends Command {
     this.timeoutTimer = new Timer();
 
     // Initialize controllers with constants including I term
-    this.xController = new ProfiledPIDController(
-        X_PID_P, X_PID_I, X_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
-    this.yController = new ProfiledPIDController(
-        Y_PID_P, Y_PID_I, Y_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
-    this.thetaController = new ProfiledPIDController(
-        THETA_PID_P,
-        THETA_PID_I,
-        THETA_PID_D,
-        new Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
+    this.xController =
+        new ProfiledPIDController(
+            X_PID_P, X_PID_I, X_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
+    this.yController =
+        new ProfiledPIDController(
+            Y_PID_P, Y_PID_I, Y_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
+    this.thetaController =
+        new ProfiledPIDController(
+            THETA_PID_P,
+            THETA_PID_I,
+            THETA_PID_D,
+            new Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
     // Set up controllers
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -114,7 +115,7 @@ public class AutoScoreCommand extends Command {
    * Creates a new AutoScoreCommand with path following capability.
    *
    * @param level The scoring level to move to
-   * @param path  The path to follow to the scoring position
+   * @param path The path to follow to the scoring position
    */
   public AutoScoreCommand(ScoringLevel level, PathPlannerPath path) {
     this.addRequirements(CoralIntake.getInstance(), Elevator.getInstance(), Drive.getInstance());
@@ -132,15 +133,18 @@ public class AutoScoreCommand extends Command {
     // MetersPerSecond));
 
     // Initialize controllers with constants including I term
-    this.xController = new ProfiledPIDController(
-        X_PID_P, X_PID_I, X_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
-    this.yController = new ProfiledPIDController(
-        Y_PID_P, Y_PID_I, Y_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
-    this.thetaController = new ProfiledPIDController(
-        THETA_PID_P,
-        THETA_PID_I,
-        THETA_PID_D,
-        new Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
+    this.xController =
+        new ProfiledPIDController(
+            X_PID_P, X_PID_I, X_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
+    this.yController =
+        new ProfiledPIDController(
+            Y_PID_P, Y_PID_I, Y_PID_D, new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
+    this.thetaController =
+        new ProfiledPIDController(
+            THETA_PID_P,
+            THETA_PID_I,
+            THETA_PID_D,
+            new Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
     // Set up controllers
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -153,20 +157,21 @@ public class AutoScoreCommand extends Command {
 
     // Safely get end pose from path
     if (path != null) {
-      this.endPose = new Pose2d(
-          DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-              ? path.getPathPoses()
-                  .get(path.getPathPoses().size() - 1)
-                  .getTranslation()
-                  .plus(new Translation2d(0.04, path.getGoalEndState().rotation()))
-              : path.flipPath()
-                  .getPathPoses()
-                  .get(path.getPathPoses().size() - 1)
-                  .getTranslation()
-                  .plus(new Translation2d(0.04, path.flipPath().getGoalEndState().rotation())),
-          DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-              ? path.getGoalEndState().rotation()
-              : path.flipPath().getGoalEndState().rotation());
+      this.endPose =
+          new Pose2d(
+              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                  ? path.getPathPoses()
+                      .get(path.getPathPoses().size() - 1)
+                      .getTranslation()
+                      .plus(new Translation2d(0.04, path.getGoalEndState().rotation()))
+                  : path.flipPath()
+                      .getPathPoses()
+                      .get(path.getPathPoses().size() - 1)
+                      .getTranslation()
+                      .plus(new Translation2d(0.04, path.flipPath().getGoalEndState().rotation())),
+              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                  ? path.getGoalEndState().rotation()
+                  : path.flipPath().getGoalEndState().rotation());
     } else {
       throw new IllegalArgumentException("Path must contain at least 3 poses");
     }
@@ -193,7 +198,7 @@ public class AutoScoreCommand extends Command {
         targetHeight = 21.6;
         break;
       case L3:
-        targetHeight = 32.78;
+        targetHeight = 33.78;
         break;
       case L4:
         targetHeight = 53.40;
@@ -222,7 +227,7 @@ public class AutoScoreCommand extends Command {
     // Update PID constants from SmartDashboard if changed
     updatePIDFromDashboard();
 
-    Drive.getInstance().setSdMultiplier(5.0);
+    Drive.getInstance().setSdMultiplier(8.0);
     // Reset command state
     tickCounter = 0;
     hasElevatorError = false;
@@ -328,7 +333,8 @@ public class AutoScoreCommand extends Command {
   private void handlePathFollowing() {
     Pose2d currentPose = Drive.getInstance().getPose();
     double distanceToTarget = currentPose.getTranslation().getDistance(endPose.getTranslation());
-    double rotationError = Math.abs(currentPose.getRotation().getRadians() - endPose.getRotation().getRadians());
+    double rotationError =
+        Math.abs(currentPose.getRotation().getRadians() - endPose.getRotation().getRadians());
 
     if (distanceToTarget > POSITION_TOLERANCE
         || rotationError > Math.toRadians(ROTATION_TOLERANCE)) {
@@ -339,16 +345,20 @@ public class AutoScoreCommand extends Command {
       // Calculate PID output with feedforward
       double xPIDOutput = xController.calculate(currentPose.getX(), endPose.getX());
       double yPIDOutput = yController.calculate(currentPose.getY(), endPose.getY());
-      double thetaPIDOutput = thetaController.calculate(
-          currentPose.getRotation().getRadians(), endPose.getRotation().getRadians());
+      double thetaPIDOutput =
+          thetaController.calculate(
+              currentPose.getRotation().getRadians(), endPose.getRotation().getRadians());
 
       // Add feedforward terms for smoother control
-      double xFeedforward = X_FEEDFORWARD_KS * Math.signum(xPIDOutput)
-          + X_FEEDFORWARD_KV * xController.getSetpoint().velocity;
-      double yFeedforward = Y_FEEDFORWARD_KS * Math.signum(yPIDOutput)
-          + Y_FEEDFORWARD_KV * yController.getSetpoint().velocity;
-      double thetaFeedforward = THETA_FEEDFORWARD_KS * Math.signum(thetaPIDOutput)
-          + THETA_FEEDFORWARD_KV * thetaController.getSetpoint().velocity;
+      double xFeedforward =
+          X_FEEDFORWARD_KS * Math.signum(xPIDOutput)
+              + X_FEEDFORWARD_KV * xController.getSetpoint().velocity;
+      double yFeedforward =
+          Y_FEEDFORWARD_KS * Math.signum(yPIDOutput)
+              + Y_FEEDFORWARD_KV * yController.getSetpoint().velocity;
+      double thetaFeedforward =
+          THETA_FEEDFORWARD_KS * Math.signum(thetaPIDOutput)
+              + THETA_FEEDFORWARD_KV * thetaController.getSetpoint().velocity;
 
       // Combine PID and feedforward
       double xOutput = xPIDOutput + xFeedforward;

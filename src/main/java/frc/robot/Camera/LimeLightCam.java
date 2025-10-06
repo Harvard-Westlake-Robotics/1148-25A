@@ -129,9 +129,13 @@ public class LimeLightCam extends BaseCam {
     LimelightHelpers.SetRobotOrientation(name, curYaw.getDegrees(), curYawRate, 0, 0, 0, 0);
   }
 
-  /* Obtains an estimated position based off tag readings.
-  When disabled, we run MegaTag1 because there shouldn't be any ambiguity variables besides distance.
-  When enabled, MegaTag2 automatically filters out invalid or ambiguous readings */
+  /*
+   * Obtains an estimated position based off tag readings.
+   * When disabled, we run MegaTag1 because there shouldn't be any ambiguity
+   * variables besides distance.
+   * When enabled, MegaTag2 automatically filters out invalid or ambiguous
+   * readings
+   */
   public Optional<AprilTagResult> getEstimate() {
     if (runNeuralNetwork) {
       return Optional.empty();
@@ -149,9 +153,10 @@ public class LimeLightCam extends BaseCam {
 
     if (latestEstimate.tagCount == 0) return Optional.empty();
 
-    // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight; MT 1 and 2 have
+    // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight;
+    // MT 1 and 2 have
     // seperated values
-    if (DriverStation.isDisabled()) {
+    if (DriverStation.isDisabled() || !DriverStation.isDisabled()) {
       if (latestEstimate.pose.getX() > X_MT1_VARIENCE_MAX) {
         X_MT1_VARIENCE_MAX = latestEstimate.pose.getX();
       }
@@ -226,7 +231,6 @@ public class LimeLightCam extends BaseCam {
           "RealOutputs/" + name + "/MT2/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
       Logger.recordOutput("RealOutputs/" + name + "/MT2/tagDistance", latestEstimate.avgTagDist);
     }
-
     return Optional.of(
         new AprilTagResult(
             latestEstimate.pose,

@@ -56,6 +56,12 @@ public class CoralIntake extends SubsystemBase {
   }
 
   public void periodic() {
+    // if (Elevator.getInstance().getHeight() <= 0.5 && hasCoral == false) {
+    // CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(13,
+    // MetersPerSecond));
+    // RobotContainer.coralIntakeCommand.setVelocity(
+    // LinearVelocity.ofBaseUnits(13, MetersPerSecond));
+    // }
     double startTime = Timer.getFPGATimestamp();
 
     io.updateInputs(inputs);

@@ -135,7 +135,7 @@ public final class Constants {
           InvertedValue.Clockwise_Positive,
           100,
           -100,
-          8.569162,
+          11.569162,
           0.0,
           0.0,
           0.3,
@@ -144,11 +144,11 @@ public final class Constants {
           4,
           7,
           6,
-          0.4,
+          0.3,
           0.000,
+          99999999.0,
           99999.0,
-          99999.0,
-          99999.0,
+          9999999999.0,
           1.0); // / 16.709
 
   public final class Elevator {

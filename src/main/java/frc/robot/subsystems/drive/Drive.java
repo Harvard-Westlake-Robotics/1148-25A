@@ -1,5 +1,5 @@
 // Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
+// http://github.cou/Mechanical-Advantage
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -114,11 +114,11 @@ public class Drive extends SubsystemBase {
           getModuleTranslations());
   public static final PathConstraints PP_CONSTRAINTS =
       new PathConstraints(
-          LinearVelocity.ofBaseUnits(7.5, MetersPerSecond),
-          LinearAcceleration.ofBaseUnits(5.5, MetersPerSecondPerSecond),
-          AngularVelocity.ofBaseUnits(1020, DegreesPerSecond),
+          LinearVelocity.ofBaseUnits(4.5, MetersPerSecond),
+          LinearAcceleration.ofBaseUnits(3.5, MetersPerSecondPerSecond),
+          AngularVelocity.ofBaseUnits(720, DegreesPerSecond),
           AngularAcceleration.ofBaseUnits(
-              2400, DegreesPerSecondPerSecond)); // PathConstraints.unlimitedConstraints(12);
+              720, DegreesPerSecondPerSecond)); // PathConstraints.unlimitedConstraints(12);
   // new PathConstraints(
   // TunerConstants.kSpeedAt12Volts,
   // LinearAcceleration.ofBaseUnits(5.0, MetersPerSecondPerSecond),
@@ -154,9 +154,9 @@ public class Drive extends SubsystemBase {
   private double PP_ROTATION_P = 5.05;
   private double PP_ROTATION_I = 0.00;
   private double PP_ROTATION_D = 0.00;
-  private double PP_TRANSLATION_P = 4.45;
-  private double PP_TRANSLATION_I = 0.00;
-  private double PP_TRANSLATION_D = 0.0;
+  private double PP_TRANSLATION_P = 5.05;
+  private double PP_TRANSLATION_I = 0.0;
+  private double PP_TRANSLATION_D = 0.1;
 
   private boolean constantsChangedThisTick = false;
   private boolean limeLightsActive = true;
@@ -200,8 +200,8 @@ public class Drive extends SubsystemBase {
     this.sdMultiplier = sdMultiplier;
   }
 
-  private double xyStdDevCoeff = 6.85;
-  private double rStdDevCoeff = 6.85;
+  private double xyStdDevCoeff = 1.25;
+  private double rStdDevCoeff = 2.95;
   private double xyStdDev = 0.8;
   private double rStdDev = 6.2;
 
@@ -1739,14 +1739,14 @@ public class Drive extends SubsystemBase {
     // Use the existing tuned formula - preserving all current constants
     double xyStdDev =
         xyStdDevCoeff
-            * Math.max(Math.pow(result.distToTag, 2.0), 0.5)
+            * Math.max(Math.pow(result.distToTag, 2.0), 1)
             / result.tagCount
             * Math.sqrt(result.ambiguity)
             * sdMultiplier;
 
     double rStdDev =
         rStdDevCoeff
-            * Math.max(Math.pow(result.distToTag, 2.0), 0.5)
+            * Math.max(Math.pow(result.distToTag, 2.0), 1)
             / result.tagCount
             * Math.sqrt(result.ambiguity)
             * sdMultiplier;

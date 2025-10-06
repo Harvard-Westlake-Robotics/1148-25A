@@ -29,7 +29,7 @@ public class TeleopCommand extends Command {
   private Command sourceCommand =
       AutoBuilder.pathfindThenFollowPath(
               NetworkCommunicator.getInstance().getSelectedSourcePath(), Drive.PP_CONSTRAINTS)
-          .andThen(new CoralIntakeCommand(6));
+          .andThen(new CoralIntakeCommand(13));
 
   @Override
   public void initialize() {
@@ -39,7 +39,8 @@ public class TeleopCommand extends Command {
       sourceCommand.cancel();
       reefCommand.schedule();
     } else {
-      RobotContainer.coralIntakeCommand.setVelocity(LinearVelocity.ofBaseUnits(6, MetersPerSecond));
+      RobotContainer.coralIntakeCommand.setVelocity(
+          LinearVelocity.ofBaseUnits(13, MetersPerSecond));
       sourceCommand.addRequirements(getRequirements());
       reefCommand.cancel();
       sourceCommand.schedule();
@@ -65,6 +66,6 @@ public class TeleopCommand extends Command {
     sourceCommand =
         AutoBuilder.pathfindThenFollowPath(
                 NetworkCommunicator.getInstance().getSelectedSourcePath(), Drive.PP_CONSTRAINTS)
-            .andThen(new CoralIntakeCommand(6));
+            .andThen(new CoralIntakeCommand(13));
   }
 }
