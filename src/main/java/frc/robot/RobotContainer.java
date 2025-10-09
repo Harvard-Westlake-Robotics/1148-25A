@@ -286,14 +286,14 @@ public class RobotContainer {
                     new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
     driver.povCenter().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
 
-    // Add drift mode toggle to the driver's right bumper button
-    operator.povLeft().onTrue(DriveCommands.toggleDriftMode(drive));
+    // // Add drift mode toggle to the driver's right bumper button
+    // operator.povLeft().onTrue(DriveCommands.toggleDriftMode(drive));
 
-    // Add traction control toggle (disabled by default for testing)
-    operator.povRight().onTrue(DriveCommands.toggleTractionControl(drive));
+    // // Add traction control toggle (disabled by default for testing)
+    // operator.povRight().onTrue(DriveCommands.toggleTractionControl(drive));
 
-    // Add traction control test command (hold for monitoring)
-    operator.leftBumper().whileTrue(DriveCommands.tractionControlTest(drive));
+    // // Add traction control test command (hold for monitoring)
+    // operator.leftBumper().whileTrue(DriveCommands.tractionControlTest(drive));
 
     ControlMap.getInstance().configurePreset1(operator, driver);
   }
