@@ -92,7 +92,7 @@ public class CoralIntakeCommand extends Command {
         CoralIntake.getInstance().push(16);
         CoralIntake.getInstance().setHasCoral(true);
       } else {
-        CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(6, MetersPerSecond));
+        CoralIntake.getInstance().setVelocity(velocity);
       }
     } else {
       CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(0, MetersPerSecond));

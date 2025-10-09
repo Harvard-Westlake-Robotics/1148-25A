@@ -106,15 +106,15 @@ public class ControlMap {
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(20, MetersPerSecond));
-                  RobotContainer.coralIntakeCommand.setEject(true);
+                      LinearVelocity.ofBaseUnits(-20, MetersPerSecond));
+                  RobotContainer.coralIntakeCommand.setEject(false);
                 }))
         .onFalse(
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(6, MetersPerSecond));
-                  RobotContainer.coralIntakeCommand.setEject(false);
+                      LinearVelocity.ofBaseUnits(-6, MetersPerSecond));
+                  // RobotContainer.coralIntakeCommand.setEject(false);
                 }));
     // Algae Intake
     driver
@@ -143,21 +143,22 @@ public class ControlMap {
                   // scoring level
 
                 }));
-    driver
-        .cross()
+    operator
+        .povLeft()
         .onTrue(
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setEject(true);
-                  RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
+                  // This line doesnt do anything because of coral intake logic
+                  // RobotContainer.coralIntakeCommand.setVelocity(
+                  // LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
                 }))
         .onFalse(
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setEject(false);
                   RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(0, MetersPerSecond));
+                      LinearVelocity.ofBaseUnits(6, MetersPerSecond));
                 }));
 
     operator

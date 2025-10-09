@@ -54,16 +54,14 @@ public class ClimbCommand extends Command {
   }
 
   @Override
-  public void end(boolean interrupted) {
-  }
+  public void end(boolean interrupted) {}
 
   public void deploy() {
     deploy = true;
   }
 
   public void climb() {
-    if (hasDeployed)
-      climbDown = true;
+    if (hasDeployed) climbDown = true;
   }
 
   public void incrementClimb() {
