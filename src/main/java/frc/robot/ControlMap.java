@@ -105,15 +105,15 @@ public class ControlMap {
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(20, MetersPerSecond));
-                  RobotContainer.coralIntakeCommand.setEject(true);
+                      LinearVelocity.ofBaseUnits(-20, MetersPerSecond));
+                  // RobotContainer.coralIntakeCommand.setEject(true);
                 }))
         .onFalse(
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
                       LinearVelocity.ofBaseUnits(6, MetersPerSecond));
-                  RobotContainer.coralIntakeCommand.setEject(false);
+                  // RobotContainer.coralIntakeCommand.setEject(false);
                 }));
     // Algae Intake
     driver
@@ -142,22 +142,23 @@ public class ControlMap {
                   // scoring level
 
                 }));
-    driver
-        .cross()
-        .onTrue(
-            new InstantCommand(
-                () -> {
-                  RobotContainer.coralIntakeCommand.setEject(true);
-                  RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
-                }))
-        .onFalse(
-            new InstantCommand(
-                () -> {
-                  RobotContainer.coralIntakeCommand.setEject(false);
-                  RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(0, MetersPerSecond));
-                }));
+                operator
+                .povLeft()
+                .onTrue(
+                    new InstantCommand(
+                        () -> {
+                          RobotContainer.coralIntakeCommand.setEject(true);
+                          // This line doesnt do anything because of coral intake logic
+                          // RobotContainer.coralIntakeCommand.setVelocity(
+                          // LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
+                        }))
+                .onFalse(
+                    new InstantCommand(
+                        () -> {
+                          RobotContainer.coralIntakeCommand.setEject(false);
+                          RobotContainer.coralIntakeCommand.setVelocity(
+                              LinearVelocity.ofBaseUnits(6, MetersPerSecond));
+                        }));
 
     operator
         .leftBumper()
