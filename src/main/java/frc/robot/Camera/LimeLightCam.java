@@ -156,7 +156,7 @@ public class LimeLightCam extends BaseCam {
     // Logs the variance, stdDev, ambiguity, and tag distance of a given limelight;
     // MT 1 and 2 have
     // seperated values
-    if (DriverStation.isDisabled() || !DriverStation.isDisabled()) {
+    if (DriverStation.isDisabled()) {
       if (latestEstimate.pose.getX() > X_MT1_VARIENCE_MAX) {
         X_MT1_VARIENCE_MAX = latestEstimate.pose.getX();
       }

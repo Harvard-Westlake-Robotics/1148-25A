@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.813201530612245,
-        "y": 2.260299744897958
+        "x": 2.9,
+        "y": 4.2
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.794181038808966,
-        "y": -0.274903123954501
+        "x": 2.4529116550454,
+        "y": 2.5801886357138892
       },
       "isLocked": false,
       "linkedName": "End Coral 1"
@@ -20,8 +20,8 @@
         "y": 0.842264344262295
       },
       "prevControl": {
-        "x": -0.05297131147540979,
-        "y": 0.8422643442622951
+        "x": 0.7612879661592511,
+        "y": 0.6749311913750025
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,10 +33,10 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.25,
-    "maxAcceleration": 5.0,
-    "maxAngularVelocity": 755.0,
-    "maxAngularAcceleration": 1054.0,
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.5,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -50,5 +50,5 @@
     "velocity": 0,
     "rotation": 0.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

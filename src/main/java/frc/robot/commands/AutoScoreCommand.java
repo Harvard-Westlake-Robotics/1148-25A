@@ -47,8 +47,8 @@ public class AutoScoreCommand extends Command {
   public static double THETA_PID_D = 0.15; // Increased from 0.1
 
   // Motion profile constants - smoother trajectory
-  private static final double MAX_VELOCITY = 2.5; // Reduced from 2.0
-  private static final double MAX_ACCELERATION = 2.0; // Reduced from 2.75
+  private static final double MAX_VELOCITY = 3; // Reduced from 2.0
+  private static final double MAX_ACCELERATION = 2.5; // Reduced from 2.75
   private static final double MAX_ANGULAR_VELOCITY = 5.5; // Reduced from 2.0
   private static final double MAX_ANGULAR_ACCELERATION = 5.0; // Reduced from 2.75
 

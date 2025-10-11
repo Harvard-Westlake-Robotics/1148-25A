@@ -142,23 +142,23 @@ public class ControlMap {
                   // scoring level
 
                 }));
-                operator
-                .povLeft()
-                .onTrue(
-                    new InstantCommand(
-                        () -> {
-                          RobotContainer.coralIntakeCommand.setEject(true);
-                          // This line doesnt do anything because of coral intake logic
-                          // RobotContainer.coralIntakeCommand.setVelocity(
-                          // LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
-                        }))
-                .onFalse(
-                    new InstantCommand(
-                        () -> {
-                          RobotContainer.coralIntakeCommand.setEject(false);
-                          RobotContainer.coralIntakeCommand.setVelocity(
-                              LinearVelocity.ofBaseUnits(6, MetersPerSecond));
-                        }));
+    operator
+        .povLeft()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  RobotContainer.coralIntakeCommand.setEject(true);
+                  // This line doesnt do anything because of coral intake logic
+                  // RobotContainer.coralIntakeCommand.setVelocity(
+                  // LinearVelocity.ofBaseUnits(-50, MetersPerSecond));
+                }))
+        .onFalse(
+            new InstantCommand(
+                () -> {
+                  RobotContainer.coralIntakeCommand.setEject(false);
+                  RobotContainer.coralIntakeCommand.setVelocity(
+                      LinearVelocity.ofBaseUnits(6, MetersPerSecond));
+                }));
 
     operator
         .leftBumper()
