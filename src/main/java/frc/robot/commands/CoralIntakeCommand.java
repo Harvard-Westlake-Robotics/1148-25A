@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.intake.CoralIntake;
 
 public class CoralIntakeCommand extends Command {
@@ -42,7 +43,12 @@ public class CoralIntakeCommand extends Command {
   public void execute() {
     // if shooting coral
     if (eject) {
-      CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(100, MetersPerSecond));
+      if (RobotContainer.elevatorCommand.targetHeight == 20.40) {
+        CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(80, MetersPerSecond));
+      } else {
+        CoralIntake.getInstance().setVelocity(LinearVelocity.ofBaseUnits(100, MetersPerSecond));
+      }
+
       // if the intake is currently spinning- no coral in hold
     } else if (velocity.baseUnitMagnitude() > 0) {
       // if coral has reached sensor 1

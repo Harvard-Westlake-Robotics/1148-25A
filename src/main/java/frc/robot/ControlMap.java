@@ -105,7 +105,7 @@ public class ControlMap {
             new InstantCommand(
                 () -> {
                   RobotContainer.coralIntakeCommand.setVelocity(
-                      LinearVelocity.ofBaseUnits(-20, MetersPerSecond));
+                      LinearVelocity.ofBaseUnits(-40, MetersPerSecond));
                   // RobotContainer.coralIntakeCommand.setEject(true);
                 }))
         .onFalse(

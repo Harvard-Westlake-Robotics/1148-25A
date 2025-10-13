@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.elevator.Elevator;
 
 public class ScoreCommand extends Command {
-  private double targetHeight;
+  public double targetHeight;
 
   public enum ScoringLevel {
     L0,
@@ -21,7 +21,7 @@ public class ScoreCommand extends Command {
     if (level == ScoringLevel.L1) {
       targetHeight = 15.5;
     } else if (level == ScoringLevel.L2) {
-      targetHeight = 20.30;
+      targetHeight = 20.40;
     } else if (level == ScoringLevel.L3) {
       targetHeight = 30.08;
     } else if (level == ScoringLevel.L4) {

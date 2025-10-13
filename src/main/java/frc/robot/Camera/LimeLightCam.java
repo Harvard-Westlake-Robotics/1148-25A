@@ -143,11 +143,11 @@ public class LimeLightCam extends BaseCam {
     LimelightHelpers.PoseEstimate latestEstimate;
 
     // Selects which MegaTag to use
-    if (DriverStation.isDisabled()) {
-      latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
-    } else {
-      latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
-    }
+    // if (DriverStation.isDisabled()) {
+    latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
+    // } else {
+    // latestEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
+    // }
 
     if (latestEstimate == null) return Optional.empty();
 
@@ -193,43 +193,48 @@ public class LimeLightCam extends BaseCam {
       Logger.recordOutput(
           "RealOutputs/" + name + "/MT1/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
       Logger.recordOutput("RealOutputs/" + name + "/MT1/tagDistance", latestEstimate.avgTagDist);
-    } else {
-      if (latestEstimate.pose.getX() > X_MT2_VARIENCE_MAX) {
-        X_MT2_VARIENCE_MAX = latestEstimate.pose.getX();
-      }
-      if (latestEstimate.pose.getX() < X_MT2_VARIENCE_MIN) {
-        X_MT2_VARIENCE_MIN = latestEstimate.pose.getX();
-      }
-      if (latestEstimate.pose.getX() > Y_MT2_VARIENCE_MAX) {
-        Y_MT2_VARIENCE_MAX = latestEstimate.pose.getY();
-      }
-      if (latestEstimate.pose.getY() < Y_MT2_VARIENCE_MIN) {
-        Y_MT2_VARIENCE_MIN = latestEstimate.pose.getY();
-      }
-      if (latestEstimate.pose.getRotation().getRadians() > T_MT2_VARIENCE_MAX) {
-        T_MT2_VARIENCE_MAX = latestEstimate.pose.getRotation().getRadians();
-      }
-      if (latestEstimate.pose.getRotation().getRadians() < T_MT2_VARIENCE_MIN) {
-        T_MT2_VARIENCE_MIN = latestEstimate.pose.getRotation().getRadians();
-      }
-      Logger.recordOutput(
-          "RealOutputs/" + name + "/MT2/XVarience", X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN);
-      Logger.recordOutput(
-          "RealOutputs/" + name + "/MT2/XStdDev",
-          Math.sqrt(X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN));
-      Logger.recordOutput(
-          "RealOutputs/" + name + "/MT2/YVarience", Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN);
-      Logger.recordOutput(
-          "RealOutputs/" + name + "/MT2/YStdDev",
-          Math.sqrt(Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN));
-      Logger.recordOutput(
-          "RealOutputs/" + name + "/MT2/AngleVarience", T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN);
-      Logger.recordOutput(
-          "RealOutputs/" + name + "/MT2/AngleStdDev",
-          Math.sqrt(T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN));
-      Logger.recordOutput(
-          "RealOutputs/" + name + "/MT2/ambiguity", latestEstimate.rawFiducials[0].ambiguity);
-      Logger.recordOutput("RealOutputs/" + name + "/MT2/tagDistance", latestEstimate.avgTagDist);
+      // } else {
+      // if (latestEstimate.pose.getX() > X_MT2_VARIENCE_MAX) {
+      // X_MT2_VARIENCE_MAX = latestEstimate.pose.getX();
+      // }
+      // if (latestEstimate.pose.getX() < X_MT2_VARIENCE_MIN) {
+      // X_MT2_VARIENCE_MIN = latestEstimate.pose.getX();
+      // }
+      // if (latestEstimate.pose.getX() > Y_MT2_VARIENCE_MAX) {
+      // Y_MT2_VARIENCE_MAX = latestEstimate.pose.getY();
+      // }
+      // if (latestEstimate.pose.getY() < Y_MT2_VARIENCE_MIN) {
+      // Y_MT2_VARIENCE_MIN = latestEstimate.pose.getY();
+      // }
+      // if (latestEstimate.pose.getRotation().getRadians() > T_MT2_VARIENCE_MAX) {
+      // T_MT2_VARIENCE_MAX = latestEstimate.pose.getRotation().getRadians();
+      // }
+      // if (latestEstimate.pose.getRotation().getRadians() < T_MT2_VARIENCE_MIN) {
+      // T_MT2_VARIENCE_MIN = latestEstimate.pose.getRotation().getRadians();
+      // }
+      // Logger.recordOutput(
+      // "RealOutputs/" + name + "/MT2/XVarience", X_MT2_VARIENCE_MAX -
+      // X_MT2_VARIENCE_MIN);
+      // Logger.recordOutput(
+      // "RealOutputs/" + name + "/MT2/XStdDev",
+      // Math.sqrt(X_MT2_VARIENCE_MAX - X_MT2_VARIENCE_MIN));
+      // Logger.recordOutput(
+      // "RealOutputs/" + name + "/MT2/YVarience", Y_MT2_VARIENCE_MAX -
+      // Y_MT2_VARIENCE_MIN);
+      // Logger.recordOutput(
+      // "RealOutputs/" + name + "/MT2/YStdDev",
+      // Math.sqrt(Y_MT2_VARIENCE_MAX - Y_MT2_VARIENCE_MIN));
+      // Logger.recordOutput(
+      // "RealOutputs/" + name + "/MT2/AngleVarience", T_MT2_VARIENCE_MAX -
+      // T_MT2_VARIENCE_MIN);
+      // Logger.recordOutput(
+      // "RealOutputs/" + name + "/MT2/AngleStdDev",
+      // Math.sqrt(T_MT2_VARIENCE_MAX - T_MT2_VARIENCE_MIN));
+      // Logger.recordOutput(
+      // "RealOutputs/" + name + "/MT2/ambiguity",
+      // latestEstimate.rawFiducials[0].ambiguity);
+      // Logger.recordOutput("RealOutputs/" + name + "/MT2/tagDistance",
+      // latestEstimate.avgTagDist);
     }
     return Optional.of(
         new AprilTagResult(

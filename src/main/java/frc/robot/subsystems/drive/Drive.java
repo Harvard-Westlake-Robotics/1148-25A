@@ -367,7 +367,7 @@ public class Drive extends SubsystemBase {
     monitor.endTiming("Drive_Odometry", odometryStartTime);
 
     // Vision updates (adaptive frequency based on performance)
-    if (shouldUpdateVision()) {
+    if (true) {
       double visionStartTime = monitor.startTiming("Drive_Vision");
       updateVisionMeasurements();
       updateVisionSystems();
@@ -1204,15 +1204,17 @@ public class Drive extends SubsystemBase {
       return true;
     }
 
-    // Reject if pose difference is too large (likely false detection)
-    Pose2d currentPose = getPose();
-    double poseDifference =
-        currentPose.getTranslation().getDistance(latestResult.pose.getTranslation());
-    if (poseDifference > VISION_MAX_POSE_DIFFERENCE_METERS) {
-      LoggingUtil.logString("Drive/Vision/RejectReason", "POSE_DIFFERENCE_TOO_LARGE");
-      LoggingUtil.logDouble("Drive/Vision/PoseDifferenceAtRejection", poseDifference);
-      return true;
-    }
+    // // Reject if pose difference is too large (likely false detection)
+    // Pose2d currentPose = getPose();
+    // double poseDifference =
+    // currentPose.getTranslation().getDistance(latestResult.pose.getTranslation());
+    // if (poseDifference > VISION_MAX_POSE_DIFFERENCE_METERS) {
+    // LoggingUtil.logString("Drive/Vision/RejectReason",
+    // "POSE_DIFFERENCE_TOO_LARGE");
+    // LoggingUtil.logDouble("Drive/Vision/PoseDifferenceAtRejection",
+    // poseDifference);
+    // return true;
+    // }
 
     // Accept the pose - all checks passed
     LoggingUtil.logString("Drive/Vision/RejectReason", "ACCEPTED");
@@ -1634,9 +1636,8 @@ public class Drive extends SubsystemBase {
    */
   private AprilTagResult[] getVisionResults() {
     return new AprilTagResult[] {
-      limelight_a.getEstimate().orElse(null),
-      limelight_b.getEstimate().orElse(null),
-      limelight_c.getEstimate().orElse(null)
+      limelight_a.getEstimate().orElse(null), limelight_b.getEstimate().orElse(null)
+      // ,limelight_c.getEstimate().orElse(null)
     };
   }
 

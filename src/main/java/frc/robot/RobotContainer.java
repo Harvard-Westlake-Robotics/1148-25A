@@ -73,7 +73,7 @@ public class RobotContainer {
   // Subsystems
   public final Drive drive;
   private final AlgaeIntake algaeIntake;
-  private final CoralIntake coralIntake;
+  public final CoralIntake coralIntake;
   private final Elevator elevator;
   private final AlgaeWrist intakeWrist;
   private final Climb hangWrist;
@@ -266,8 +266,7 @@ public class RobotContainer {
             ));
     elevatorCommand = new ScoreCommand(ScoringLevel.L0);
     elevator.setDefaultCommand(elevatorCommand);
-    coralIntakeCommand = new CoralIntakeCommand(6);
-    coralIntake.setDefaultCommand(coralIntakeCommand);
+
     algaeIntakeCommand = new GroundIntakeCommand(LinearVelocity.ofBaseUnits(0, MetersPerSecond));
     algaeIntake.setDefaultCommand(algaeIntakeCommand);
     hangCommand = new ClimbCommand();
@@ -304,6 +303,9 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    if (coralIntakeCommand != null) coralIntakeCommand.cancel();
+    if (CoralIntake.getInstance().getDefaultCommand() != null)
+      CoralIntake.getInstance().removeDefaultCommand();
     // return autoChooser.get();
     return preAutoChooser
         .get()

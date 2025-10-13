@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
@@ -27,11 +28,11 @@ import org.littletonrobotics.junction.Logger;
  */
 public class AutoScoreCommand extends Command {
   // Constants for position and timing - relaxed tolerances for smoother control
-  public static double POSITION_TOLERANCE = 0.02; // meters (increased from 0.02)
-  public static double ROTATION_TOLERANCE = 1.0; // degrees (increased from 0.6)
+  public static double POSITION_TOLERANCE = 0.015; // meters (increased from 0.02)
+  public static double ROTATION_TOLERANCE = 0.5; // degrees (decreased from 1.0)
   private static final double ELEVATOR_TOLERANCE = 0.8; // meters
-  private static final double SCORING_DELAY_TICKS = 3;
-  private static final double SCORING_VELOCITY = 52.0; // meters per second
+  private static final double SCORING_DELAY_TICKS = 4;
+  private static final double SCORING_VELOCITY = 40.0; // meters per second
   // private static final double DEFAULT_VELOCITY = 6.0; // meters per second
   private static final double COMMAND_TIMEOUT = 10.0; // seconds
 
@@ -47,18 +48,18 @@ public class AutoScoreCommand extends Command {
   public static double THETA_PID_D = 0.15; // Increased from 0.1
 
   // Motion profile constants - smoother trajectory
-  private static final double MAX_VELOCITY = 3; // Reduced from 2.0
+  private static final double MAX_VELOCITY = 2.7; // Reduced from 2.0
   private static final double MAX_ACCELERATION = 2.5; // Reduced from 2.75
   private static final double MAX_ANGULAR_VELOCITY = 5.5; // Reduced from 2.0
   private static final double MAX_ANGULAR_ACCELERATION = 5.0; // Reduced from 2.75
 
   // Feedforward constants
-  private static final double X_FEEDFORWARD_KS = 0.1; // Static friction
+  private static final double X_FEEDFORWARD_KS = 0.05; // Static friction
   private static final double X_FEEDFORWARD_KV = 0.05; // Velocity feedforward
-  private static final double Y_FEEDFORWARD_KS = 0.1; // Static friction
+  private static final double Y_FEEDFORWARD_KS = 0.05; // Static friction
   private static final double Y_FEEDFORWARD_KV = 0.05; // Velocity feedforward
-  private static final double THETA_FEEDFORWARD_KS = 0.05; // Static friction
-  private static final double THETA_FEEDFORWARD_KV = 0.02; // Velocity feedforward
+  private static final double THETA_FEEDFORWARD_KS = 0.01; // Static friction
+  private static final double THETA_FEEDFORWARD_KV = 0.01; // Velocity feedforward
 
   // Deadband constants to prevent tiny oscillations
   private static final double VELOCITY_DEADBAND = 0.01; // m/s
@@ -69,7 +70,7 @@ public class AutoScoreCommand extends Command {
   private final ProfiledPIDController xController;
   private final ProfiledPIDController yController;
   private final ProfiledPIDController thetaController;
-  private final Pose2d endPose;
+  private Pose2d endPose;
   private int tickCounter = 0;
   private final Timer timeoutTimer;
   private boolean hasElevatorError = false;
@@ -227,7 +228,7 @@ public class AutoScoreCommand extends Command {
     // Update PID constants from SmartDashboard if changed
     updatePIDFromDashboard();
 
-    Drive.getInstance().setSdMultiplier(8.0);
+    Drive.getInstance().setSdMultiplier(5.0);
     // Reset command state
     tickCounter = 0;
     hasElevatorError = false;
@@ -307,12 +308,11 @@ public class AutoScoreCommand extends Command {
     }
 
     // Check for elevator errors
-    double currentHeight = Elevator.getInstance().getHeight();
-    if (currentHeight < 0) {
-      hasElevatorError = true;
-      this.cancel();
-      return;
-    }
+    // if (currentHeight < 0) {
+    // hasElevatorError = true;
+    // this.cancel();
+    // return;
+    // }
 
     // Move elevator to target height
     // If the coral is not fully in the robot, prevent sending the elevator up so
@@ -320,7 +320,7 @@ public class AutoScoreCommand extends Command {
     if (CoralIntake.getInstance().getSensor3()) {
       Elevator.getInstance().goToHeight(targetHeight);
     }
-
+    RobotContainer.coralIntakeCommand.cancel();
     // Handle path following if endPose is set
     if (endPose != null) {
       handlePathFollowing();
@@ -384,6 +384,7 @@ public class AutoScoreCommand extends Command {
     } else {
       // Stop the drive when in position
       Drive.getInstance().stop();
+      this.endPose = null;
       handleScoring();
     }
   }
@@ -392,7 +393,7 @@ public class AutoScoreCommand extends Command {
   private void handleScoring() {
     Drive.getInstance().stop();
     double currentHeight = Elevator.getInstance().getHeight();
-    if (Math.abs(targetHeight - currentHeight) < ELEVATOR_TOLERANCE
+    if (Math.abs(targetHeight - currentHeight) <= ELEVATOR_TOLERANCE
         || currentHeight > targetHeight) {
       if (tickCounter >= SCORING_DELAY_TICKS) {
         CoralIntake.getInstance()
