@@ -132,8 +132,10 @@ public class AlgaeIntake extends SubsystemBase {
 
   /** Updates all tunable parameters from SmartDashboard */
   private void updateTunableParameters() {
-    velocityTolerance = LoggingUtil.getTunableDouble("AlgaeIntake/VelocityTolerance", velocityTolerance);
-    currentThreshold = LoggingUtil.getTunableDouble("AlgaeIntake/CurrentThreshold", currentThreshold);
+    velocityTolerance =
+        LoggingUtil.getTunableDouble("AlgaeIntake/VelocityTolerance", velocityTolerance);
+    currentThreshold =
+        LoggingUtil.getTunableDouble("AlgaeIntake/CurrentThreshold", currentThreshold);
 
     // Log current tunable values
     LoggingUtil.logDouble("AlgaeIntake/Tuning/VelocityTolerance", velocityTolerance);
@@ -141,14 +143,12 @@ public class AlgaeIntake extends SubsystemBase {
   }
 
   public double getVelocityError() {
-    if (targetVelocity == null)
-      return 0.0;
+    if (targetVelocity == null) return 0.0;
     return Math.abs(targetVelocity.magnitude() - inputs.intakeVelocityMPS);
   }
 
   public boolean isAtTargetVelocity() {
-    if (targetVelocity == null)
-      return true;
+    if (targetVelocity == null) return true;
     return Math.abs(targetVelocity.magnitude() - inputs.intakeVelocityMPS) < velocityTolerance;
   }
 }

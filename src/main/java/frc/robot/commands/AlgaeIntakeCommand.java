@@ -77,6 +77,7 @@ public class AlgaeIntakeCommand extends Command {
 
   public void outtake() {
     this.index = 3;
-    this.velocity = LinearVelocity.ofBaseUnits(-Constants.AlgaeIntake.intakeVelocity, MetersPerSecond);
+    this.velocity =
+        LinearVelocity.ofBaseUnits(-Constants.AlgaeIntake.intakeVelocity, MetersPerSecond);
   }
 }
