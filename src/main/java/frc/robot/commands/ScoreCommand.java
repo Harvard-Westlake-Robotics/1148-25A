@@ -51,13 +51,13 @@ public class ScoreCommand extends Command {
     if (level == ScoringLevel.L1) {
       targetHeight = 15.5;
     } else if (level == ScoringLevel.L2) {
-      targetHeight = 20.40;
+      targetHeight = 19.90; // 22
     } else if (level == ScoringLevel.L3) {
-      targetHeight = 30.08;
+      targetHeight = 32.90; // 35.28
     } else if (level == ScoringLevel.L4) {
       targetHeight = 53.40;
     } else if (level == ScoringLevel.TOP_REMOVE) {
-      targetHeight = 20.82;
+      targetHeight = 20.82; // 20.82
     } else if (level == ScoringLevel.BOTTOM_REMOVE) {
       targetHeight = 9.80;
     } else {

@@ -164,12 +164,12 @@ public class AutoScoreCommand extends Command {
                   ? path.getPathPoses()
                       .get(path.getPathPoses().size() - 1)
                       .getTranslation()
-                      .plus(new Translation2d(0.04, path.getGoalEndState().rotation()))
+                      .plus(new Translation2d(0.045, path.getGoalEndState().rotation()))
                   : path.flipPath()
                       .getPathPoses()
                       .get(path.getPathPoses().size() - 1)
                       .getTranslation()
-                      .plus(new Translation2d(0.04, path.flipPath().getGoalEndState().rotation())),
+                      .plus(new Translation2d(0.045, path.flipPath().getGoalEndState().rotation())),
               DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
                   ? path.getGoalEndState().rotation()
                   : path.flipPath().getGoalEndState().rotation());
@@ -228,7 +228,7 @@ public class AutoScoreCommand extends Command {
     // Update PID constants from SmartDashboard if changed
     updatePIDFromDashboard();
 
-    Drive.getInstance().setSdMultiplier(5.0);
+    Drive.getInstance().setSdMultiplier(4.5);
     // Reset command state
     tickCounter = 0;
     hasElevatorError = false;

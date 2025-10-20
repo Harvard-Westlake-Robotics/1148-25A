@@ -154,7 +154,7 @@ public class Drive extends SubsystemBase {
   private double PP_ROTATION_P = 5.05;
   private double PP_ROTATION_I = 0.00;
   private double PP_ROTATION_D = 0.00;
-  private double PP_TRANSLATION_P = 5.05;
+  private double PP_TRANSLATION_P = 4.85;
   private double PP_TRANSLATION_I = 0.0;
   private double PP_TRANSLATION_D = 0.1;
 
@@ -200,8 +200,8 @@ public class Drive extends SubsystemBase {
     this.sdMultiplier = sdMultiplier;
   }
 
-  private double xyStdDevCoeff = 1.25;
-  private double rStdDevCoeff = 2.95;
+  private double xyStdDevCoeff = 1.00;
+  private double rStdDevCoeff = 2.25;
   private double xyStdDev = 0.8;
   private double rStdDev = 6.2;
 
@@ -211,13 +211,13 @@ public class Drive extends SubsystemBase {
   // Field dimensions and vision constants
   private static final double FIELD_WIDTH_METERS = 16.54;
   private static final double FIELD_HEIGHT_METERS = 8.02;
-  private static final double FIELD_BORDER_MARGIN_METERS = 0.05;
-  private static final double MAX_YAW_RATE_DEGREES_PER_SEC = 520.0;
+  private static final double FIELD_BORDER_MARGIN_METERS = 0.00;
+  private static final double MAX_YAW_RATE_DEGREES_PER_SEC = 720.0;
 
   // Enhanced vision filtering constants (tunable via SmartDashboard)
   private static double VISION_AMBIGUITY_THRESHOLD = 0.3; // Maximum acceptable ambiguity
-  private static double VISION_MAX_DISTANCE_METERS = 6.0; // Maximum detection distance
-  private static double VISION_MAX_POSE_DIFFERENCE_METERS = 2.0; // Maximum pose jump allowed
+  private static double VISION_MAX_DISTANCE_METERS = 6.5; // Maximum detection distance
+  private static double VISION_MAX_POSE_DIFFERENCE_METERS = 3.0; // Maximum pose jump allowed
 
   // Drift compensation constants
   private static final double DRIFT_CALIBRATION_VELOCITY = 1.0; // m/s for calibration
@@ -346,6 +346,8 @@ public class Drive extends SubsystemBase {
     NetworkCommunicator.getInstance().init();
   }
 
+  public boolean hasAprilTag = false;
+
   @Override
   public void periodic() {
     // Start performance monitoring
@@ -373,6 +375,12 @@ public class Drive extends SubsystemBase {
       updateVisionSystems();
       monitor.endTiming("Drive_Vision", visionStartTime);
     }
+    if (limelight_a.getEstimate().isPresent() || limelight_b.getEstimate().isPresent()) {
+      hasAprilTag = true;
+    } else {
+      hasAprilTag = false;
+    }
+    Logger.recordOutput("RealOutputs/HasAprilTag", hasAprilTag);
 
     // Critical safety updates (always execute)
     if (DriverStation.isDisabled()) {
@@ -1740,14 +1748,14 @@ public class Drive extends SubsystemBase {
     // Use the existing tuned formula - preserving all current constants
     double xyStdDev =
         xyStdDevCoeff
-            * Math.max(Math.pow(result.distToTag, 2.0), 1)
+            * Math.max(Math.pow(result.distToTag, 1.8), 0.5)
             / result.tagCount
             * Math.sqrt(result.ambiguity)
             * sdMultiplier;
 
     double rStdDev =
         rStdDevCoeff
-            * Math.max(Math.pow(result.distToTag, 2.0), 1)
+            * Math.max(Math.pow(result.distToTag, 1.8), 0.5)
             / result.tagCount
             * Math.sqrt(result.ambiguity)
             * sdMultiplier;
