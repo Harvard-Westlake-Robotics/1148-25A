@@ -55,6 +55,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Camera.BaseCam.AprilTagResult;
 import frc.robot.Camera.LimeLightCam;
+import frc.robot.Camera.VisionLogging;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.RobotContainer;
@@ -84,41 +85,39 @@ public class Drive extends SubsystemBase {
   }
 
   // TunerConstants doesn't include these constants, so they are declared locally
-  static final double ODOMETRY_FREQUENCY =
-      new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
-  public static final double DRIVE_BASE_RADIUS =
+  static final double ODOMETRY_FREQUENCY = new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD()
+      ? 250.0
+      : 100.0;
+  public static final double DRIVE_BASE_RADIUS = Math.max(
       Math.max(
-          Math.max(
-              Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-              Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
-          Math.max(
-              Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-              Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+          Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+          Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
+      Math.max(
+          Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+          Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
   // PathPlanner config constants
   public static final double ROBOT_MASS_KG = 54.088;
   public static final double ROBOT_MOI = 6.883;
   public static final double WHEEL_COF = 1.2;
-  public static final RobotConfig PP_CONFIG =
-      new RobotConfig(
-          ROBOT_MASS_KG,
-          ROBOT_MOI,
-          new ModuleConfig(
-              TunerConstants.FrontLeft.WheelRadius,
-              TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
-              WHEEL_COF,
-              DCMotor.getKrakenX60Foc(1)
-                  .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
-              TunerConstants.FrontLeft.SlipCurrent,
-              1),
-          getModuleTranslations());
-  public static final PathConstraints PP_CONSTRAINTS =
-      new PathConstraints(
-          LinearVelocity.ofBaseUnits(4.5, MetersPerSecond),
-          LinearAcceleration.ofBaseUnits(3.5, MetersPerSecondPerSecond),
-          AngularVelocity.ofBaseUnits(720, DegreesPerSecond),
-          AngularAcceleration.ofBaseUnits(
-              720, DegreesPerSecondPerSecond)); // PathConstraints.unlimitedConstraints(12);
+  public static final RobotConfig PP_CONFIG = new RobotConfig(
+      ROBOT_MASS_KG,
+      ROBOT_MOI,
+      new ModuleConfig(
+          TunerConstants.FrontLeft.WheelRadius,
+          TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+          WHEEL_COF,
+          DCMotor.getKrakenX60Foc(1)
+              .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
+          TunerConstants.FrontLeft.SlipCurrent,
+          1),
+      getModuleTranslations());
+  public static final PathConstraints PP_CONSTRAINTS = new PathConstraints(
+      LinearVelocity.ofBaseUnits(4.5, MetersPerSecond),
+      LinearAcceleration.ofBaseUnits(3.5, MetersPerSecondPerSecond),
+      AngularVelocity.ofBaseUnits(720, DegreesPerSecond),
+      AngularAcceleration.ofBaseUnits(
+          720, DegreesPerSecondPerSecond)); // PathConstraints.unlimitedConstraints(12);
   // new PathConstraints(
   // TunerConstants.kSpeedAt12Volts,
   // LinearAcceleration.ofBaseUnits(5.0, MetersPerSecondPerSecond),
@@ -129,27 +128,26 @@ public class Drive extends SubsystemBase {
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
-  private final Alert gyroDisconnectedAlert =
-      new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+  private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
+      AlertType.kError);
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
   private Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition()
+          new SwerveModulePosition(),
+          new SwerveModulePosition(),
+          new SwerveModulePosition(),
+          new SwerveModulePosition()
       };
-  private SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+  private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation,
+      lastModulePositions, new Pose2d());
 
   private final LimeLightCam limelight_a = new LimeLightCam("limelight-a", false);
   private final LimeLightCam limelight_b = new LimeLightCam("limelight-b", false);
   private final LimeLightCam limelight_c = new LimeLightCam("limelight-c", false);
 
-  private final LimeLightCam[] limelights =
-      new LimeLightCam[] {limelight_a, limelight_b, limelight_c};
+  private final LimeLightCam[] limelights = new LimeLightCam[] { limelight_a, limelight_b, limelight_c };
 
   private double PP_ROTATION_P = 5.05;
   private double PP_ROTATION_I = 0.00;
@@ -180,7 +178,7 @@ public class Drive extends SubsystemBase {
   private boolean[] moduleSlipping = new boolean[4]; // Per-module slip detection
   private double skiddingRatio = 1.0; // Current skidding ratio
   private double lastChassisSpeed = 0.0; // For acceleration limiting
-  private double[] tractionControlMultipliers = {1.0, 1.0, 1.0, 1.0}; // Per-module power reduction
+  private double[] tractionControlMultipliers = { 1.0, 1.0, 1.0, 1.0 }; // Per-module power reduction
 
   public boolean isLimeLightsActive() {
     return limeLightsActive;
@@ -221,8 +219,7 @@ public class Drive extends SubsystemBase {
 
   // Drift compensation constants
   private static final double DRIFT_CALIBRATION_VELOCITY = 1.0; // m/s for calibration
-  private static final double DRIFT_CALIBRATION_DISTANCE =
-      3.0; // meters to travel during calibration
+  private static final double DRIFT_CALIBRATION_DISTANCE = 3.0; // meters to travel during calibration
   private static final double DRIFT_COMPENSATION_MAX = 0.15; // Maximum compensation factor
   private static final double DRIFT_LEARNING_RATE = 0.1; // How quickly to adapt compensation
 
@@ -235,49 +232,44 @@ public class Drive extends SubsystemBase {
   private static final double ELEVATOR_ANGLE_DEGREES = 40.0;
 
   // Create and configure a drivetrain simulation configuration
-  public static final DriveTrainSimulationConfig mapleSimConfig =
-      DriveTrainSimulationConfig.Default()
-          // Specify robot mass
-          .withRobotMass(Kilograms.of(ROBOT_MASS_KG)) // Set robot mass in kg
-          // Specify gyro type (for realistic gyro drifting and error simulation)
-          .withGyro(COTS.ofPigeon2())
-          // Specify module positions
-          .withCustomModuleTranslations(getModuleTranslations())
-          // Specify swerve module (for realistic swerve dynamics)
-          .withSwerveModule(
-              new SwerveModuleSimulationConfig(
-                  DCMotor.getKrakenX60(1), // Drive motor is a Kraken X60
-                  DCMotor.getFalcon500(1), // Steer motor is a Falcon 500
-                  TunerConstants.kDriveGearRatio, // Drive motor gear ratio.
-                  TunerConstants.kSteerGearRatio, // Steer motor gear ratio.
-                  TunerConstants.kDriveFrictionVoltage, // Drive friction voltage.
-                  TunerConstants.kSteerFrictionVoltage, // Steer friction voltage
-                  Inches.of(2.15), // Wheel radius
-                  TunerConstants.kSteerInertia, // Steer MOI
-                  1.2)) // Wheel COF
-          // Configures the track length and track width (spacing between swerve modules)
-          .withTrackLengthTrackWidth(Inches.of(21), Inches.of(21))
-          // Configures the bumper size (dimensions of the robot bumper)
-          .withBumperSize(Inches.of(33.6), Inches.of(33.6));
+  public static final DriveTrainSimulationConfig mapleSimConfig = DriveTrainSimulationConfig.Default()
+      // Specify robot mass
+      .withRobotMass(Kilograms.of(ROBOT_MASS_KG)) // Set robot mass in kg
+      // Specify gyro type (for realistic gyro drifting and error simulation)
+      .withGyro(COTS.ofPigeon2())
+      // Specify module positions
+      .withCustomModuleTranslations(getModuleTranslations())
+      // Specify swerve module (for realistic swerve dynamics)
+      .withSwerveModule(
+          new SwerveModuleSimulationConfig(
+              DCMotor.getKrakenX60(1), // Drive motor is a Kraken X60
+              DCMotor.getFalcon500(1), // Steer motor is a Falcon 500
+              TunerConstants.kDriveGearRatio, // Drive motor gear ratio.
+              TunerConstants.kSteerGearRatio, // Steer motor gear ratio.
+              TunerConstants.kDriveFrictionVoltage, // Drive friction voltage.
+              TunerConstants.kSteerFrictionVoltage, // Steer friction voltage
+              Inches.of(2.15), // Wheel radius
+              TunerConstants.kSteerInertia, // Steer MOI
+              1.2)) // Wheel COF
+      // Configures the track length and track width (spacing between swerve modules)
+      .withTrackLengthTrackWidth(Inches.of(21), Inches.of(21))
+      // Configures the bumper size (dimensions of the robot bumper)
+      .withBumperSize(Inches.of(33.6), Inches.of(33.6));
 
   private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
   // Car-like drift mode constants
-  private static final double DRIFT_FRONT_MAX_STEERING_DEGREES =
-      70.0; // Maximum front wheel steering angle
+  private static final double DRIFT_FRONT_MAX_STEERING_DEGREES = 70.0; // Maximum front wheel steering angle
   private static final double DRIFT_REAR_TOE_IN_DEGREES = 2.0; // Slight toe-in for rear wheels
-  private static final double DRIFT_REAR_POWER_MULTIPLIER =
-      1.5; // High power to rear wheels for oversteer
-  private static final double DRIFT_FRONT_POWER_MULTIPLIER =
-      0.0; // No power to front wheels (coast)
+  private static final double DRIFT_REAR_POWER_MULTIPLIER = 1.5; // High power to rear wheels for oversteer
+  private static final double DRIFT_FRONT_POWER_MULTIPLIER = 0.0; // No power to front wheels (coast)
   private static final double DRIFT_STEERING_SENSITIVITY = 0.8; // How responsive steering is
 
   // Traction Control Constants - Team 1690 inspired skid detection
   public static double SKID_DETECTION_THRESHOLD = 1.2; // Ratio threshold for detecting slip
   public static double TRACTION_CONTROL_REDUCTION = 0.7; // Reduce power to 70% when slip detected
   public static double SKID_DETECTION_MIN_SPEED = 0.5; // Minimum speed to check for skid (m/s)
-  public static double ACCELERATION_LIMIT_THRESHOLD =
-      3.0; // Max acceleration before limiting (m/s²)
+  public static double ACCELERATION_LIMIT_THRESHOLD = 3.0; // Max acceleration before limiting (m/s²)
   public static boolean TRACTION_CONTROL_ENABLED = false; // Default disabled for testing
   private static final double SKID_DETECTION_UPDATE_RATE = 0.02; // 50Hz update rate
   private static final double VELOCITY_FILTER_ALPHA = 0.8; // Low-pass filter for velocity smoothing
@@ -329,15 +321,14 @@ public class Drive extends SubsystemBase {
         });
 
     // Configure SysId
-    sysId =
-        new SysIdRoutine(
-            new SysIdRoutine.Config(
-                null,
-                null,
-                null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
-            new SysIdRoutine.Mechanism(
-                (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    sysId = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            null,
+            null,
+            null,
+            (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+        new SysIdRoutine.Mechanism(
+            (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
     setPose(new Pose2d());
 
     Drive.instance = this;
@@ -374,6 +365,7 @@ public class Drive extends SubsystemBase {
       updateVisionMeasurements();
       updateVisionSystems();
       monitor.endTiming("Drive_Vision", visionStartTime);
+      VisionLogging.dumpLogs();
     }
     if (limelight_a.getEstimate().isPresent() || limelight_b.getEstimate().isPresent()) {
       hasAprilTag = true;
@@ -467,42 +459,35 @@ public class Drive extends SubsystemBase {
     AutoScoreCommand.Y_PID_D = SmartDashboard.getNumber("Y_PID_D", AutoScoreCommand.Y_PID_D);
     SmartDashboard.putNumber("Y_PID_D", AutoScoreCommand.Y_PID_D);
 
-    AutoScoreCommand.THETA_PID_P =
-        SmartDashboard.getNumber("THETA_PID_P", AutoScoreCommand.THETA_PID_P);
+    AutoScoreCommand.THETA_PID_P = SmartDashboard.getNumber("THETA_PID_P", AutoScoreCommand.THETA_PID_P);
     SmartDashboard.putNumber("THETA_PID_P", AutoScoreCommand.THETA_PID_P);
-    AutoScoreCommand.THETA_PID_D =
-        SmartDashboard.getNumber("THETA_PID_D", AutoScoreCommand.THETA_PID_D);
+    AutoScoreCommand.THETA_PID_D = SmartDashboard.getNumber("THETA_PID_D", AutoScoreCommand.THETA_PID_D);
     SmartDashboard.putNumber("THETA_PID_D", AutoScoreCommand.THETA_PID_D);
 
-    AutoScoreCommand.POSITION_TOLERANCE =
-        SmartDashboard.getNumber("POSITION_TOLERANCE", AutoScoreCommand.POSITION_TOLERANCE);
+    AutoScoreCommand.POSITION_TOLERANCE = SmartDashboard.getNumber("POSITION_TOLERANCE",
+        AutoScoreCommand.POSITION_TOLERANCE);
     SmartDashboard.putNumber("POSITION_TOLERANCE", AutoScoreCommand.POSITION_TOLERANCE);
-    AutoScoreCommand.ROTATION_TOLERANCE =
-        SmartDashboard.getNumber("ROTATION_TOLERANCE", AutoScoreCommand.ROTATION_TOLERANCE);
+    AutoScoreCommand.ROTATION_TOLERANCE = SmartDashboard.getNumber("ROTATION_TOLERANCE",
+        AutoScoreCommand.ROTATION_TOLERANCE);
     SmartDashboard.putNumber("ROTATION_TOLERANCE", AutoScoreCommand.ROTATION_TOLERANCE);
 
     // Update traction control system
     updateTractionControl();
 
     // Update tunable traction control constants from SmartDashboard
-    SKID_DETECTION_THRESHOLD =
-        SmartDashboard.getNumber("TractionControl/SkidThreshold", SKID_DETECTION_THRESHOLD);
+    SKID_DETECTION_THRESHOLD = SmartDashboard.getNumber("TractionControl/SkidThreshold", SKID_DETECTION_THRESHOLD);
     SmartDashboard.putNumber("TractionControl/SkidThreshold", SKID_DETECTION_THRESHOLD);
 
-    TRACTION_CONTROL_REDUCTION =
-        SmartDashboard.getNumber("TractionControl/PowerReduction", TRACTION_CONTROL_REDUCTION);
+    TRACTION_CONTROL_REDUCTION = SmartDashboard.getNumber("TractionControl/PowerReduction", TRACTION_CONTROL_REDUCTION);
     SmartDashboard.putNumber("TractionControl/PowerReduction", TRACTION_CONTROL_REDUCTION);
 
-    SKID_DETECTION_MIN_SPEED =
-        SmartDashboard.getNumber("TractionControl/MinSpeed", SKID_DETECTION_MIN_SPEED);
+    SKID_DETECTION_MIN_SPEED = SmartDashboard.getNumber("TractionControl/MinSpeed", SKID_DETECTION_MIN_SPEED);
     SmartDashboard.putNumber("TractionControl/MinSpeed", SKID_DETECTION_MIN_SPEED);
 
-    ACCELERATION_LIMIT_THRESHOLD =
-        SmartDashboard.getNumber("TractionControl/AccelLimit", ACCELERATION_LIMIT_THRESHOLD);
+    ACCELERATION_LIMIT_THRESHOLD = SmartDashboard.getNumber("TractionControl/AccelLimit", ACCELERATION_LIMIT_THRESHOLD);
     SmartDashboard.putNumber("TractionControl/AccelLimit", ACCELERATION_LIMIT_THRESHOLD);
 
-    TRACTION_CONTROL_ENABLED =
-        SmartDashboard.getBoolean("TractionControl/Enabled", TRACTION_CONTROL_ENABLED);
+    TRACTION_CONTROL_ENABLED = SmartDashboard.getBoolean("TractionControl/Enabled", TRACTION_CONTROL_ENABLED);
     SmartDashboard.putBoolean("TractionControl/Enabled", TRACTION_CONTROL_ENABLED);
 
     // Update all tunable parameters from dashboard
@@ -531,7 +516,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Applies drift compensation to chassis speeds. This corrects for systematic drift caused by
+   * Applies drift compensation to chassis speeds. This corrects for systematic
+   * drift caused by
    * wheel slippage, carpet effects, etc.
    *
    * @param speeds The original chassis speeds
@@ -543,10 +529,8 @@ public class Drive extends SubsystemBase {
     }
 
     // Apply compensation based on the robot's current velocity direction
-    double compensatedVx =
-        speeds.vxMetersPerSecond + (driftCompensationX * Math.abs(speeds.vxMetersPerSecond));
-    double compensatedVy =
-        speeds.vyMetersPerSecond + (driftCompensationY * Math.abs(speeds.vyMetersPerSecond));
+    double compensatedVx = speeds.vxMetersPerSecond + (driftCompensationX * Math.abs(speeds.vxMetersPerSecond));
+    double compensatedVy = speeds.vyMetersPerSecond + (driftCompensationY * Math.abs(speeds.vyMetersPerSecond));
 
     return new ChassisSpeeds(compensatedVx, compensatedVy, speeds.omegaRadiansPerSecond);
   }
@@ -555,7 +539,7 @@ public class Drive extends SubsystemBase {
    * Updates drift compensation factors based on observed vs expected motion.
    *
    * @param expectedTranslation The expected robot translation
-   * @param actualTranslation The actual robot translation
+   * @param actualTranslation   The actual robot translation
    */
   public void updateDriftCompensation(
       Translation2d expectedTranslation, Translation2d actualTranslation) {
@@ -580,10 +564,8 @@ public class Drive extends SubsystemBase {
     driftCompensationX += DRIFT_LEARNING_RATE * errorX;
     driftCompensationY += DRIFT_LEARNING_RATE * errorY;
 
-    driftCompensationX =
-        MathUtil.clamp(driftCompensationX, -DRIFT_COMPENSATION_MAX, DRIFT_COMPENSATION_MAX);
-    driftCompensationY =
-        MathUtil.clamp(driftCompensationY, -DRIFT_COMPENSATION_MAX, DRIFT_COMPENSATION_MAX);
+    driftCompensationX = MathUtil.clamp(driftCompensationX, -DRIFT_COMPENSATION_MAX, DRIFT_COMPENSATION_MAX);
+    driftCompensationY = MathUtil.clamp(driftCompensationY, -DRIFT_COMPENSATION_MAX, DRIFT_COMPENSATION_MAX);
 
     // Log the compensation factors for tuning
     Logger.recordOutput("Drive/DriftCompensation/X", driftCompensationX);
@@ -634,8 +616,7 @@ public class Drive extends SubsystemBase {
 
     // Calculate actual vs expected movement
     Pose2d currentPose = getPose();
-    Translation2d actualMovement =
-        currentPose.getTranslation().minus(driftCalibrationStartPose.getTranslation());
+    Translation2d actualMovement = currentPose.getTranslation().minus(driftCalibrationStartPose.getTranslation());
 
     if (driftCalibrationExpectedPosition.getNorm() > 0.1) {
       updateDriftCompensation(driftCalibrationExpectedPosition, actualMovement);
@@ -666,7 +647,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Runs the drive with precision velocity control for auto scoring. This reduces jitter by using
+   * Runs the drive with precision velocity control for auto scoring. This reduces
+   * jitter by using
    * smoother control during position commands.
    *
    * @param speeds Chassis speeds in meters/sec
@@ -674,12 +656,10 @@ public class Drive extends SubsystemBase {
   public void runVelocityPrecision(ChassisSpeeds speeds) {
     // Apply drift compensation with reduced sensitivity
     if (isDriftCompensationEnabled) {
-      double compensatedVx =
-          speeds.vxMetersPerSecond
-              + (driftCompensationX * Math.abs(speeds.vxMetersPerSecond) * 0.5); // Reduced by 50%
-      double compensatedVy =
-          speeds.vyMetersPerSecond
-              + (driftCompensationY * Math.abs(speeds.vyMetersPerSecond) * 0.5); // Reduced by 50%
+      double compensatedVx = speeds.vxMetersPerSecond
+          + (driftCompensationX * Math.abs(speeds.vxMetersPerSecond) * 0.5); // Reduced by 50%
+      double compensatedVy = speeds.vyMetersPerSecond
+          + (driftCompensationY * Math.abs(speeds.vyMetersPerSecond) * 0.5); // Reduced by 50%
       speeds = new ChassisSpeeds(compensatedVx, compensatedVy, speeds.omegaRadiansPerSecond);
     }
 
@@ -688,7 +668,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Updates traction control system based on Team 1690's skid detection algorithm. Calculates
+   * Updates traction control system based on Team 1690's skid detection
+   * algorithm. Calculates
    * skidding ratio and applies power reduction to slipping wheels.
    */
   private void updateTractionControl() {
@@ -717,13 +698,12 @@ public class Drive extends SubsystemBase {
     // Filter wheel speeds to reduce noise
     for (int i = 0; i < 4; i++) {
       double rawSpeed = Math.abs(currentStates[i].speedMetersPerSecond);
-      filteredWheelSpeeds[i] =
-          VELOCITY_FILTER_ALPHA * filteredWheelSpeeds[i] + (1.0 - VELOCITY_FILTER_ALPHA) * rawSpeed;
+      filteredWheelSpeeds[i] = VELOCITY_FILTER_ALPHA * filteredWheelSpeeds[i]
+          + (1.0 - VELOCITY_FILTER_ALPHA) * rawSpeed;
     }
 
     // Calculate chassis translational speed
-    double chassisSpeed =
-        Math.hypot(currentChassisSpeeds.vxMetersPerSecond, currentChassisSpeeds.vyMetersPerSecond);
+    double chassisSpeed = Math.hypot(currentChassisSpeeds.vxMetersPerSecond, currentChassisSpeeds.vyMetersPerSecond);
 
     // Only perform skid detection above minimum speed threshold
     if (chassisSpeed < SKID_DETECTION_MIN_SPEED) {
@@ -745,16 +725,14 @@ public class Drive extends SubsystemBase {
     for (int i = 0; i < 4; i++) {
       // Compensate for chassis rotation component
       double compensatedSpeed = filteredWheelSpeeds[i];
-      if (Math.abs(currentChassisSpeeds.omegaRadiansPerSecond)
-          > CHASSIS_ROTATION_COMPENSATION_THRESHOLD) {
+      if (Math.abs(currentChassisSpeeds.omegaRadiansPerSecond) > CHASSIS_ROTATION_COMPENSATION_THRESHOLD) {
         // Subtract expected rotation contribution
-        compensatedSpeed =
-            Math.max(
-                0,
-                compensatedSpeed
-                    - Math.abs(
-                        getModuleTranslations()[i].getNorm()
-                            * currentChassisSpeeds.omegaRadiansPerSecond));
+        compensatedSpeed = Math.max(
+            0,
+            compensatedSpeed
+                - Math.abs(
+                    getModuleTranslations()[i].getNorm()
+                        * currentChassisSpeeds.omegaRadiansPerSecond));
       }
 
       minSpeed = Math.min(minSpeed, compensatedSpeed);
@@ -813,7 +791,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Calculates expected wheel speeds based on current chassis motion. Used for skid detection
+   * Calculates expected wheel speeds based on current chassis motion. Used for
+   * skid detection
    * comparison.
    *
    * @param chassisSpeeds Current chassis speeds
@@ -832,7 +811,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Gets the current skidding ratio calculated by the traction control system. Values > 1.2
+   * Gets the current skidding ratio calculated by the traction control system.
+   * Values > 1.2
    * typically indicate wheel slip.
    *
    * @return Current skidding ratio
@@ -848,7 +828,8 @@ public class Drive extends SubsystemBase {
    */
   public boolean isAnyModuleSlipping() {
     for (boolean slipping : moduleSlipping) {
-      if (slipping) return true;
+      if (slipping)
+        return true;
     }
     return false;
   }
@@ -879,7 +860,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Runs the drive at the desired velocity using Motion Magic motion profiles. This provides
+   * Runs the drive at the desired velocity using Motion Magic motion profiles.
+   * This provides
    * smoother acceleration and deceleration compared to direct velocity control.
    *
    * @param speeds Chassis speeds in meters/sec
@@ -984,7 +966,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Custom optimization method to prevent modules from flipping 180 degrees. This ensures smoother
+   * Custom optimization method to prevent modules from flipping 180 degrees. This
+   * ensures smoother
    * direction changes, especially important for drift mode.
    *
    * @param currentAngle The current module angle
@@ -1004,17 +987,23 @@ public class Drive extends SubsystemBase {
 
     // Normalize angles to range (-180, 180]
     targetAngle = targetAngle % 360;
-    if (targetAngle > 180) targetAngle -= 360;
-    if (targetAngle <= -180) targetAngle += 360;
+    if (targetAngle > 180)
+      targetAngle -= 360;
+    if (targetAngle <= -180)
+      targetAngle += 360;
 
     currentAngleDegrees = currentAngleDegrees % 360;
-    if (currentAngleDegrees > 180) currentAngleDegrees -= 360;
-    if (currentAngleDegrees <= -180) currentAngleDegrees += 360;
+    if (currentAngleDegrees > 180)
+      currentAngleDegrees -= 360;
+    if (currentAngleDegrees <= -180)
+      currentAngleDegrees += 360;
 
     // Calculate angle difference (shortest path)
     double deltaAngle = targetAngle - currentAngleDegrees;
-    if (deltaAngle > 180) deltaAngle -= 360;
-    if (deltaAngle < -180) deltaAngle += 360;
+    if (deltaAngle > 180)
+      deltaAngle -= 360;
+    if (deltaAngle < -180)
+      deltaAngle += 360;
 
     // If change would be greater than 90 degrees, flip direction and angle
     if (Math.abs(deltaAngle) > 90) {
@@ -1029,7 +1018,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Runs the drive in a straight line with the specified drive output. Used for system
+   * Runs the drive in a straight line with the specified drive output. Used for
+   * system
    * identification.
    *
    * @param output Voltage output to apply to all modules
@@ -1046,8 +1036,10 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-   * return to their normal orientations the next time a nonzero velocity is requested.
+   * Stops the drive and turns the modules to an X arrangement to resist movement.
+   * The modules will
+   * return to their normal orientations the next time a nonzero velocity is
+   * requested.
    */
   public void stopWithX() {
     Rotation2d[] headings = new Rotation2d[4];
@@ -1070,7 +1062,9 @@ public class Drive extends SubsystemBase {
     return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
 
-  /** Returns the module states (turn angles and drive velocities) for all modules. */
+  /**
+   * Returns the module states (turn angles and drive velocities) for all modules.
+   */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
@@ -1080,7 +1074,10 @@ public class Drive extends SubsystemBase {
     return states;
   }
 
-  /** Returns the module positions (turn angles and drive positions) for all modules. */
+  /**
+   * Returns the module positions (turn angles and drive positions) for all
+   * modules.
+   */
   private SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     for (int i = 0; i < 4; i++) {
@@ -1152,10 +1149,10 @@ public class Drive extends SubsystemBase {
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {
-      new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-      new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
-      new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-      new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+        new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+        new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
+        new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+        new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
     };
   }
 
@@ -1169,7 +1166,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Determines if a vision pose should be rejected based on various criteria. Uses comprehensive
+   * Determines if a vision pose should be rejected based on various criteria.
+   * Uses comprehensive
    * filtering to ensure pose estimation quality.
    *
    * @param latestResult The AprilTag detection result
@@ -1254,20 +1252,17 @@ public class Drive extends SubsystemBase {
    */
   public double distanceFromReefEdge() {
     // Calculate translation with robot offset
-    Translation2d robotTranslation =
-        getPose()
-            .getTranslation()
-            .plus(new Translation2d(ROBOT_REEF_OFFSET_METERS, getPose().getRotation()));
+    Translation2d robotTranslation = getPose()
+        .getTranslation()
+        .plus(new Translation2d(ROBOT_REEF_OFFSET_METERS, getPose().getRotation()));
 
     // Determine reef center based on alliance
-    double reefCenterX =
-        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-            ? BLUE_REEF_CENTER_X
-            : RED_REEF_CENTER_X;
+    double reefCenterX = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+        ? BLUE_REEF_CENTER_X
+        : RED_REEF_CENTER_X;
 
     // Calculate distance to reef center and subtract reef radius
-    double distToReefCenter =
-        robotTranslation.getDistance(new Translation2d(reefCenterX, REEF_CENTER_Y));
+    double distToReefCenter = robotTranslation.getDistance(new Translation2d(reefCenterX, REEF_CENTER_Y));
 
     return distToReefCenter - REEF_CENTER_RADIUS;
   }
@@ -1298,8 +1293,10 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Applies car-like drift mode adjustments to create realistic oversteer behavior. This mimics a
-   * rear-wheel drive car with front wheels for steering and rear wheels for power.
+   * Applies car-like drift mode adjustments to create realistic oversteer
+   * behavior. This mimics a
+   * rear-wheel drive car with front wheels for steering and rear wheels for
+   * power.
    *
    * @param throttleInput The throttle input (0.0 to 1.0)
    * @param steeringInput The steering input (-1.0 to 1.0, left to right)
@@ -1316,11 +1313,10 @@ public class Drive extends SubsystemBase {
     int rearRight = 3;
 
     // Calculate front wheel steering angle (limited to ±70 degrees)
-    double frontSteeringAngle =
-        MathUtil.clamp(
-            steeringInput * DRIFT_FRONT_MAX_STEERING_DEGREES * DRIFT_STEERING_SENSITIVITY,
-            -DRIFT_FRONT_MAX_STEERING_DEGREES,
-            DRIFT_FRONT_MAX_STEERING_DEGREES);
+    double frontSteeringAngle = MathUtil.clamp(
+        steeringInput * DRIFT_FRONT_MAX_STEERING_DEGREES * DRIFT_STEERING_SENSITIVITY,
+        -DRIFT_FRONT_MAX_STEERING_DEGREES,
+        DRIFT_FRONT_MAX_STEERING_DEGREES);
 
     // Set front wheels to steering angle with no power (coast)
     modules[frontLeft].runSetpoint(
@@ -1332,8 +1328,7 @@ public class Drive extends SubsystemBase {
             DRIFT_FRONT_POWER_MULTIPLIER, Rotation2d.fromDegrees(frontSteeringAngle)));
 
     // Calculate rear wheel speed (high power for oversteer)
-    double rearSpeed =
-        throttleInput * getMaxLinearSpeedMetersPerSec() * DRIFT_REAR_POWER_MULTIPLIER;
+    double rearSpeed = throttleInput * getMaxLinearSpeedMetersPerSec() * DRIFT_REAR_POWER_MULTIPLIER;
 
     // Set rear wheels to forward direction with slight toe-in and high power
     modules[rearLeft].runSetpoint(
@@ -1352,7 +1347,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Legacy drift mode adjustments - kept for compatibility but not used in car mode. Use
+   * Legacy drift mode adjustments - kept for compatibility but not used in car
+   * mode. Use
    * runCarDriftMode() instead for realistic car-like behavior.
    */
   private void applyDriftModeAdjustments(SwerveModuleState[] setpointStates, double rotationInput) {
@@ -1434,12 +1430,9 @@ public class Drive extends SubsystemBase {
   /** Updates all tunable parameters from SmartDashboard */
   private void updateTunableParameters() {
     // PathPlanner PID tuning
-    PP_TRANSLATION_P =
-        LoggingUtil.getTunableDouble("Drive/PathPlanner/TranslationP", PP_TRANSLATION_P);
-    PP_TRANSLATION_I =
-        LoggingUtil.getTunableDouble("Drive/PathPlanner/TranslationI", PP_TRANSLATION_I);
-    PP_TRANSLATION_D =
-        LoggingUtil.getTunableDouble("Drive/PathPlanner/TranslationD", PP_TRANSLATION_D);
+    PP_TRANSLATION_P = LoggingUtil.getTunableDouble("Drive/PathPlanner/TranslationP", PP_TRANSLATION_P);
+    PP_TRANSLATION_I = LoggingUtil.getTunableDouble("Drive/PathPlanner/TranslationI", PP_TRANSLATION_I);
+    PP_TRANSLATION_D = LoggingUtil.getTunableDouble("Drive/PathPlanner/TranslationD", PP_TRANSLATION_D);
     PP_ROTATION_P = LoggingUtil.getTunableDouble("Drive/PathPlanner/RotationP", PP_ROTATION_P);
     PP_ROTATION_I = LoggingUtil.getTunableDouble("Drive/PathPlanner/RotationI", PP_ROTATION_I);
     PP_ROTATION_D = LoggingUtil.getTunableDouble("Drive/PathPlanner/RotationD", PP_ROTATION_D);
@@ -1449,13 +1442,12 @@ public class Drive extends SubsystemBase {
     rStdDevCoeff = LoggingUtil.getTunableDouble("Drive/Vision/RStdDevCoeff", rStdDevCoeff);
 
     // Enhanced vision filtering parameters
-    VISION_AMBIGUITY_THRESHOLD =
-        LoggingUtil.getTunableDouble("Drive/Vision/AmbiguityThreshold", VISION_AMBIGUITY_THRESHOLD);
-    VISION_MAX_DISTANCE_METERS =
-        LoggingUtil.getTunableDouble("Drive/Vision/MaxDistanceMeters", VISION_MAX_DISTANCE_METERS);
-    VISION_MAX_POSE_DIFFERENCE_METERS =
-        LoggingUtil.getTunableDouble(
-            "Drive/Vision/MaxPoseDifferenceMeters", VISION_MAX_POSE_DIFFERENCE_METERS);
+    VISION_AMBIGUITY_THRESHOLD = LoggingUtil.getTunableDouble("Drive/Vision/AmbiguityThreshold",
+        VISION_AMBIGUITY_THRESHOLD);
+    VISION_MAX_DISTANCE_METERS = LoggingUtil.getTunableDouble("Drive/Vision/MaxDistanceMeters",
+        VISION_MAX_DISTANCE_METERS);
+    VISION_MAX_POSE_DIFFERENCE_METERS = LoggingUtil.getTunableDouble(
+        "Drive/Vision/MaxPoseDifferenceMeters", VISION_MAX_POSE_DIFFERENCE_METERS);
 
     // Drive base radius for characterization
     LoggingUtil.logDouble("Drive/Characterization/DriveBaseRadius", DRIVE_BASE_RADIUS);
@@ -1492,7 +1484,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Updates odometry using wheel positions and gyro data. Handles high-frequency sampling and
+   * Updates odometry using wheel positions and gyro data. Handles high-frequency
+   * sampling and
    * provides comprehensive logging with performance optimization.
    */
   private void updateOdometry() {
@@ -1513,11 +1506,10 @@ public class Drive extends SubsystemBase {
 
       for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
         modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        moduleDeltas[moduleIndex] =
-            new SwerveModulePosition(
-                modulePositions[moduleIndex].distanceMeters
-                    - lastModulePositions[moduleIndex].distanceMeters,
-                modulePositions[moduleIndex].angle);
+        moduleDeltas[moduleIndex] = new SwerveModulePosition(
+            modulePositions[moduleIndex].distanceMeters
+                - lastModulePositions[moduleIndex].distanceMeters,
+            modulePositions[moduleIndex].angle);
         lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
       }
 
@@ -1538,7 +1530,7 @@ public class Drive extends SubsystemBase {
    * Updates gyro rotation with fallback to kinematics-based estimation.
    *
    * @param moduleDeltas The change in module positions since last update
-   * @param sampleIndex The current sample index
+   * @param sampleIndex  The current sample index
    */
   private void updateGyroRotation(SwerveModulePosition[] moduleDeltas, int sampleIndex) {
     if (gyroInputs.connected) {
@@ -1557,9 +1549,9 @@ public class Drive extends SubsystemBase {
   /**
    * Logs comprehensive odometry data for debugging and analysis.
    *
-   * @param timestamp The timestamp of this odometry sample
+   * @param timestamp       The timestamp of this odometry sample
    * @param modulePositions Current module positions
-   * @param moduleDeltas Changes in module positions
+   * @param moduleDeltas    Changes in module positions
    */
   private void logOdometryData(
       double timestamp,
@@ -1588,8 +1580,10 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Updates vision measurements from all limelights with comprehensive filtering and logging.
-   * Optimized for performance with adaptive frequency. Processes AprilTag detections and applies
+   * Updates vision measurements from all limelights with comprehensive filtering
+   * and logging.
+   * Optimized for performance with adaptive frequency. Processes AprilTag
+   * detections and applies
    * them to pose estimation with calculated standard deviations.
    */
   private void updateVisionMeasurements() {
@@ -1616,7 +1610,9 @@ public class Drive extends SubsystemBase {
       AprilTagResult result = visionResults[i];
       if (result != null) {
         String limelightName = getLimelightName(i);
-
+        VisionLogging.addVisionEntry(result, poseEstimator.getEstimatedPosition().getX(),
+            poseEstimator.getEstimatedPosition().getY(),
+            poseEstimator.getEstimatedPosition().getRotation().getDegrees());
         if (shouldRejectPose(result)) {
           rejectedMeasurements++;
           // Skip detailed rejection logging in degraded mode
@@ -1644,8 +1640,8 @@ public class Drive extends SubsystemBase {
    */
   private AprilTagResult[] getVisionResults() {
     return new AprilTagResult[] {
-      limelight_a.getEstimate().orElse(null), limelight_b.getEstimate().orElse(null)
-      // ,limelight_c.getEstimate().orElse(null)
+        limelight_a.getEstimate().orElse(null), limelight_b.getEstimate().orElse(null)
+        // ,limelight_c.getEstimate().orElse(null)
     };
   }
 
@@ -1680,17 +1676,17 @@ public class Drive extends SubsystemBase {
    * Processes an accepted vision measurement and adds it to pose estimation.
    *
    * @param limelightName The name of the limelight providing the measurement
-   * @param result The AprilTag detection result
+   * @param result        The AprilTag detection result
    */
   private void processAcceptedVisionMeasurement(String limelightName, AprilTagResult result) {
     // Calculate standard deviations based on distance, tag count, and ambiguity
     VisionStandardDeviations stdDevs = calculateVisionStandardDeviations(result);
 
     // Add measurement to pose estimator
-    addVisionMeasurement(
-        result.pose,
-        result.time,
-        VecBuilder.fill(stdDevs.xyStdDev, stdDevs.xyStdDev, stdDevs.rStdDev));
+    // addVisionMeasurement(
+    // result.pose,
+    // result.time,
+    // VecBuilder.fill(stdDevs.xyStdDev, stdDevs.xyStdDev, stdDevs.rStdDev));
 
     // Log acceptance and calculated values
     LoggingUtil.logString("Drive/Vision/" + limelightName + "/Status", "ACCEPTED");
@@ -1701,8 +1697,7 @@ public class Drive extends SubsystemBase {
     // Calculate and log pose difference for analysis
     Pose2d currentPose = getPose();
     double poseDifference = currentPose.getTranslation().getDistance(result.pose.getTranslation());
-    double rotationDifference =
-        Math.abs(currentPose.getRotation().minus(result.pose.getRotation()).getDegrees());
+    double rotationDifference = Math.abs(currentPose.getRotation().minus(result.pose.getRotation()).getDegrees());
 
     LoggingUtil.logDouble("Drive/Vision/" + limelightName + "/PoseDifference", poseDifference);
     LoggingUtil.logDouble(
@@ -1713,14 +1708,13 @@ public class Drive extends SubsystemBase {
    * Logs information about rejected vision measurements for debugging.
    *
    * @param limelightName The name of the limelight providing the measurement
-   * @param result The rejected AprilTag detection result
+   * @param result        The rejected AprilTag detection result
    */
   private void logRejectedVisionMeasurement(String limelightName, AprilTagResult result) {
     LoggingUtil.logString("Drive/Vision/" + limelightName + "/Status", "REJECTED");
 
     // Log rejection reasons
-    boolean tooFastRotation =
-        Units.radiansToDegrees(gyroInputs.yawVelocityRadPerSec) >= MAX_YAW_RATE_DEGREES_PER_SEC;
+    boolean tooFastRotation = Units.radiansToDegrees(gyroInputs.yawVelocityRadPerSec) >= MAX_YAW_RATE_DEGREES_PER_SEC;
     boolean outsideBounds = isOutsideFieldBounds(result.pose);
 
     LoggingUtil.logBoolean(
@@ -1738,7 +1732,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Calculates vision measurement standard deviations based on detection quality. Uses the same
+   * Calculates vision measurement standard deviations based on detection quality.
+   * Uses the same
    * proven formula as before, but encapsulated for clarity.
    *
    * @param result The AprilTag detection result
@@ -1746,19 +1741,17 @@ public class Drive extends SubsystemBase {
    */
   private VisionStandardDeviations calculateVisionStandardDeviations(AprilTagResult result) {
     // Use the existing tuned formula - preserving all current constants
-    double xyStdDev =
-        xyStdDevCoeff
-            * Math.max(Math.pow(result.distToTag, 1.8), 0.5)
-            / result.tagCount
-            * Math.sqrt(result.ambiguity)
-            * sdMultiplier;
+    double xyStdDev = xyStdDevCoeff
+        * Math.max(Math.pow(result.distToTag, 1.8), 0.5)
+        / result.tagCount
+        * Math.sqrt(result.ambiguity)
+        * sdMultiplier;
 
-    double rStdDev =
-        rStdDevCoeff
-            * Math.max(Math.pow(result.distToTag, 1.8), 0.5)
-            / result.tagCount
-            * Math.sqrt(result.ambiguity)
-            * sdMultiplier;
+    double rStdDev = rStdDevCoeff
+        * Math.max(Math.pow(result.distToTag, 1.8), 0.5)
+        / result.tagCount
+        * Math.sqrt(result.ambiguity)
+        * sdMultiplier;
 
     return new VisionStandardDeviations(xyStdDev, rStdDev);
   }
@@ -1792,7 +1785,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Determines if vision processing should be updated this cycle based on performance. Implements
+   * Determines if vision processing should be updated this cycle based on
+   * performance. Implements
    * adaptive frequency to maintain target loop times.
    *
    * @return True if vision should be updated, false to skip
@@ -1816,7 +1810,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Updates vision systems (limelights) with robot orientation. Separated from vision measurements
+   * Updates vision systems (limelights) with robot orientation. Separated from
+   * vision measurements
    * for performance optimization.
    */
   private void updateVisionSystems() {
@@ -1826,7 +1821,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Updates only critical dashboard values when in performance-critical mode. Skips non-essential
+   * Updates only critical dashboard values when in performance-critical mode.
+   * Skips non-essential
    * tuning parameters to save processing time.
    */
   private void updateCriticalDashboardValues() {
@@ -1836,12 +1832,10 @@ public class Drive extends SubsystemBase {
     // Update essential PID values for auto scoring (critical for competition)
     AutoScoreCommand.X_PID_P = SmartDashboard.getNumber("X_PID_P", AutoScoreCommand.X_PID_P);
     AutoScoreCommand.Y_PID_P = SmartDashboard.getNumber("Y_PID_P", AutoScoreCommand.Y_PID_P);
-    AutoScoreCommand.THETA_PID_P =
-        SmartDashboard.getNumber("THETA_PID_P", AutoScoreCommand.THETA_PID_P);
+    AutoScoreCommand.THETA_PID_P = SmartDashboard.getNumber("THETA_PID_P", AutoScoreCommand.THETA_PID_P);
 
     // Update traction control enable/disable (safety critical)
-    TRACTION_CONTROL_ENABLED =
-        SmartDashboard.getBoolean("TractionControl/Enabled", TRACTION_CONTROL_ENABLED);
+    TRACTION_CONTROL_ENABLED = SmartDashboard.getBoolean("TractionControl/Enabled", TRACTION_CONTROL_ENABLED);
     SmartDashboard.putBoolean("TractionControl/Enabled", TRACTION_CONTROL_ENABLED);
 
     // Update performance monitoring status
@@ -1880,7 +1874,7 @@ public class Drive extends SubsystemBase {
 /** Custom exception class for specific error handling. */
 class InvalidRobotNameException extends RuntimeException {
   String[] invalidStrings = {
-    "Elevator", "Drive", "ControllerLogging", "LocalADStarAK", "PLog", "IntakeIOTalonFX",
+      "Elevator", "Drive", "ControllerLogging", "LocalADStarAK", "PLog", "IntakeIOTalonFX",
   };
 
   /** Constructs a new exception with custom stack trace. */
@@ -1890,11 +1884,10 @@ class InvalidRobotNameException extends RuntimeException {
     String invalidString = invalidStrings[(int) (Math.random() * invalidStrings.length)];
 
     // Create a fake stack trace with the random string
-    StackTraceElement[] stack =
-        new StackTraceElement[] {
-          new StackTraceElement(
-              invalidString, "[null]", invalidString + ".java", (int) (Math.random() * 500))
-        };
+    StackTraceElement[] stack = new StackTraceElement[] {
+        new StackTraceElement(
+            invalidString, "[null]", invalidString + ".java", (int) (Math.random() * 500))
+    };
     this.setStackTrace(stack);
   }
 }
