@@ -249,6 +249,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // Dynamic default command based on drift mode state
     drive.setDefaultCommand(
+        // Regular joystick drive with rotation and xy
         Commands.either(
             // Drift mode: Use R2 as throttle and left stick X as steering
             DriveCommands.carDriftDrive(
@@ -264,7 +265,19 @@ public class RobotContainer {
                 () -> -driver.getRightX() // Rotation
                 ),
             () -> RobotContainer.isDriftModeActive // Condition to check
-            ));
+            )
+        // Just xy, pointing at a vision target
+        );
+    // drive.setDefaultCommand(
+    // DriveCommands.joystickDriveAtAngle(
+    // drive,
+    // () -> -driver.getLeftY(), // Forward/backward
+    // () -> -driver.getLeftX(), // Left/right strafe
+    // () ->
+    // new Rotation2d(
+    // (Math.atan2(drive.getPose().getX(), drive.getPose().getY())) // Rotation
+    // )));
+
     elevatorCommand = new ScoreCommand(ScoringLevel.L0);
     elevator.setDefaultCommand(elevatorCommand);
 
