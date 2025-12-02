@@ -5,8 +5,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
@@ -14,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.GroundIntakeCommand;
 import frc.robot.commands.ScoreCommand.ScoringLevel;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.NetworkCommunicator;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.CoralIntake;
 
@@ -28,8 +25,7 @@ public class ControlMap {
     return instance;
   }
 
-  private ControlMap() {
-  }
+  private ControlMap() {}
 
   public void configurePreset1(CommandXboxController operator, CommandPS5Controller driver) {
     // Reset gyro to 0° when B button is pressed
@@ -37,12 +33,13 @@ public class ControlMap {
         .back()
         .onTrue(
             Commands.runOnce(
-                () -> Drive.getInstance()
-                    .setPose(
-                        new Pose2d(
-                            Drive.getInstance().getPose().getTranslation(),
-                            new Rotation2d())),
-                Drive.getInstance())
+                    () ->
+                        Drive.getInstance()
+                            .setPose(
+                                new Pose2d(
+                                    Drive.getInstance().getPose().getTranslation(),
+                                    new Rotation2d())),
+                    Drive.getInstance())
                 .ignoringDisable(true));
 
     // Intake commands
@@ -119,17 +116,14 @@ public class ControlMap {
     // Algae Intake
     driver
         .L1()
-        .whileTrue(new GroundIntakeCommand(LinearVelocity.ofBaseUnits(6.5,
-            MetersPerSecond)));
+        .whileTrue(new GroundIntakeCommand(LinearVelocity.ofBaseUnits(6.5, MetersPerSecond)));
 
     driver
         .povUp()
-        .whileTrue(new GroundIntakeCommand(LinearVelocity.ofBaseUnits(-6.5,
-            MetersPerSecond)));
+        .whileTrue(new GroundIntakeCommand(LinearVelocity.ofBaseUnits(-6.5, MetersPerSecond)));
     driver
         .povLeft()
-        .whileTrue(new GroundIntakeCommand(LinearVelocity.ofBaseUnits(-4,
-            MetersPerSecond)));
+        .whileTrue(new GroundIntakeCommand(LinearVelocity.ofBaseUnits(-4, MetersPerSecond)));
     // Elevator
 
     driver
@@ -140,7 +134,7 @@ public class ControlMap {
                   if (Elevator.getInstance().getHeight() > 1) {
                     RobotContainer.elevatorCommand.setHeight(ScoringLevel.L0);
                   } else {
-                    RobotContainer.elevatorCommand.setHeight(ScoringLevel.L4);
+                    RobotContainer.elevatorCommand.setHeight(ScoringLevel.L2);
                   }
                   // a way to recieve selected
                   // scoring level

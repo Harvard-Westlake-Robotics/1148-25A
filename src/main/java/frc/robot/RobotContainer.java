@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Camera.LimelightHelpers;
 import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.CoralIntakeCommand;
@@ -266,8 +267,10 @@ public class RobotContainer {
                 ),
             () -> RobotContainer.isDriftModeActive // Condition to check
             )
-        // Just xy, pointing at a vision target
+        // // Just xy, pointing at a vision target
         );
+    LimelightHelpers.getTX(null);
+    // get tx.
     // drive.setDefaultCommand(
     // DriveCommands.joystickDriveAtAngle(
     // drive,
