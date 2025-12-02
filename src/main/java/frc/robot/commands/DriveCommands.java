@@ -97,7 +97,7 @@ public class DriveCommands {
           drive.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
-                  isFlipped
+                  !isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))
                       : drive.getRotation()));
         },

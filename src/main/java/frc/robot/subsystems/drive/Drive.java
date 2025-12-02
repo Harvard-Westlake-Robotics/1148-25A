@@ -144,9 +144,9 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
-  private final LimeLightCam limelight_a = new LimeLightCam("limelight-a", false);
-  private final LimeLightCam limelight_b = new LimeLightCam("limelight-b", false);
-  private final LimeLightCam limelight_c = new LimeLightCam("limelight-c", false);
+  private final LimeLightCam limelight_a = new LimeLightCam("limelight-left", false);
+  private final LimeLightCam limelight_b = new LimeLightCam("limelight-right", false);
+  private final LimeLightCam limelight_c = new LimeLightCam("limelight-back", false);
 
   private final LimeLightCam[] limelights =
       new LimeLightCam[] {limelight_a, limelight_b, limelight_c};
@@ -1135,8 +1135,8 @@ public class Drive extends SubsystemBase {
       Pose2d visionRobotPoseMeters,
       double timestampSeconds,
       Matrix<N3, N1> visionMeasurementStdDevs) {
-    poseEstimator.addVisionMeasurement(
-        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+    poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
+    Logger.recordOutput("Odometry/VisionPos", visionRobotPoseMeters);
   }
 
   /** Returns the maximum linear speed in meters per sec. */
@@ -1644,8 +1644,9 @@ public class Drive extends SubsystemBase {
    */
   private AprilTagResult[] getVisionResults() {
     return new AprilTagResult[] {
-      limelight_a.getEstimate().orElse(null), limelight_b.getEstimate().orElse(null)
-      // ,limelight_c.getEstimate().orElse(null)
+      limelight_a.getEstimate().orElse(null),
+      limelight_b.getEstimate().orElse(null),
+      limelight_c.getEstimate().orElse(null)
     };
   }
 
