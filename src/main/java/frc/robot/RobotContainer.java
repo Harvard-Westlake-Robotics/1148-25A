@@ -47,7 +47,6 @@ import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXReal;
 import frc.robot.subsystems.drive.ModuleIOTalonFXSim;
-import frc.robot.subsystems.drive.NetworkCommunicator;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.AlgaeIntake;
 import frc.robot.subsystems.intake.CoralIntake;
@@ -307,12 +306,12 @@ public class RobotContainer {
     if (coralIntakeCommand != null) coralIntakeCommand.cancel();
     if (CoralIntake.getInstance().getDefaultCommand() != null)
       CoralIntake.getInstance().removeDefaultCommand();
-    // return autoChooser.get();
-    return preAutoChooser
-        .get()
-        .andThen(
-            new Command() {}.withTimeout(0.3)
-                .andThen(NetworkCommunicator.getInstance().getCustomAuto()));
+    return autoChooser.get();
+    // return preAutoChooser
+    //     .get()
+    //     .andThen(
+    //         new Command() {}.withTimeout(0.3)
+    //             .andThen(NetworkCommunicator.getInstance().getCustomAuto()));
   }
 
   public void resetSimulationField() {
