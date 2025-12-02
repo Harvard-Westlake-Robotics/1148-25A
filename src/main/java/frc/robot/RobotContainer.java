@@ -20,6 +20,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -30,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Camera.LimelightHelpers;
 import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.CoralIntakeCommand;
@@ -248,37 +248,47 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Dynamic default command based on drift mode state
-    drive.setDefaultCommand(
-        // Regular joystick drive with rotation and xy
-        Commands.either(
-            // Drift mode: Use R2 as throttle and left stick X as steering
-            DriveCommands.carDriftDrive(
-                drive,
-                () -> driver.getR2Axis(), // R2 trigger for throttle
-                () -> -driver.getLeftX() // Left stick X for steering (inverted)
-                ),
-            // Normal mode: Standard swerve controls
-            DriveCommands.joystickDrive(
-                drive,
-                () -> -driver.getLeftY(), // Forward/backward
-                () -> -driver.getLeftX(), // Left/right strafe
-                () -> -driver.getRightX() // Rotation
-                ),
-            () -> RobotContainer.isDriftModeActive // Condition to check
-            )
-        // // Just xy, pointing at a vision target
-        );
-    LimelightHelpers.getTX(null);
-    // get tx.
     // drive.setDefaultCommand(
-    // DriveCommands.joystickDriveAtAngle(
-    // drive,
-    // () -> -driver.getLeftY(), // Forward/backward
-    // () -> -driver.getLeftX(), // Left/right strafe
-    // () ->
-    // new Rotation2d(
-    // (Math.atan2(drive.getPose().getX(), drive.getPose().getY())) // Rotation
-    // )));
+    //     // Regular joystick drive with rotation and xy
+    //     Commands.either(
+    //         // Drift mode: Use R2 as throttle and left stick X as steering
+    //         DriveCommands.carDriftDrive(
+    //             drive,
+    //             () -> driver.getR2Axis(), // R2 trigger for throttle
+    //             () -> -driver.getLeftX() // Left stick X for steering (inverted)
+    //             ),
+    //         // Normal mode: Standard swerve controls
+    //         DriveCommands.joystickDrive(
+    //             drive,
+    //             () -> -driver.getLeftY(), // Forward/backward
+    //             () -> -driver.getLeftX(), // Left/right strafe
+    //             () -> -driver.getRightX() // Rotation
+    //             ),
+    //         () -> RobotContainer.isDriftModeActive // Condition to check
+    //         )
+    //     // // Just xy, pointing at a vision target
+    //     );
+    // Get robot position in x and y
+    double robotX = drive.getPose().getX();
+    double robotY = drive.getPose().getY();
+    Translation2d robotTranslation = drive.getPose().getTranslation();
+    // Get reef position in x and y (stored in constant)
+    // x is the first element, y is the second element
+    double[] reefCoords = Drive.getInstance().getReefPositions();
+    // Calculate delta x and y
+    double deltaX = reefCoords[0] - robotX;
+    double deltaY = reefCoords[1] - robotY;
+    // Find the angle, put that into drive at angle
+    double angle = Math.atan2(deltaX, deltaY);
+    drive.setDefaultCommand(
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -driver.getLeftY(), // Forward/backward
+            () -> -driver.getLeftX(), // Left/right strafe
+            () ->
+                new Rotation2d(
+                    angle // Rotation
+                    )));
 
     elevatorCommand = new ScoreCommand(ScoringLevel.L0);
     elevator.setDefaultCommand(elevatorCommand);

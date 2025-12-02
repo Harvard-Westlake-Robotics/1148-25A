@@ -1272,6 +1272,19 @@ public class Drive extends SubsystemBase {
     return distToReefCenter - REEF_CENTER_RADIUS;
   }
 
+  // Checks through the latest result of a limelight, and if it is looking at a reef
+  // edge, returns the aprilTag id it is looking at. If it isn't returns -1.
+  public double[] getReefPositions() {
+    // Check the latest april tag result for an id
+    double[] reefPositions = new double[2];
+    reefPositions[0] =
+        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+            ? BLUE_REEF_CENTER_X
+            : RED_REEF_CENTER_X;
+    reefPositions[1] = REEF_CENTER_Y;
+    return reefPositions;
+  }
+
   /**
    * Calculates the elevator height based on the distance from the reef edge.
    *
