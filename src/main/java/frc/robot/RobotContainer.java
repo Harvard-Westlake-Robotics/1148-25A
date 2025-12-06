@@ -20,7 +20,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -59,9 +58,12 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
@@ -92,7 +94,7 @@ public class RobotContainer {
   public static CoralIntakeCommand coralIntakeCommand;
   public static ClimbCommand hangCommand;
 
-  private SwerveDriveSimulation driveSimulation = null;
+  public static SwerveDriveSimulation driveSimulation = null;
 
   public boolean elevatorDeployed = false;
 
@@ -102,19 +104,21 @@ public class RobotContainer {
     Integer.parseInt(motorSerialString);
   }
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
-                new ModuleIOTalonFXReal(TunerConstants.FrontRight),
-                new ModuleIOTalonFXReal(TunerConstants.BackLeft),
-                new ModuleIOTalonFXReal(TunerConstants.BackRight),
-                pose -> {});
+        drive = new Drive(
+            new GyroIOPigeon2(),
+            new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
+            new ModuleIOTalonFXReal(TunerConstants.FrontRight),
+            new ModuleIOTalonFXReal(TunerConstants.BackLeft),
+            new ModuleIOTalonFXReal(TunerConstants.BackRight),
+            pose -> {
+            });
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -127,17 +131,15 @@ public class RobotContainer {
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
-        driveSimulation =
-            new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+        driveSimulation = new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
-        drive =
-            new Drive(
-                new GyroIOSim(driveSimulation.getGyroSimulation()),
-                new ModuleIOTalonFXSim(TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
-                new ModuleIOTalonFXSim(TunerConstants.FrontRight, driveSimulation.getModules()[1]),
-                new ModuleIOTalonFXSim(TunerConstants.BackLeft, driveSimulation.getModules()[2]),
-                new ModuleIOTalonFXSim(TunerConstants.BackRight, driveSimulation.getModules()[3]),
-                driveSimulation::setSimulationWorldPose);
+        drive = new Drive(
+            new GyroIOSim(driveSimulation.getGyroSimulation()),
+            new ModuleIOTalonFXSim(TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
+            new ModuleIOTalonFXSim(TunerConstants.FrontRight, driveSimulation.getModules()[1]),
+            new ModuleIOTalonFXSim(TunerConstants.BackLeft, driveSimulation.getModules()[2]),
+            new ModuleIOTalonFXSim(TunerConstants.BackRight, driveSimulation.getModules()[3]),
+            driveSimulation::setSimulationWorldPose);
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -150,14 +152,19 @@ public class RobotContainer {
 
       default:
         // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOTalonFX(TunerConstants.FrontLeft) {},
-                new ModuleIOTalonFX(TunerConstants.FrontRight) {},
-                new ModuleIOTalonFX(TunerConstants.BackLeft) {},
-                new ModuleIOTalonFX(TunerConstants.BackRight) {},
-                pose -> {});
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIOTalonFX(TunerConstants.FrontLeft) {
+            },
+            new ModuleIOTalonFX(TunerConstants.FrontRight) {
+            },
+            new ModuleIOTalonFX(TunerConstants.BackLeft) {
+            },
+            new ModuleIOTalonFX(TunerConstants.BackRight) {
+            },
+            pose -> {
+            });
         this.algaeIntake = AlgaeIntake.getInstance();
         this.coralIntake = CoralIntake.getInstance();
         this.elevator = Elevator.getInstance();
@@ -229,66 +236,67 @@ public class RobotContainer {
     preAutoChooser.addDefaultOption("None", Commands.none());
     preAutoChooser.addOption("Push", AutoBuilder.followPath(pathfindL));
     SmartDashboard.putData("Pre Auto Chooser", preAutoChooser.getSendableChooser());
-    Command stowCommand =
-        new Command() {
-          @Override
-          public void initialize() {
-            hangCommand.stow();
-          }
-        };
+    Command stowCommand = new Command() {
+      @Override
+      public void initialize() {
+        hangCommand.stow();
+      }
+    };
     stowCommand.runsWhenDisabled();
     SmartDashboard.putData("Stow Hang", stowCommand.withTimeout(0.1));
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
     // Dynamic default command based on drift mode state
-    // drive.setDefaultCommand(
-    //     // Regular joystick drive with rotation and xy
-    //     Commands.either(
-    //         // Drift mode: Use R2 as throttle and left stick X as steering
-    //         DriveCommands.carDriftDrive(
-    //             drive,
-    //             () -> driver.getR2Axis(), // R2 trigger for throttle
-    //             () -> -driver.getLeftX() // Left stick X for steering (inverted)
-    //             ),
-    //         // Normal mode: Standard swerve controls
-    //         DriveCommands.joystickDrive(
-    //             drive,
-    //             () -> -driver.getLeftY(), // Forward/backward
-    //             () -> -driver.getLeftX(), // Left/right strafe
-    //             () -> -driver.getRightX() // Rotation
-    //             ),
-    //         () -> RobotContainer.isDriftModeActive // Condition to check
-    //         )
-    //     // // Just xy, pointing at a vision target
-    //     );
-    // Get robot position in x and y
-    double robotX = drive.getPose().getX();
-    double robotY = drive.getPose().getY();
-    Translation2d robotTranslation = drive.getPose().getTranslation();
-    // Get reef position in x and y (stored in constant)
-    // x is the first element, y is the second element
-    double[] reefCoords = Drive.getInstance().getReefPositions();
-    // Calculate delta x and y
-    double deltaX = reefCoords[0] - robotX;
-    double deltaY = reefCoords[1] - robotY;
-    // Find the angle, put that into drive at angle
-    double angle = Math.atan2(deltaX, deltaY);
     drive.setDefaultCommand(
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> -driver.getLeftY(), // Forward/backward
-            () -> -driver.getLeftX(), // Left/right strafe
-            () ->
-                new Rotation2d(
-                    angle // Rotation
-                    )));
+        // Regular joystick drive with rotation and xy
+        Commands.either(
+            // Drift mode: Use R2 as throttle and left stick X as steering
+            DriveCommands.carDriftDrive(
+                drive,
+                () -> driver.getR2Axis(), // R2 trigger for throttle
+                () -> -driver.getLeftX() // Left stick X for steering (inverted)
+            ),
+            // Normal mode: Standard swerve controls
+            DriveCommands.joystickDrive(
+                drive,
+                () -> -driver.getLeftY(), // Forward/backward
+                () -> -driver.getLeftX(), // Left/right strafe
+                () -> -driver.getRightX() // Rotation
+            ),
+            () -> RobotContainer.isDriftModeActive // Condition to check
+        )
+    // // Just xy, pointing at a vision target
+    );
+    // Get robot position in x and y
+    // double robotX = drive.getPose().getX();
+    // double robotY = drive.getPose().getY();
+    // Translation2d robotTranslation = drive.getPose().getTranslation();
+    // // Get reef position in x and y (stored in constant)
+    // // x is the first element, y is the second element
+    // double[] reefCoords = Drive.getInstance().getReefPositions();
+    // // Calculate delta x and y
+    // double deltaX = reefCoords[0] - robotX;
+    // double deltaY = reefCoords[1] - robotY;
+    // // Find the angle, put that into drive at angle
+    // double angle = Math.atan2(deltaX, deltaY);
+    // drive.setDefaultCommand(
+    // DriveCommands.joystickDriveAtAngle(
+    // drive,
+    // () -> -driver.getLeftY(), // Forward/backward
+    // () -> -driver.getLeftX(), // Left/right strafe
+    // () ->
+    // new Rotation2d(
+    // angle // Rotation
+    // )));
 
     elevatorCommand = new ScoreCommand(ScoringLevel.L0);
     elevator.setDefaultCommand(elevatorCommand);
@@ -299,16 +307,13 @@ public class RobotContainer {
     hangWrist.setDefaultCommand(hangCommand);
 
     // Reset gyro / odometry
-    final Runnable resetGyro =
-        Constants.currentMode == Constants.Mode.SIM
-            ? () ->
-                drive.setPose(
-                    driveSimulation
-                        .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during
-            // simulation
-            : () ->
-                drive.setPose(
-                    new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
+    final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
+        ? () -> drive.setPose(
+            driveSimulation
+                .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during
+        // simulation
+        : () -> drive.setPose(
+            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
     driver.povCenter().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
 
     // // Add drift mode toggle to the driver's right bumper button
@@ -329,26 +334,29 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    if (coralIntakeCommand != null) coralIntakeCommand.cancel();
+    if (coralIntakeCommand != null)
+      coralIntakeCommand.cancel();
     if (CoralIntake.getInstance().getDefaultCommand() != null)
       CoralIntake.getInstance().removeDefaultCommand();
     return autoChooser.get();
     // return preAutoChooser
-    //     .get()
-    //     .andThen(
-    //         new Command() {}.withTimeout(0.3)
-    //             .andThen(NetworkCommunicator.getInstance().getCustomAuto()));
+    // .get()
+    // .andThen(
+    // new Command() {}.withTimeout(0.3)
+    // .andThen(NetworkCommunicator.getInstance().getCustomAuto()));
   }
 
   public void resetSimulationField() {
-    if (Constants.currentMode != Constants.Mode.SIM) return;
+    if (Constants.currentMode != Constants.Mode.SIM)
+      return;
 
     driveSimulation.setSimulationWorldPose(new Pose2d(3, 3, new Rotation2d()));
     SimulatedArena.getInstance().resetFieldForAuto();
   }
 
   public void updateSimulation() {
-    if (Constants.currentMode != Constants.Mode.SIM) return;
+    if (Constants.currentMode != Constants.Mode.SIM)
+      return;
 
     SimulatedArena.getInstance().simulationPeriodic();
     Logger.recordOutput(

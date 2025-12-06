@@ -48,20 +48,20 @@ import frc.robot.generated.TunerConstants;
 import java.util.Queue;
 
 /**
- * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
+ * Module IO implementation for Talon FX drive motor controller, Talon FX turn
+ * motor controller, and
  * CANcoder. Configured using a set of module constants from Phoenix.
  *
- * <p>Device configuration and other behaviors not exposed by TunerConstants can be customized here.
+ * <p>
+ * Device configuration and other behaviors not exposed by TunerConstants can be
+ * customized here.
  */
 public class ModuleIOTalonFX implements ModuleIO {
   // Constants for drift mode
-  protected static final double DRIFT_CURRENT_LIMIT_STATOR =
-      240; // Higher current limit for more torque during drift
+  protected static final double DRIFT_CURRENT_LIMIT_STATOR = 240; // Higher current limit for more torque during drift
   protected static final double DRIFT_CURRENT_LIMIT_SUPPLY = 100; // Supply current limit
 
-  protected final SwerveModuleConstants<
-          TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
-      constants;
+  protected final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
 
   // Hardware objects
   protected final TalonFX driveTalon;
@@ -73,21 +73,16 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   // Voltage control requests
   protected final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
-  protected final PositionVoltage positionVoltageRequest =
-      new PositionVoltage(0.0).withEnableFOC(true);
-  protected final MotionMagicVoltage driveMotionMagicVoltageRequest =
-      new MotionMagicVoltage(0.0).withEnableFOC(true);
-  protected final VelocityVoltage velocityVoltageRequest =
-      new VelocityVoltage(0.0).withEnableFOC(true);
+  protected final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0).withEnableFOC(true);
+  protected final MotionMagicVoltage driveMotionMagicVoltageRequest = new MotionMagicVoltage(0.0).withEnableFOC(true);
+  protected final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0).withEnableFOC(true);
 
   // Torque-current control requests
   protected final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);
-  protected final MotionMagicTorqueCurrentFOC driveMotionMagicTorqueCurrentRequest =
-      new MotionMagicTorqueCurrentFOC(0.0);
-  protected final MotionMagicTorqueCurrentFOC positionTorqueCurrentRequest =
-      new MotionMagicTorqueCurrentFOC(0.0);
-  protected final VelocityTorqueCurrentFOC velocityTorqueCurrentRequest =
-      new VelocityTorqueCurrentFOC(0.0);
+  protected final MotionMagicTorqueCurrentFOC driveMotionMagicTorqueCurrentRequest = new MotionMagicTorqueCurrentFOC(
+      0.0);
+  protected final MotionMagicTorqueCurrentFOC positionTorqueCurrentRequest = new MotionMagicTorqueCurrentFOC(0.0);
+  protected final VelocityTorqueCurrentFOC velocityTorqueCurrentRequest = new VelocityTorqueCurrentFOC(0.0);
 
   // Timestamp inputs from Phoenix thread
   protected final Queue<Double> timestampQueue;
@@ -113,8 +108,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   protected final Debouncer turnEncoderConnectedDebounce = new Debouncer(0.5);
 
   public ModuleIOTalonFX(
-      SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
-          constants) {
+      SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants) {
     this.constants = constants;
 
     // Determine if this is a front module based on location
@@ -138,10 +132,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     // Configure CANCoder
     CANcoderConfiguration cancoderConfig = constants.EncoderInitialConfigs;
     cancoderConfig.MagnetSensor.MagnetOffset = constants.EncoderOffset;
-    cancoderConfig.MagnetSensor.SensorDirection =
-        constants.EncoderInverted
-            ? SensorDirectionValue.Clockwise_Positive
-            : SensorDirectionValue.CounterClockwise_Positive;
+    cancoderConfig.MagnetSensor.SensorDirection = constants.EncoderInverted
+        ? SensorDirectionValue.Clockwise_Positive
+        : SensorDirectionValue.CounterClockwise_Positive;
     cancoder.getConfigurator().apply(cancoderConfig);
 
     // Create timestamp queue
@@ -149,8 +142,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // Create drive status signals
     drivePosition = driveTalon.getPosition();
-    drivePositionQueue =
-        PhoenixOdometryThread.getInstance().registerSignal(driveTalon.getPosition());
+    drivePositionQueue = PhoenixOdometryThread.getInstance().registerSignal(driveTalon.getPosition());
     driveVelocity = driveTalon.getVelocity();
     driveAppliedVolts = driveTalon.getMotorVoltage();
     driveCurrent = driveTalon.getStatorCurrent();
@@ -165,7 +157,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // Configure periodic frames
     BaseStatusSignal.setUpdateFrequencyForAll(
-        Drive.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
+        TunerConstants.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
         driveVelocity,
@@ -179,7 +171,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   /**
-   * Configures the drive motor with appropriate settings for normal operation or car-like drift
+   * Configures the drive motor with appropriate settings for normal operation or
+   * car-like drift
    * mode.
    *
    * @param driveConfig The drive motor configuration to modify
@@ -224,10 +217,9 @@ public class ModuleIOTalonFX implements ModuleIO {
       driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     }
 
-    driveConfig.MotorOutput.Inverted =
-        constants.DriveMotorInverted
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
+    driveConfig.MotorOutput.Inverted = constants.DriveMotorInverted
+        ? InvertedValue.Clockwise_Positive
+        : InvertedValue.CounterClockwise_Positive;
   }
 
   /**
@@ -237,10 +229,9 @@ public class ModuleIOTalonFX implements ModuleIO {
    */
   private void configureTurnMotor(TalonFXConfiguration turnConfig) {
     // Configure neutral mode based on drift mode
-    turnConfig.MotorOutput.NeutralMode =
-        RobotContainer.isDriftModeActive
-            ? NeutralModeValue.Brake // More resistance in drift mode
-            : NeutralModeValue.Coast; // Normal operation
+    turnConfig.MotorOutput.NeutralMode = RobotContainer.isDriftModeActive
+        ? NeutralModeValue.Brake // More resistance in drift mode
+        : NeutralModeValue.Coast; // Normal operation
 
     turnConfig.Slot0 = constants.SteerMotorGains;
     turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
@@ -275,19 +266,16 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
-    turnConfig.MotorOutput.Inverted =
-        constants.SteerMotorInverted
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
+    turnConfig.MotorOutput.Inverted = constants.SteerMotorInverted
+        ? InvertedValue.Clockwise_Positive
+        : InvertedValue.CounterClockwise_Positive;
   }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     // Refresh all signals
-    var driveStatus =
-        BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
-    var turnStatus =
-        BaseStatusSignal.refreshAll(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent);
+    var driveStatus = BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
+    var turnStatus = BaseStatusSignal.refreshAll(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent);
     var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
 
     // Update drive inputs
@@ -307,16 +295,13 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
 
     // Update odometry inputs
-    inputs.odometryTimestamps =
-        timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream()
-            .mapToDouble((Double value) -> Units.rotationsToRadians(value))
-            .toArray();
-    inputs.odometryTurnPositions =
-        turnPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromRotations(value))
-            .toArray(Rotation2d[]::new);
+    inputs.odometryTimestamps = timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+    inputs.odometryDrivePositionsRad = drivePositionQueue.stream()
+        .mapToDouble((Double value) -> Units.rotationsToRadians(value))
+        .toArray();
+    inputs.odometryTurnPositions = turnPositionQueue.stream()
+        .map((Double value) -> Rotation2d.fromRotations(value))
+        .toArray(Rotation2d[]::new);
     timestampQueue.clear();
     drivePositionQueue.clear();
     turnPositionQueue.clear();
@@ -385,7 +370,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   /**
-   * Updates the motor configuration when drift mode changes. This method should be called whenever
+   * Updates the motor configuration when drift mode changes. This method should
+   * be called whenever
    * RobotContainer.isDriftModeActive changes.
    */
   public void updateDriftModeConfiguration() {
@@ -431,8 +417,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     if (RobotContainer.isDriftModeActive) {
       // Car-like drift: front wheels can turn freely (coast), rear wheels locked in
       // position (brake)
-      turnOutputConfig.NeutralMode =
-          isFrontModule ? NeutralModeValue.Coast : NeutralModeValue.Brake;
+      turnOutputConfig.NeutralMode = isFrontModule ? NeutralModeValue.Coast : NeutralModeValue.Brake;
     } else {
       turnOutputConfig.NeutralMode = NeutralModeValue.Coast;
     }
