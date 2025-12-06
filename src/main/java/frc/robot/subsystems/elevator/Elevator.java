@@ -15,7 +15,7 @@ public class Elevator extends SubsystemBase {
   private ElevatorIOTalonFX io;
   private ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
-  private SysIdRoutine sysid;
+//   private SysIdRoutine sysid;
 
   private String key = "Elevator";
 
