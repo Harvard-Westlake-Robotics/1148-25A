@@ -154,8 +154,8 @@ public final class Constants {
   public final class Elevator {
     public static final int elevator1ID = 13;
     public static final int elevator2ID = 14;
+    public static final InvertedValue elevator2Inverted = InvertedValue.CounterClockwise_Positive;
     public static final InvertedValue elevator1Inverted = InvertedValue.Clockwise_Positive;
-    public static final boolean elevatorMotorsOpposite = true;
     public static double kP = 1.85;
     public static double kI = 0.02;
     public static double kD = 0.0;

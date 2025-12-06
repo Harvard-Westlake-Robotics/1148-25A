@@ -36,7 +36,7 @@ public class RaiseElevatorCommand extends Command {
 
   @Override
   public void execute() {
-    if (targetHeight == 0.0 && !Elevator.getInstance().getInput()) {
+    if (targetHeight == 0.0 && !Elevator.getInstance().dio.get()) {
       targetHeight = Elevator.getInstance().getHeight();
     }
     Elevator.getInstance().goToHeight(targetHeight);

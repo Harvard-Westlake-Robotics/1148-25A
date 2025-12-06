@@ -5,26 +5,36 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ElevatorIO {
   @AutoLog
   public static class ElevatorIOInputs {
-    public boolean motor1Connected = false;
-    public boolean motor2Connected = false;
-    public double elevatorPositionMeters = 0.0;
-    public double elevatorVelocityMPS = 0.0;
-    public double elevatorAppliedVolts = 0.0;
-    public double elevatorCurrentAmps = 0.0;
-    public boolean inputValue = false;
+    public boolean elevator1Connected = false;
+    public double elevator1PositionMeters = 0.0;
+    public double elevator1VelocityMPS = 0.0;
+    public double elevator1AppliedVolts = 0.0;
+    public double elevator1CurrentAmps = 0.0;
+
+    public boolean elevator2Connected = false;
+    public double elevator2PositionMeters = 0.0;
+    public double elevator2VelocityMPS = 0.0;
+    public double elevator2AppliedVolts = 0.0;
+    public double elevator2CurrentAmps = 0.0;
   }
 
+  /** Updates the set of loggable inputs. */
   public default void updateInputs(ElevatorIOInputs inputs) {}
 
-  public default void goToHeight(double heightMeters) {}
+  /** Run the drive motor at the specified velocity. */
+  public default void setHeightClosedLoop(double velocityRadPerSec) {}
 
-  public default void runVoltage(double volts) {}
+  public default void setHeightMetersAdjusted(double meters) {}
+
+  public default void zeroMotors() {}
+
+  public default void setIsOverriding(boolean isOverriding) {}
+
+  public default void setHeightClosedLoopOverride(double velocity) {}
+
+  public default void runCharacterization(double voltage) {}
 
   public default double getTarget() {
     return 0.0;
-  }
-
-  public default boolean getInput() {
-    return false;
   }
 }
