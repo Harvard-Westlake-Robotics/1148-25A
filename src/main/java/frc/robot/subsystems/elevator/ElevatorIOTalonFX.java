@@ -68,7 +68,9 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
         Constants.Elevator.elevatorReverseSoftLimitRotations;
 
-    // config.MotionMagic.MotionMagicAcceleration = Constants.Elevator.
+    config.MotionMagic.MotionMagicAcceleration = 390;
+    config.MotionMagic.MotionMagicCruiseVelocity = 250;
+    config.MotionMagic.MotionMagicJerk = 990;
 
     motorMaster.getConfigurator().apply(config);
     motorFollower.getConfigurator().apply(config);
